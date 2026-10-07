@@ -17,6 +17,7 @@ import com.fieldbook.tracker.activities.CameraActivity
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.utilities.FileUtil
+import com.fieldbook.tracker.utilities.camera.CameraControlSettings
 import com.fieldbook.tracker.views.VideoCameraSettingsView
 import org.threeten.bp.OffsetDateTime
 import java.io.File
@@ -60,6 +61,9 @@ class VideoTraitLayout : PhotoTraitLayout {
     constructor(context: android.content.Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     override fun type() = type
+
+    // advanced still-camera controls (exposure, white balance, RAW) don't apply to video
+    override fun controlSettings() = CameraControlSettings.DEFAULT
 
     override fun init(act: android.app.Activity) {
         super.init(act)

@@ -9,18 +9,26 @@ import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import android.graphics.ColorFilter
 import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraMetadata
+import android.hardware.camera2.CaptureRequest
 import android.util.Log
 import android.util.Size
 import android.util.TypedValue
 import androidx.annotation.OptIn
+import androidx.camera.camera2.interop.Camera2CameraControl
 import androidx.camera.camera2.interop.Camera2CameraInfo
+import androidx.camera.camera2.interop.Camera2Interop
+import androidx.camera.camera2.interop.CaptureRequestOptions
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
+import androidx.camera.core.ExtendableBuilder
+import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
+import androidx.camera.core.MeteringPoint
 import androidx.camera.core.Preview
 import androidx.camera.core.UseCaseGroup
 import androidx.camera.core.resolutionselector.AspectRatioStrategy
@@ -35,6 +43,14 @@ import androidx.lifecycle.LifecycleOwner
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.utilities.camera.CameraCapabilities
+import com.fieldbook.tracker.utilities.camera.CameraControlSettings
+import com.fieldbook.tracker.utilities.camera.ExposureMode
+import com.fieldbook.tracker.utilities.camera.LockedCameraValues
+import com.fieldbook.tracker.utilities.camera.LockedCameraValuesStore
+import com.fieldbook.tracker.utilities.camera.ThreeAStateMonitor
+import com.fieldbook.tracker.utilities.camera.applyExposure
+import com.fieldbook.tracker.utilities.camera.applyWhiteBalance
 import com.fieldbook.tracker.views.CropImageView
 import dagger.hilt.android.qualifiers.ActivityContext
 import java.util.concurrent.ExecutorService
@@ -78,7 +94,193 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
     }
 
     fun unbind() {
+        monitor?.cancel()
         cameraXInstance.get().unbindAll()
+    }
+
+    // tracks AE/AWB convergence for the currently bound session
+    private var monitor: ThreeAStateMonitor? = null
+
+    // the camera control settings used by the last bind
+    private var activeControls: CameraControlSettings = CameraControlSettings.DEFAULT
+
+    /** True when the last bind captures RAW (DNG) alongside JPEG. */
+    var isRawCaptureActive = false
+        private set
+
+    /** True when the last bind requested RAW but had to fall back to JPEG only. */
+    var rawCaptureFellBack = false
+        private set
+
+    /** Invoked on the main thread once AE and/or AWB locks have been engaged. */
+    var onLocksApplied: ((ae: Boolean, awb: Boolean) -> Unit)? = null
+
+    private fun capabilitiesFor(selector: CameraSelector): CameraCapabilities = try {
+        CameraCapabilities.from(cameraXInstance.get().getCameraInfo(selector))
+    } catch (e: Exception) {
+        Log.w(TAG, "Unable to read capabilities for selector", e)
+        CameraCapabilities.NONE
+    }
+
+    /**
+     * Applies manual ISO and shutter speed as static options, so they cover both the repeating
+     * preview requests and still-capture requests.
+     */
+    private fun <T> applyManualExposure(
+        builder: ExtendableBuilder<T>,
+        controls: CameraControlSettings,
+        capabilities: CameraCapabilities
+    ) {
+
+        if (controls.exposureMode != ExposureMode.MANUAL || !capabilities.manualSensor) return
+
+        val exposure = capabilities.clampExposure(controls.exposureTimeNs)
+
+        val extender = Camera2Interop.Extender(builder)
+            .setCaptureRequestOption(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_OFF)
+            .setCaptureRequestOption(CaptureRequest.SENSOR_SENSITIVITY, capabilities.clampIso(controls.iso))
+            .setCaptureRequestOption(CaptureRequest.SENSOR_EXPOSURE_TIME, exposure)
+
+        // long exposures need a frame duration at least as long as the exposure
+        if (exposure > 33_333_333L) {
+            extender.setCaptureRequestOption(CaptureRequest.SENSOR_FRAME_DURATION, exposure)
+        }
+    }
+
+    private fun <T> attachMonitor(builder: ExtendableBuilder<T>) {
+        monitor?.cancel()
+        monitor = ThreeAStateMonitor().also {
+            Camera2Interop.Extender(builder).setSessionCaptureCallback(it)
+        }
+    }
+
+    /**
+     * Locks exposure and/or white balance as requested by [controls].
+     *
+     * Values remembered for this trait and camera (see [LockedCameraValuesStore]) are restored
+     * directly as manual values when the device supports it, so a lock survives the camera being
+     * rebound. Anything not restored is metered: once AE/AWB converge the lock is engaged, and the
+     * values the camera locked to are remembered for the next bind.
+     *
+     * [onLocked] runs on the main thread once the locks are in place.
+     */
+    fun applyLocks(
+        camera: Camera,
+        controls: CameraControlSettings = activeControls,
+        onLocked: (() -> Unit)? = null
+    ) {
+
+        val capabilities = CameraCapabilities.from(camera.cameraInfo)
+
+        val wantAe = controls.exposureMode == ExposureMode.LOCKED && capabilities.aeLockAvailable
+        val wantAwb = controls.awbLock && capabilities.awbLockAvailable
+
+        val control = Camera2CameraControl.from(camera.cameraControl)
+
+        // drop any lock sequence still waiting from an earlier bind or re-meter
+        monitor?.cancel()
+
+        val traitKey = controls.lockKey
+        val cameraId = capabilities.cameraId
+
+        val stored = if (traitKey != null && cameraId != null) {
+            LockedCameraValuesStore.get(traitKey, cameraId)
+        } else null
+
+        // exact values can only be set back with auto-exposure / auto-white-balance turned off
+        val restoredExposure = stored?.exposure?.takeIf { wantAe && capabilities.manualSensor }
+        val restoredWhiteBalance = stored?.whiteBalance?.takeIf { wantAwb && capabilities.manualPostProcessing }
+
+        fun restoredOptions() = CaptureRequestOptions.Builder().apply {
+            restoredExposure?.let { applyExposure(it, capabilities) }
+            restoredWhiteBalance?.let { applyWhiteBalance(it) }
+        }
+
+        // setCaptureRequestOptions replaces the previous options, so this also clears any old lock
+        control.setCaptureRequestOptions(restoredOptions().build())
+
+        val meterAe = wantAe && restoredExposure == null
+        val meterAwb = wantAwb && restoredWhiteBalance == null
+
+        if (!meterAe && !meterAwb) {
+            if (wantAe || wantAwb) {
+                Log.d(TAG, "Restored camera locks: ae=$wantAe awb=$wantAwb")
+                notifyLocked(wantAe, wantAwb, onLocked)
+            }
+            return
+        }
+
+        val stateMonitor = monitor ?: return
+
+        stateMonitor.awaitConverged(meterAe, meterAwb) {
+
+            val options = restoredOptions().apply {
+                if (meterAe) setCaptureRequestOption(CaptureRequest.CONTROL_AE_LOCK, true)
+                if (meterAwb) setCaptureRequestOption(CaptureRequest.CONTROL_AWB_LOCK, true)
+            }.build()
+
+            control.setCaptureRequestOptions(options)
+
+            Log.d(TAG, "Applied camera locks: ae=$wantAe awb=$wantAwb")
+
+            notifyLocked(wantAe, wantAwb, onLocked)
+
+            // remember what the camera locked to so the next bind can restore it
+            if (traitKey != null && cameraId != null) {
+                stateMonitor.awaitLockedFrame(meterAe, meterAwb) { result ->
+                    result?.let {
+                        val values = LockedCameraValues.from(it, meterAe, meterAwb)
+                        LockedCameraValuesStore.merge(traitKey, cameraId, values)
+                        Log.d(TAG, "Remembered locked values for trait $traitKey camera $cameraId: $values")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun notifyLocked(ae: Boolean, awb: Boolean, onLocked: (() -> Unit)?) {
+        onLocksApplied?.invoke(ae, awb)
+        onLocked?.invoke()
+    }
+
+    /**
+     * Forgets the remembered values, re-meters exposure and white balance (at [point] if given),
+     * then locks and remembers the new values.
+     */
+    fun remeterAndLock(
+        camera: Camera,
+        point: MeteringPoint?,
+        controls: CameraControlSettings = activeControls,
+        onLocked: (() -> Unit)? = null
+    ) {
+
+        monitor?.cancel()
+
+        val cameraId = CameraCapabilities.from(camera.cameraInfo).cameraId
+
+        val traitKey = controls.lockKey
+
+        if (traitKey != null && cameraId != null) {
+            LockedCameraValuesStore.clear(traitKey, cameraId)
+        }
+
+        // release the locks (and any restored manual values) so the camera adjusts again
+        Camera2CameraControl.from(camera.cameraControl)
+            .setCaptureRequestOptions(CaptureRequestOptions.Builder().build())
+
+        if (point == null) {
+            applyLocks(camera, controls, onLocked)
+            return
+        }
+
+        val action = FocusMeteringAction.Builder(
+            point,
+            FocusMeteringAction.FLAG_AF or FocusMeteringAction.FLAG_AE or FocusMeteringAction.FLAG_AWB
+        ).disableAutoCancel().build()
+
+        camera.cameraControl.startFocusAndMetering(action).addListener({
+            applyLocks(camera, controls, onLocked)
+        }, ContextCompat.getMainExecutor(context))
     }
 
     /** Toggle between back and front camera selectors. */
@@ -123,8 +325,63 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
         }
     }
 
+    private fun buildResolutionSelector(targetResolution: Size): ResolutionSelector {
+
+        val resolutionStrategy = ResolutionStrategy(targetResolution, ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER)
+
+        val aspectRatioStrategy = AspectRatioStrategy(
+            AspectRatio.RATIO_4_3,
+            AspectRatioStrategy.FALLBACK_RULE_NONE
+        )
+
+        return ResolutionSelector.Builder()
+            .setResolutionStrategy(resolutionStrategy)
+            .setAspectRatioStrategy(aspectRatioStrategy)
+            .build()
+    }
+
+    /**
+     * Binds with RAW + JPEG output when requested and supported, falling back to JPEG only
+     * if the device rejects the stream combination.
+     */
+    private fun bindWithRawFallback(
+        controls: CameraControlSettings,
+        capabilities: CameraCapabilities,
+        bindOnce: (raw: Boolean) -> Pair<Camera, ImageCapture>
+    ): Pair<Camera, ImageCapture> {
+
+        activeControls = controls
+
+        val wantRaw = controls.saveRaw && capabilities.raw
+
+        // only report a fallback when a RAW-capable camera rejected the stream combination
+        rawCaptureFellBack = false
+
+        val result = try {
+
+            bindOnce(wantRaw).also { isRawCaptureActive = wantRaw }
+
+        } catch (e: IllegalArgumentException) {
+
+            if (!wantRaw) throw e
+
+            Log.w(TAG, "RAW + JPEG capture unsupported in this configuration, falling back to JPEG", e)
+
+            unbind()
+
+            rawCaptureFellBack = true
+
+            bindOnce(false).also { isRawCaptureActive = false }
+        }
+
+        applyLocks(result.first, controls)
+
+        return result
+    }
+
     fun bindFrontCapture(
         targetResolution: Size?,
+        controls: CameraControlSettings = CameraControlSettings.DEFAULT,
         onBind: (Camera, ExecutorService?, ImageCapture) -> Unit,
     ) {
 
@@ -132,32 +389,32 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
 
         try {
 
-            val builder = ImageCapture.Builder()
+            val capabilities = capabilitiesFor(currentSelector)
 
-            if (targetResolution != null) {
+            val (camera, imageCapture) = bindWithRawFallback(controls, capabilities) { raw ->
 
-                val resolutionStrategy = ResolutionStrategy(targetResolution, ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER)
+                val builder = ImageCapture.Builder()
 
-                val aspectRatioStrategy = AspectRatioStrategy(
-                    AspectRatio.RATIO_4_3,
-                    AspectRatioStrategy.FALLBACK_RULE_NONE
+                if (targetResolution != null) {
+                    builder.setResolutionSelector(buildResolutionSelector(targetResolution))
+                }
+
+                if (raw) builder.setOutputFormat(ImageCapture.OUTPUT_FORMAT_RAW_JPEG)
+
+                applyManualExposure(builder, controls, capabilities)
+
+                attachMonitor(builder)
+
+                val imageCapture = builder.build()
+
+                val camera = cameraXInstance.get().bindToLifecycle(
+                    context as LifecycleOwner,
+                    currentSelector,
+                    imageCapture
                 )
 
-                val resolutionSelector = ResolutionSelector.Builder()
-                    .setResolutionStrategy(resolutionStrategy)
-                    .setAspectRatioStrategy(aspectRatioStrategy)
-                    .build()
-
-                builder.setResolutionSelector(resolutionSelector)
+                camera to imageCapture
             }
-
-            val imageCapture = builder.build()
-
-            val camera = cameraXInstance.get().bindToLifecycle(
-                context as LifecycleOwner,
-                currentSelector,
-                imageCapture
-            )
 
             Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
 
@@ -178,37 +435,11 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
         traitId: String? = null,
         analysis: ImageAnalysis?,
         showCropRegion: Boolean,
+        controls: CameraControlSettings = CameraControlSettings.DEFAULT,
         onBind: (Camera, ExecutorService?, ImageCapture) -> Unit
     ) {
 
         unbind()
-
-        val builder = ImageCapture.Builder()
-        val prevBuilder = Preview.Builder()
-
-        if (targetResolution != null) {
-
-            val resolutionStrategy = ResolutionStrategy(targetResolution, ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER)
-
-            val aspectRatioStrategy = AspectRatioStrategy(
-                AspectRatio.RATIO_4_3,
-                AspectRatioStrategy.FALLBACK_RULE_NONE
-            )
-
-            val resolutionSelector = ResolutionSelector.Builder()
-                .setResolutionStrategy(resolutionStrategy)
-                .setAspectRatioStrategy(aspectRatioStrategy)
-                .build()
-
-            builder.setResolutionSelector(resolutionSelector)
-            prevBuilder.setResolutionSelector(resolutionSelector)
-        }
-
-        val imageCapture = builder.build()
-
-        val p = prevBuilder.build()
-
-        p.surfaceProvider = previewView?.surfaceProvider
 
         // remove previous drawable overlay if present
         try {
@@ -257,22 +488,49 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
             }
         }
 
-        val useCaseGroupBuilder = UseCaseGroup.Builder()
-
-        useCaseGroupBuilder.addUseCase(p)
-
-        useCaseGroupBuilder.addUseCase(imageCapture)
-
-        analysis?.let { a -> useCaseGroupBuilder.addUseCase(a) }
-
-        val useCaseGroup = useCaseGroupBuilder.build()
+        val capabilities = capabilitiesFor(currentSelector)
 
         try {
-            val camera = cameraXInstance.get().bindToLifecycle(
-                context as LifecycleOwner,
-                currentSelector,
-                useCaseGroup
-            )
+            val (camera, imageCapture) = bindWithRawFallback(controls, capabilities) { raw ->
+
+                val builder = ImageCapture.Builder()
+                val prevBuilder = Preview.Builder()
+
+                if (targetResolution != null) {
+                    val resolutionSelector = buildResolutionSelector(targetResolution)
+                    builder.setResolutionSelector(resolutionSelector)
+                    prevBuilder.setResolutionSelector(resolutionSelector)
+                }
+
+                if (raw) builder.setOutputFormat(ImageCapture.OUTPUT_FORMAT_RAW_JPEG)
+
+                applyManualExposure(builder, controls, capabilities)
+                applyManualExposure(prevBuilder, controls, capabilities)
+
+                attachMonitor(prevBuilder)
+
+                val imageCapture = builder.build()
+
+                val p = prevBuilder.build()
+
+                p.surfaceProvider = previewView?.surfaceProvider
+
+                val useCaseGroupBuilder = UseCaseGroup.Builder()
+
+                useCaseGroupBuilder.addUseCase(p)
+
+                useCaseGroupBuilder.addUseCase(imageCapture)
+
+                analysis?.let { a -> useCaseGroupBuilder.addUseCase(a) }
+
+                val camera = cameraXInstance.get().bindToLifecycle(
+                    context as LifecycleOwner,
+                    currentSelector,
+                    useCaseGroupBuilder.build()
+                )
+
+                camera to imageCapture
+            }
 
             Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
 

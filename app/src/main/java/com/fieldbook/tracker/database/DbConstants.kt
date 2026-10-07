@@ -84,4 +84,9 @@ object ObservationVariableAttributeDetailsView {
     const val ALLOW_OTHER = "allowOther"
     const val CANOPY_SENSITIVITY = "canopySensitivity"
     const val DURATION = "duration"
+    const val CAMERA_EXPOSURE_MODE = "cameraExposureMode"
+    const val CAMERA_ISO = "cameraIso"
+    const val CAMERA_EXPOSURE_TIME = "cameraExposureTimeNs"
+    const val CAMERA_AWB_LOCK = "cameraAwbLock"
+    const val CAMERA_SAVE_RAW = "cameraSaveRaw"
 }

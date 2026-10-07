@@ -132,11 +132,42 @@ object TraitAttributes {
         valueType = ValueType.STRING
     )
 
+    val CAMERA_EXPOSURE_MODE = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.CAMERA_EXPOSURE_MODE,
+        valueType = ValueType.STRING,
+        defaultValue = "auto"
+    )
+
+    val CAMERA_ISO = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.CAMERA_ISO,
+        valueType = ValueType.STRING,
+        defaultValue = ""
+    )
+
+    val CAMERA_EXPOSURE_TIME = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.CAMERA_EXPOSURE_TIME,
+        valueType = ValueType.STRING,
+        defaultValue = ""
+    )
+
+    val CAMERA_AWB_LOCK = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.CAMERA_AWB_LOCK,
+        valueType = ValueType.BOOLEAN,
+        defaultValue = "false"
+    )
+
+    val CAMERA_SAVE_RAW = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.CAMERA_SAVE_RAW,
+        valueType = ValueType.BOOLEAN,
+        defaultValue = "false"
+    )
+
     val ALL = listOf(MIN_VALUE, MAX_VALUE, CATEGORIES, CLOSE_KEYBOARD, CROP_IMAGE, SAVE_IMAGE,
         USE_DAY_OF_YEAR, CATEGORY_DISPLAY_VALUE, RESOURCE_FILE,
         DECIMAL_PLACES_REQUIRED, MATH_SYMBOLS_ENABLED, ALLOW_MULTICAT, REPEATED_MEASURES,
         AUTO_SWITCH_PLOT, UNIT, INVALID_VALUES, MULTI_MEDIA_AUDIO, MULTI_MEDIA_VIDEO, MULTI_MEDIA_PHOTO,
-        ALLOW_OTHER, CANOPY_SENSITIVITY, DURATION
+        ALLOW_OTHER, CANOPY_SENSITIVITY, DURATION, CAMERA_EXPOSURE_MODE, CAMERA_ISO,
+        CAMERA_EXPOSURE_TIME, CAMERA_AWB_LOCK, CAMERA_SAVE_RAW
     )
 
     fun byKey(key: String): AttributeDefinition? = ALL.find { it.key == key }
