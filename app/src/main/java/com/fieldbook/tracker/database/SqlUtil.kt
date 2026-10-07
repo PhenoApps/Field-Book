@@ -33,6 +33,12 @@ typealias Table = MutableList<Row>
 fun getTime(): String = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZZZZZ",
         Locale.getDefault()).format(Calendar.getInstance().time)
 
+// Quote a value as an SQL string literal, double quotes would make sqlite resolve it as a column first
+fun String.sqlLiteral(): String = "'${replace("'", "''")}'"
+
+// Quote a name as an SQL identifier, used for column aliases built from attribute names
+fun String.sqlIdentifier(): String = "\"${replace("\"", "\"\"")}\""
+
 // Helper function to safely get string values from cursor
 fun getStringVal(cursor: Cursor, columnName: String): String? {
     val columnIndex = cursor.getColumnIndex(columnName)

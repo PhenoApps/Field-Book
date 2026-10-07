@@ -16,6 +16,8 @@ import com.fieldbook.tracker.database.ObservationChangeTracker
 import com.fieldbook.tracker.database.getTime
 import com.fieldbook.tracker.database.models.StudyModel
 import com.fieldbook.tracker.database.query
+import com.fieldbook.tracker.database.sqlIdentifier
+import com.fieldbook.tracker.database.sqlLiteral
 import com.fieldbook.tracker.database.toFirst
 import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.FieldObject
@@ -122,7 +124,7 @@ class StudyDao {
             //create a select statement based on the saved plot attribute names
             val select = headers.map { col ->
 
-                "MAX(CASE WHEN attr.observation_unit_attribute_name = \"$col\" THEN vals.observation_unit_value_name ELSE NULL END) AS \"$col\""
+                "MAX(CASE WHEN attr.observation_unit_attribute_name = ${col.sqlLiteral()} THEN vals.observation_unit_value_name ELSE NULL END) AS ${col.sqlIdentifier()}"
 
             }
 

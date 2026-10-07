@@ -15,6 +15,8 @@ import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.Migrator.Study
 import com.fieldbook.tracker.database.query
+import com.fieldbook.tracker.database.sqlIdentifier
+import com.fieldbook.tracker.database.sqlLiteral
 import com.fieldbook.tracker.database.toFirst
 import com.fieldbook.tracker.database.toTable
 import com.fieldbook.tracker.database.withDatabase
@@ -117,7 +119,7 @@ class ObservationUnitPropertyDao {
                 val placeholders = traits.joinToString(", ") { it.id }
 
                 val unitSelectAttributes = fieldList.joinToString(", ") { attributeName ->
-                    "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
+                    "MAX(CASE WHEN attr.observation_unit_attribute_name = ${attributeName.sqlLiteral()} THEN vals.observation_unit_value_name ELSE NULL END) AS ${attributeName.sqlIdentifier()}"
                 }
 
                 val obsSelectAttributes =
@@ -248,7 +250,7 @@ class ObservationUnitPropertyDao {
                 if (attributeName in coreColumns) {
                     "MAX(units.\"$attributeName\") AS \"$attributeName\""
                 } else {
-                    "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
+                    "MAX(CASE WHEN attr.observation_unit_attribute_name = ${attributeName.sqlLiteral()} THEN vals.observation_unit_value_name ELSE NULL END) AS ${attributeName.sqlIdentifier()}"
                 }
             }
 
@@ -338,7 +340,7 @@ class ObservationUnitPropertyDao {
                 if (attributeName in coreColumns) {
                     "MAX(units.\"$attributeName\") AS \"$attributeName\""
                 } else {
-                    "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
+                    "MAX(CASE WHEN attr.observation_unit_attribute_name = ${attributeName.sqlLiteral()} THEN vals.observation_unit_value_name ELSE NULL END) AS ${attributeName.sqlIdentifier()}"
                 }
             }
 
@@ -469,7 +471,7 @@ class ObservationUnitPropertyDao {
             val headers = ObservationUnitAttributeDao.getAllNames(studyId).filter { it != "geo_coordinates" }
 
             val selectStatement = headers.joinToString(", ") { col ->
-                "MAX(CASE WHEN attr.observation_unit_attribute_name = \"$col\" THEN vals.observation_unit_value_name ELSE NULL END) AS \"$col\""
+                "MAX(CASE WHEN attr.observation_unit_attribute_name = ${col.sqlLiteral()} THEN vals.observation_unit_value_name ELSE NULL END) AS ${col.sqlIdentifier()}"
             }
 
             val orderByClause = getSortOrderClause(context, studyId.toString())

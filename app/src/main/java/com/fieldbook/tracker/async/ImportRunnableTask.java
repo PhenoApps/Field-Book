@@ -36,6 +36,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
     boolean uniqueFail;
     boolean containsDuplicates = false;
     boolean fieldNameExists = false;
+    String protectedColumnName = null;
 
     public ImportRunnableTask(Context context, FieldFileObject.FieldFileBase fieldFile,
                               int idColPosition, String unique) {
@@ -109,7 +110,8 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                 //later we will skip the rows if these are not present
                 if (!columns[i].isEmpty()) {
 
-                    if (!nonEmptyColumns.contains(columns[i])) {
+                    //sqlite column names are case-insensitive, so Plot and plot are duplicates
+                    if (!containsIgnoreCase(nonEmptyColumns, columns[i])) {
                         nonEmptyColumns.add(columns[i]);
                         nonEmptyIndices.add(i);
 
@@ -119,6 +121,13 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
                     } else containsDuplicates = true;
                 }
+            }
+
+            //protected names collide with columns used when switching fields (issue 1478)
+            protectedColumnName = DataHelper.findProtectedColumnName(nonEmptyColumns);
+            if (protectedColumnName != null) {
+                mFieldFile.close();
+                return -1;
             }
 
             FieldObject f = mFieldFile.createFieldObject();
@@ -213,6 +222,17 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
         if (dialog.isShowing())
             dialog.dismiss();
 
+        if (protectedColumnName != null) {
+            SharedPreferences.Editor ed = preferences.edit();
+            ed.putString(GeneralKeys.FIELD_FILE, null);
+            ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
+            ed.apply();
+            if (context != null) {
+                Utils.makeToast(context, context.getString(R.string.import_error_column_name) + " \"" + protectedColumnName + "\"");
+            }
+            return;
+        }
+
         if (fail | uniqueFail | mFieldFile.hasSpecialCharacters()) {
             controller.getDatabase().deleteField(result);
             SharedPreferences.Editor ed = preferences.edit();
@@ -261,6 +281,13 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
             }
         }
+    }
+
+    private static boolean containsIgnoreCase(ArrayList<String> list, String value) {
+        for (String s : list) {
+            if (s.equalsIgnoreCase(value)) return true;
+        }
+        return false;
     }
 
     private boolean verifyUniqueColumn(FieldFileObject.FieldFileBase fieldFile) {
