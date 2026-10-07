@@ -564,6 +564,11 @@ public class DataHelper {
         return ObservationUnitDao.Companion.getBySearchAttribute(studyId, searchValue);
     }
 
+    public List<kotlin.Pair<String, String>> getObservationUnitSearchAttributeValues(int studyId) {
+        open();
+        return ObservationUnitDao.Companion.getSearchAttributeValues(studyId);
+    }
+
     public void updateImage(FieldBookImage image) {
 
         open();
