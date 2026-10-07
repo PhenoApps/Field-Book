@@ -117,6 +117,10 @@ class TraitObject {
         get() = attributeValues.getString(TraitAttributes.DURATION)
         set(value) = attributeValues.setValue(TraitAttributes.DURATION, value)
 
+    var autoAdvanceDigits: String
+        get() = attributeValues.getString(TraitAttributes.AUTO_ADVANCE_DIGITS)
+        set(value) = attributeValues.setValue(TraitAttributes.AUTO_ADVANCE_DIGITS, value)
+
     companion object {
 
         fun fromJson(json: TraitJson, maxPosition: Int, originalFileName: String) = TraitObject().apply {
@@ -204,7 +208,8 @@ class TraitObject {
                 attachVideo == that.attachVideo &&
                 allowOther == that.allowOther &&
                 sensitivity == that.sensitivity &&
-                duration == that.duration
+                duration == that.duration &&
+                autoAdvanceDigits == that.autoAdvanceDigits
     }
 
     override fun hashCode(): Int {
@@ -215,7 +220,7 @@ class TraitObject {
             saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms,
             maxDecimalPlaces, mathSymbolsEnabled, allowMulticat, repeatedMeasures,
             autoSwitchPlot, unit, invalidValues, attachAudio, attachPhoto, attachVideo,
-            allowOther, duration, sensitivity
+            allowOther, duration, sensitivity, autoAdvanceDigits
         )
     }
 
@@ -256,6 +261,7 @@ class TraitObject {
         t.allowOther = this.allowOther
         t.sensitivity = this.sensitivity
         t.duration = this.duration
+        t.autoAdvanceDigits = this.autoAdvanceDigits
 
         return t
     }
