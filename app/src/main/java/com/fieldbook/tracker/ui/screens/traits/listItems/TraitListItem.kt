@@ -9,7 +9,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DragHandle
@@ -25,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -101,13 +106,28 @@ fun TraitListItem(
 
             Spacer(modifier = Modifier.width(5.dp))
 
-            // format icon
+            // format icon, with a badge in the corner for traits imported via brapi
             val formatEnum = Formats.entries.find { it.getDatabaseName() == trait.format }
-            AppIcon(
-                icon = painterResource(
-                    formatEnum?.getIcon() ?: R.drawable.ic_trait_categorical
-                ),
-            )
+            Box {
+                AppIcon(
+                    icon = painterResource(
+                        formatEnum?.getIcon() ?: R.drawable.ic_trait_categorical
+                    ),
+                )
+
+                if (trait.isBrapiTrait()) {
+                    AppIcon(
+                        icon = R.drawable.ic_adv_brapi,
+                        contentDescription = stringResource(R.string.trait_brapi_indicator),
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .offset(x = 4.dp, y = 4.dp)
+                            .size(14.dp)
+                            .background(color = AppTheme.colors.background, shape = CircleShape)
+                            .padding(1.dp)
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.width(15.dp))
 
@@ -143,6 +163,26 @@ private fun TraitListItemPreview() {
         alias = "Percent trait"
         format = "percent"
         visible = false
+    }
+
+    AppTheme {
+        TraitListItem(
+            trait = traitObject,
+            onClick = { },
+            onToggleVisibility = { },
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BrapiTraitListItemPreview() {
+    val traitObject = TraitObject()
+    traitObject.apply {
+        alias = "BrAPI numeric trait"
+        format = "numeric"
+        visible = true
+        externalDbId = "variable1"
     }
 
     AppTheme {
