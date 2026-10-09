@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.net.wifi.WifiManager
 import android.net.wifi.WifiNetworkSpecifier
 import android.os.Build
 import android.os.Handler
@@ -44,11 +45,26 @@ class WifiHelper @Inject constructor(
          * How long to wait for the camera's access point before giving up. Generous: the user may
          * still be reading the system connect dialog.
          */
-        const val REQUEST_TIMEOUT_MS = 45000L
+        const val REQUEST_TIMEOUT_MS = 60000L
+
+        /**
+         * Once the deadline passes while the access point is visible in recent scan results, the
+         * user most likely has it listed in the connect dialog and just has not accepted yet, so
+         * the wait is extended in these steps, up to [MAX_REQUEST_WAIT_MS] in total.
+         */
+        private const val VISIBLE_EXTENSION_MS = 30000L
+        private const val MAX_REQUEST_WAIT_MS = 180000L
+
+        //scan results older than this no longer count as the access point being in range
+        private const val SCAN_RESULT_MAX_AGE_MS = 30000L
     }
 
     private val connectivityManager by lazy {
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    }
+
+    private val wifiManager by lazy {
+        context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
     }
 
     private val timeoutHandler = Handler(Looper.getMainLooper())
@@ -64,23 +80,41 @@ class WifiHelper @Inject constructor(
             .setWpa2Passphrase(pass)
             .build()
 
-        requestNetwork(specifier.toRequest(), requester, ssid)
+        requestNetwork(specifier.toRequest(), requester, ssid) { it == ssid }
     }
 
     fun startWifiSearch(format: String, requester: WifiRequester) {
 
+        val pattern = PatternMatcher(".*$format.*", PatternMatcher.PATTERN_SIMPLE_GLOB)
+
         val specifier = WifiNetworkSpecifier.Builder()
-            .setSsidPattern(
-                PatternMatcher(
-                    ".*$format.*",
-                    PatternMatcher.PATTERN_SIMPLE_GLOB
-                )
-            )
+            .setSsidPattern(pattern)
             //adding BSSID will remove the need for the "connect" dialog
             //.setBssid(MacAddress.fromString(bssid!!))
             .build()
 
-        requestNetwork(specifier.toRequest(), requester, "*$format*")
+        requestNetwork(specifier.toRequest(), requester, "*$format*") { pattern.match(it) }
+    }
+
+    /**
+     * Whether a network matching [matches] showed up in the system's recent scan results. Only
+     * reads what the system already has, the connect dialog scans on its own while it is open.
+     * Returns false when the results are unavailable, e.g. location permission or services off.
+     */
+    private fun isVisibleInScan(matches: (String) -> Boolean): Boolean {
+        return try {
+            val nowMicros = SystemClock.elapsedRealtime() * 1000
+            wifiManager.scanResults.any { result ->
+                @Suppress("DEPRECATION")
+                val ssid = result.SSID
+                !ssid.isNullOrEmpty()
+                        && nowMicros - result.timestamp < SCAN_RESULT_MAX_AGE_MS * 1000
+                        && matches(ssid)
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Unable to read wifi scan results", e)
+            false
+        }
     }
 
     private fun WifiNetworkSpecifier.toRequest(): NetworkRequest =
@@ -98,7 +132,12 @@ class WifiHelper @Inject constructor(
      * [ConnectivityManager.requestNetwork] throws TooManyRequestsException and the device can only
      * recover by toggling wifi.
      */
-    private fun requestNetwork(request: NetworkRequest, requester: WifiRequester, label: String) {
+    private fun requestNetwork(
+        request: NetworkRequest,
+        requester: WifiRequester,
+        label: String,
+        matches: (String) -> Boolean
+    ) {
 
         //releases any previous request and unbinds the process
         disconnect()
@@ -177,8 +216,19 @@ class WifiHelper @Inject constructor(
             return
         }
 
-        timeoutRunnable = Runnable {
-            if (networkCallback === callback && boundNetwork == null) {
+        timeoutRunnable = object : Runnable {
+            override fun run() {
+
+                if (networkCallback !== callback || boundNetwork != null) return
+
+                //the access point is in range, so the user is most likely looking at it in the
+                //connect dialog: keep waiting for them rather than failing underneath it
+                if (elapsed() + VISIBLE_EXTENSION_MS <= MAX_REQUEST_WAIT_MS && isVisibleInScan(matches)) {
+                    Log.d(TAG, "$label is visible after ${elapsed()}ms, extending wait")
+                    timeoutHandler.postDelayed(this, VISIBLE_EXTENSION_MS)
+                    return
+                }
+
                 Log.e(TAG, "Timed out joining $label after ${elapsed()}ms")
                 disconnect()
                 requester.onNetworkUnavailable()
