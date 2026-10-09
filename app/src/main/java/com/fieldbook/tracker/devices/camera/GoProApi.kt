@@ -148,7 +148,13 @@ class GoProApi @Inject constructor(
     //state id refers to https://gopro.github.io/OpenGoPro/http#tag/Query/operation/OGP_GET_STATE
     enum class GoProStateKeys(val key: String) {
         BUSY("8"),
-        IS_ENCODING("10")
+        IS_ENCODING("10"),
+        PHOTO_COUNT("38")
+    }
+
+    /** One read of the camera state, [photoCount] is null if the camera did not report it. */
+    private data class CameraState(val busy: Int, val encoding: Int, val photoCount: Int?) {
+        val isBusy get() = busy == 1 || encoding == 1
     }
 
     companion object {
@@ -940,11 +946,9 @@ class GoProApi @Inject constructor(
 
             if (state != null) {
 
-                callbacks?.onBusyStateChanged(state.first, state.second)
+                callbacks?.onBusyStateChanged(state.busy, state.encoding)
 
-                val busy = state.first == 1 || state.second == 1
-
-                if (busy) {
+                if (state.isBusy) {
                     sawBusy = true
                 } else if (sawBusy || System.currentTimeMillis() - start > CAPTURE_BUSY_WINDOW_MS) {
                     return true
@@ -957,7 +961,7 @@ class GoProApi @Inject constructor(
         return false
     }
 
-    private suspend fun fetchBusyState(): Pair<Int, Int>? {
+    private suspend fun fetchBusyState(): CameraState? {
 
         return try {
 
@@ -980,12 +984,13 @@ class GoProApi @Inject constructor(
         }
     }
 
-    private fun parseState(responseBody: String): Pair<Int, Int>? {
+    private fun parseState(responseBody: String): CameraState? {
         return try {
             val state = JSONObject(responseBody).getJSONObject("status")
-            Pair(
+            CameraState(
                 state.getInt(GoProStateKeys.BUSY.key),
-                state.getInt(GoProStateKeys.IS_ENCODING.key)
+                state.getInt(GoProStateKeys.IS_ENCODING.key),
+                state.optInt(GoProStateKeys.PHOTO_COUNT.key, -1).takeIf { it >= 0 }
             )
         } catch (e: JSONException) {
             Log.w(TAG, "Unable to parse camera state", e)
@@ -1006,14 +1011,16 @@ class GoProApi @Inject constructor(
         pollJob = ioScope.launch {
 
             var wasBusy = false
+            var lastPhotoCount: Int? = null
 
             while (isActive) {
 
                 if (pollPaused || !connectionState.isActive) {
 
-                    //drop the edge we were tracking, otherwise resuming after an app driven
-                    //capture looks like a fresh busy -> idle transition
+                    //drop the edge and count we were tracking, otherwise resuming after an app
+                    //driven capture looks like a fresh photo taken on the camera
                     wasBusy = false
+                    lastPhotoCount = null
 
                 } else {
 
@@ -1021,18 +1028,29 @@ class GoProApi @Inject constructor(
 
                     if (state != null) {
 
-                        callbacks?.onBusyStateChanged(state.first, state.second)
+                        callbacks?.onBusyStateChanged(state.busy, state.encoding)
 
-                        val busy = state.first == 1 || state.second == 1
+                        //a single photo is usually written well inside one poll interval, so the
+                        //busy flag alone misses most shutter presses. A rising photo count does
+                        //not, the busy -> idle edge stays as a fallback for cameras without it.
+                        val countRose = lastPhotoCount != null && state.photoCount != null
+                                && state.photoCount > lastPhotoCount
+                        val busyEdge = wasBusy && !state.isBusy
 
-                        //busy -> idle means a photo was just written
-                        if (wasBusy && !busy) {
+                        //wait out a capture in progress so the media list already holds the photo
+                        if ((countRose || busyEdge) && !state.isBusy) {
+                            Log.d(TAG, "Camera shutter capture detected, count=${state.photoCount}")
                             currentEntry?.let { entry ->
                                 harvest(entry, entry.trait.saveImage)
                             }
                         }
 
-                        wasBusy = busy
+                        wasBusy = state.isBusy
+
+                        //hold the old count while busy so the rise is still seen once it settles
+                        if (!state.isBusy) {
+                            lastPhotoCount = state.photoCount
+                        }
                     }
                 }
 
