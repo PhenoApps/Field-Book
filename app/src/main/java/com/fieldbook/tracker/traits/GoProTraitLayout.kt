@@ -61,16 +61,26 @@ class GoProTraitLayout :
             GoProApi.ConnectionState.ERROR -> setupDisconnected()
 
             GoProApi.ConnectionState.STREAMING,
-            GoProApi.ConnectionState.CAPTURING -> bindExistingSession()
+            GoProApi.ConnectionState.CAPTURING -> {
+                bindExistingSession()
+                //cancels a park still waiting on a capture if the user came straight back
+                api.resume()
+            }
+
+            GoProApi.ConnectionState.PARKED -> {
+                showConnectingUi()
+                api.resume()
+            }
 
             else -> showConnectingUi()
         }
     }
 
     /**
-     * Releases the session when the user leaves the trait. Only job handles are cancelled here:
-     * the layout instance is created once per activity and reused, so cancelling the shared
-     * coroutine scopes would permanently disable the trait.
+     * Parks the session when the user leaves the trait, so coming back skips the bluetooth
+     * handshake and the wifi connect dialog. Only job handles are cancelled here: the layout
+     * instance is created once per activity and reused, so cancelling the shared coroutine scopes
+     * would permanently disable the trait.
      */
     override fun onExit() {
         super.onExit()
@@ -81,7 +91,7 @@ class GoProTraitLayout :
 
         shutterButton?.setOnClickListener(null)
 
-        api.teardownAsync()
+        api.park()
     }
 
     private fun setupWaitForStreamDialog(): AlertDialog {
@@ -295,6 +305,7 @@ class GoProTraitLayout :
 
                 GoProApi.ConnectionState.STREAMING,
                 GoProApi.ConnectionState.CAPTURING,
+                GoProApi.ConnectionState.PARKED,
                 GoProApi.ConnectionState.DISCONNECTING -> Unit
             }
         }

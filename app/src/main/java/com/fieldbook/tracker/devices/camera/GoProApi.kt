@@ -119,6 +119,9 @@ class GoProApi @Inject constructor(
         CONNECTED,
         STREAMING,
         CAPTURING,
+
+        /** Links kept open with the preview stopped while the user is on another trait. */
+        PARKED,
         DISCONNECTING,
         ERROR;
 
@@ -148,7 +151,13 @@ class GoProApi @Inject constructor(
     //state id refers to https://gopro.github.io/OpenGoPro/http#tag/Query/operation/OGP_GET_STATE
     enum class GoProStateKeys(val key: String) {
         BUSY("8"),
-        IS_ENCODING("10")
+        IS_ENCODING("10"),
+        PHOTO_COUNT("38")
+    }
+
+    /** One read of the camera state, [photoCount] is null if the camera did not report it. */
+    private data class CameraState(val busy: Int, val encoding: Int, val photoCount: Int?) {
+        val isBusy get() = busy == 1 || encoding == 1
     }
 
     companion object {
@@ -204,6 +213,9 @@ class GoProApi @Inject constructor(
 
         //idle cadence for detecting captures triggered by the camera's own shutter button
         private const val IDLE_POLL_INTERVAL_MS = 2000L
+
+        //how long a parked session survives while the user is on other traits
+        private const val PARK_TIMEOUT_MS = 5 * 60 * 1000L
     }
 
     private val gatt by lazy {
@@ -241,6 +253,9 @@ class GoProApi @Inject constructor(
 
                 Player.STATE_READY -> {
                     Log.d(TAG, "Player Ready")
+
+                    //a preview restored by a capture that finished after the session was parked
+                    if (!connectionState.hasPlayer) return
 
                     streamWatchdog?.cancel()
                     streamWatchdog = null
@@ -307,6 +322,13 @@ class GoProApi @Inject constructor(
     private var captureJob: Job? = null
     private var pollJob: Job? = null
     private var pollPaused = false
+
+    private var parkJob: Job? = null
+    private var parkTimeoutJob: Job? = null
+    private var resumeJob: Job? = null
+
+    /** The camera network the session joined, checked on resume so a replaced one is not reused. */
+    private var cameraNetwork: Network? = null
 
     private var stateChangedAt = 0L
 
@@ -553,6 +575,10 @@ class GoProApi @Inject constructor(
 
         setState(ConnectionState.DISCONNECTING)
 
+        parkJob?.cancel()
+        parkTimeoutJob?.cancel()
+        resumeJob?.cancel()
+
         try { captureJob?.cancel() } catch (_: Exception) {}
         streamWatchdog?.cancel()
         streamWatchdog = null
@@ -583,6 +609,7 @@ class GoProApi @Inject constructor(
         httpClient = null
 
         controller.getWifiHelper().disconnect()
+        cameraNetwork = null
 
         withContext(Dispatchers.Main) {
             player?.removeListener(playerListener)
@@ -611,6 +638,122 @@ class GoProApi @Inject constructor(
         job.invokeOnCompletion {
             callbacks = null
             ioScope.cancel()
+        }
+    }
+
+    /**
+     * Park region
+     */
+
+    /**
+     * Called when the user leaves the trait. A live session keeps its bluetooth link and wifi
+     * request but stops the preview and unbinds the process, so other traits are not stuck behind
+     * the camera's access point. Coming back through [resume] then only restarts the preview
+     * instead of repeating the whole handshake and the system connect dialog. A session that is
+     * still connecting is torn down as before.
+     */
+    fun park() {
+
+        when (connectionState) {
+            ConnectionState.STREAMING, ConnectionState.CAPTURING -> Unit
+            ConnectionState.PARKED -> return
+            else -> {
+                teardownAsync()
+                return
+            }
+        }
+
+        if (parkJob?.isActive == true) return
+
+        parkJob = ioScope.launch {
+
+            //let a capture in flight finish and restore the preview before it is stopped
+            captureMutex.withLock {
+
+                if (connectionState != ConnectionState.STREAMING) return@launch
+
+                //set first so player errors raised by the shutdown below are not retried
+                setState(ConnectionState.PARKED)
+
+                stopPolling()
+                streamWatchdog?.cancel()
+                streamWatchdog = null
+                playerRetries = 0
+
+                try {
+                    stopStreamSuspend()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.w(TAG, "Stop stream request failed while parking", e)
+                }
+
+                controller.getFfmpegHelper().cancel()
+
+                //stop rather than release: the instance is reused on resume, see createPlayer
+                withContext(Dispatchers.Main) { player?.stop() }
+
+                controller.getWifiHelper().releaseProcessBinding()
+
+                armParkTimeout()
+            }
+        }
+    }
+
+    private fun armParkTimeout() {
+
+        parkTimeoutJob?.cancel()
+
+        parkTimeoutJob = ioScope.launch {
+
+            delay(PARK_TIMEOUT_MS)
+
+            if (connectionState == ConnectionState.PARKED) {
+                Log.d(TAG, "Parked for ${PARK_TIMEOUT_MS}ms, releasing the camera")
+                teardownAsync()
+            }
+        }
+    }
+
+    /**
+     * Brings a parked session back when the user returns to the trait, through the same
+     * [ConnectionState.CONNECTED] path a fresh connection takes once wifi is joined. Safe to call
+     * on every layout load, it does nothing unless a park is pending or in place.
+     */
+    fun resume() {
+
+        if (connectionState != ConnectionState.PARKED && parkJob?.isActive != true) return
+
+        if (resumeJob?.isActive == true) return
+
+        parkTimeoutJob?.cancel()
+        parkTimeoutJob = null
+
+        resumeJob = ioScope.launch {
+
+            parkJob?.let { job ->
+                //back before a pending park got past the capture in flight: keep the session
+                if (connectionState != ConnectionState.PARKED) job.cancel()
+                //a quick switch back can also land while the park is still stopping the stream
+                job.join()
+            }
+
+            if (connectionState != ConnectionState.PARKED) return@launch
+
+            val network = cameraNetwork
+
+            if (network == null || !controller.getWifiHelper().restoreProcessBinding(network)) {
+                Log.e(TAG, "Camera network gone while parked")
+                setState(ConnectionState.ERROR, R.string.gopro_error_wifi_lost)
+                teardownAsync()
+                return@launch
+            }
+
+            Log.d(TAG, "Resuming parked session")
+
+            setState(ConnectionState.CONNECTED)
+
+            callbacks?.onConnected()
         }
     }
 
@@ -940,11 +1083,9 @@ class GoProApi @Inject constructor(
 
             if (state != null) {
 
-                callbacks?.onBusyStateChanged(state.first, state.second)
+                callbacks?.onBusyStateChanged(state.busy, state.encoding)
 
-                val busy = state.first == 1 || state.second == 1
-
-                if (busy) {
+                if (state.isBusy) {
                     sawBusy = true
                 } else if (sawBusy || System.currentTimeMillis() - start > CAPTURE_BUSY_WINDOW_MS) {
                     return true
@@ -957,7 +1098,7 @@ class GoProApi @Inject constructor(
         return false
     }
 
-    private suspend fun fetchBusyState(): Pair<Int, Int>? {
+    private suspend fun fetchBusyState(): CameraState? {
 
         return try {
 
@@ -980,12 +1121,13 @@ class GoProApi @Inject constructor(
         }
     }
 
-    private fun parseState(responseBody: String): Pair<Int, Int>? {
+    private fun parseState(responseBody: String): CameraState? {
         return try {
             val state = JSONObject(responseBody).getJSONObject("status")
-            Pair(
+            CameraState(
                 state.getInt(GoProStateKeys.BUSY.key),
-                state.getInt(GoProStateKeys.IS_ENCODING.key)
+                state.getInt(GoProStateKeys.IS_ENCODING.key),
+                state.optInt(GoProStateKeys.PHOTO_COUNT.key, -1).takeIf { it >= 0 }
             )
         } catch (e: JSONException) {
             Log.w(TAG, "Unable to parse camera state", e)
@@ -1006,14 +1148,16 @@ class GoProApi @Inject constructor(
         pollJob = ioScope.launch {
 
             var wasBusy = false
+            var lastPhotoCount: Int? = null
 
             while (isActive) {
 
                 if (pollPaused || !connectionState.isActive) {
 
-                    //drop the edge we were tracking, otherwise resuming after an app driven
-                    //capture looks like a fresh busy -> idle transition
+                    //drop the edge and count we were tracking, otherwise resuming after an app
+                    //driven capture looks like a fresh photo taken on the camera
                     wasBusy = false
+                    lastPhotoCount = null
 
                 } else {
 
@@ -1021,18 +1165,29 @@ class GoProApi @Inject constructor(
 
                     if (state != null) {
 
-                        callbacks?.onBusyStateChanged(state.first, state.second)
+                        callbacks?.onBusyStateChanged(state.busy, state.encoding)
 
-                        val busy = state.first == 1 || state.second == 1
+                        //a single photo is usually written well inside one poll interval, so the
+                        //busy flag alone misses most shutter presses. A rising photo count does
+                        //not, the busy -> idle edge stays as a fallback for cameras without it.
+                        val countRose = lastPhotoCount != null && state.photoCount != null
+                                && state.photoCount > lastPhotoCount
+                        val busyEdge = wasBusy && !state.isBusy
 
-                        //busy -> idle means a photo was just written
-                        if (wasBusy && !busy) {
+                        //wait out a capture in progress so the media list already holds the photo
+                        if ((countRose || busyEdge) && !state.isBusy) {
+                            Log.d(TAG, "Camera shutter capture detected, count=${state.photoCount}")
                             currentEntry?.let { entry ->
                                 harvest(entry, entry.trait.saveImage)
                             }
                         }
 
-                        wasBusy = busy
+                        wasBusy = state.isBusy
+
+                        //hold the old count while busy so the rise is still seen once it settles
+                        if (!state.isBusy) {
+                            lastPhotoCount = state.photoCount
+                        }
                     }
                 }
 
@@ -1348,6 +1503,8 @@ class GoProApi @Inject constructor(
      * WifiRequester region
      */
     override fun onNetworkBound(network: Network) {
+
+        cameraNetwork = network
 
         ioScope.launch {
             // Assign a fresh client bound to the network. Evict old connections first.
