@@ -119,6 +119,9 @@ class GoProApi @Inject constructor(
         CONNECTED,
         STREAMING,
         CAPTURING,
+
+        /** Links kept open with the preview stopped while the user is on another trait. */
+        PARKED,
         DISCONNECTING,
         ERROR;
 
@@ -210,6 +213,9 @@ class GoProApi @Inject constructor(
 
         //idle cadence for detecting captures triggered by the camera's own shutter button
         private const val IDLE_POLL_INTERVAL_MS = 2000L
+
+        //how long a parked session survives while the user is on other traits
+        private const val PARK_TIMEOUT_MS = 5 * 60 * 1000L
     }
 
     private val gatt by lazy {
@@ -247,6 +253,9 @@ class GoProApi @Inject constructor(
 
                 Player.STATE_READY -> {
                     Log.d(TAG, "Player Ready")
+
+                    //a preview restored by a capture that finished after the session was parked
+                    if (!connectionState.hasPlayer) return
 
                     streamWatchdog?.cancel()
                     streamWatchdog = null
@@ -313,6 +322,13 @@ class GoProApi @Inject constructor(
     private var captureJob: Job? = null
     private var pollJob: Job? = null
     private var pollPaused = false
+
+    private var parkJob: Job? = null
+    private var parkTimeoutJob: Job? = null
+    private var resumeJob: Job? = null
+
+    /** The camera network the session joined, checked on resume so a replaced one is not reused. */
+    private var cameraNetwork: Network? = null
 
     private var stateChangedAt = 0L
 
@@ -559,6 +575,10 @@ class GoProApi @Inject constructor(
 
         setState(ConnectionState.DISCONNECTING)
 
+        parkJob?.cancel()
+        parkTimeoutJob?.cancel()
+        resumeJob?.cancel()
+
         try { captureJob?.cancel() } catch (_: Exception) {}
         streamWatchdog?.cancel()
         streamWatchdog = null
@@ -589,6 +609,7 @@ class GoProApi @Inject constructor(
         httpClient = null
 
         controller.getWifiHelper().disconnect()
+        cameraNetwork = null
 
         withContext(Dispatchers.Main) {
             player?.removeListener(playerListener)
@@ -617,6 +638,122 @@ class GoProApi @Inject constructor(
         job.invokeOnCompletion {
             callbacks = null
             ioScope.cancel()
+        }
+    }
+
+    /**
+     * Park region
+     */
+
+    /**
+     * Called when the user leaves the trait. A live session keeps its bluetooth link and wifi
+     * request but stops the preview and unbinds the process, so other traits are not stuck behind
+     * the camera's access point. Coming back through [resume] then only restarts the preview
+     * instead of repeating the whole handshake and the system connect dialog. A session that is
+     * still connecting is torn down as before.
+     */
+    fun park() {
+
+        when (connectionState) {
+            ConnectionState.STREAMING, ConnectionState.CAPTURING -> Unit
+            ConnectionState.PARKED -> return
+            else -> {
+                teardownAsync()
+                return
+            }
+        }
+
+        if (parkJob?.isActive == true) return
+
+        parkJob = ioScope.launch {
+
+            //let a capture in flight finish and restore the preview before it is stopped
+            captureMutex.withLock {
+
+                if (connectionState != ConnectionState.STREAMING) return@launch
+
+                //set first so player errors raised by the shutdown below are not retried
+                setState(ConnectionState.PARKED)
+
+                stopPolling()
+                streamWatchdog?.cancel()
+                streamWatchdog = null
+                playerRetries = 0
+
+                try {
+                    stopStreamSuspend()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.w(TAG, "Stop stream request failed while parking", e)
+                }
+
+                controller.getFfmpegHelper().cancel()
+
+                //stop rather than release: the instance is reused on resume, see createPlayer
+                withContext(Dispatchers.Main) { player?.stop() }
+
+                controller.getWifiHelper().releaseProcessBinding()
+
+                armParkTimeout()
+            }
+        }
+    }
+
+    private fun armParkTimeout() {
+
+        parkTimeoutJob?.cancel()
+
+        parkTimeoutJob = ioScope.launch {
+
+            delay(PARK_TIMEOUT_MS)
+
+            if (connectionState == ConnectionState.PARKED) {
+                Log.d(TAG, "Parked for ${PARK_TIMEOUT_MS}ms, releasing the camera")
+                teardownAsync()
+            }
+        }
+    }
+
+    /**
+     * Brings a parked session back when the user returns to the trait, through the same
+     * [ConnectionState.CONNECTED] path a fresh connection takes once wifi is joined. Safe to call
+     * on every layout load, it does nothing unless a park is pending or in place.
+     */
+    fun resume() {
+
+        if (connectionState != ConnectionState.PARKED && parkJob?.isActive != true) return
+
+        if (resumeJob?.isActive == true) return
+
+        parkTimeoutJob?.cancel()
+        parkTimeoutJob = null
+
+        resumeJob = ioScope.launch {
+
+            parkJob?.let { job ->
+                //back before a pending park got past the capture in flight: keep the session
+                if (connectionState != ConnectionState.PARKED) job.cancel()
+                //a quick switch back can also land while the park is still stopping the stream
+                job.join()
+            }
+
+            if (connectionState != ConnectionState.PARKED) return@launch
+
+            val network = cameraNetwork
+
+            if (network == null || !controller.getWifiHelper().restoreProcessBinding(network)) {
+                Log.e(TAG, "Camera network gone while parked")
+                setState(ConnectionState.ERROR, R.string.gopro_error_wifi_lost)
+                teardownAsync()
+                return@launch
+            }
+
+            Log.d(TAG, "Resuming parked session")
+
+            setState(ConnectionState.CONNECTED)
+
+            callbacks?.onConnected()
         }
     }
 
@@ -1366,6 +1503,8 @@ class GoProApi @Inject constructor(
      * WifiRequester region
      */
     override fun onNetworkBound(network: Network) {
+
+        cameraNetwork = network
 
         ioScope.launch {
             // Assign a fresh client bound to the network. Evict old connections first.

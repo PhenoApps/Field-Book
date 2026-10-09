@@ -236,6 +236,35 @@ class WifiHelper @Inject constructor(
         }.also { timeoutHandler.postDelayed(it, REQUEST_TIMEOUT_MS) }
     }
 
+    /**
+     * Unbinds the process from the access point while keeping the request, and with it the
+     * connection, alive. Traffic that is not tied to the network explicitly returns to the
+     * default route, so the rest of the app is not stuck behind a network with no internet.
+     */
+    fun releaseProcessBinding() {
+        try {
+            connectivityManager.bindProcessToNetwork(null)
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to unbind process network", e)
+        }
+    }
+
+    /**
+     * Rebinds the process after [releaseProcessBinding]. Returns false if [network] is no longer
+     * the one this helper holds, i.e. it was lost or replaced by another request in the meantime.
+     */
+    fun restoreProcessBinding(network: Network): Boolean {
+
+        if (boundNetwork != network) return false
+
+        return try {
+            connectivityManager.bindProcessToNetwork(network)
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to rebind process network", e)
+            false
+        }
+    }
+
     private fun cancelTimeout() {
         timeoutRunnable?.let { timeoutHandler.removeCallbacks(it) }
         timeoutRunnable = null
