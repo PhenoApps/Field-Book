@@ -20,8 +20,9 @@ import com.fieldbook.tracker.devices.multispeq.MultispeqCalculator
 import com.fieldbook.tracker.devices.multispeq.MultispeqListener
 import com.fieldbook.tracker.devices.multispeq.MultispeqManager
 import com.fieldbook.tracker.devices.multispeq.MultispeqParameter
+import com.fieldbook.tracker.devices.multispeq.MultispeqProtocolLoader
+import com.fieldbook.tracker.devices.multispeq.MultispeqProtocolType
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -34,8 +35,8 @@ import org.json.JSONObject
  * 2. User taps "Connect" → dialog lists bonded MultispeQ devices.
  * 3. On connection the UI shows device name; [requestDeviceInfo] is called to
  *    fetch battery, firmware, and device ID.
- * 4. User taps the leaf-icon FAB to measure → RIDES 2.1 protocol (filtered to
- *    required sub-protocols) is sent, progress shown.
+ * 4. User taps the leaf-icon FAB to measure → the fastest protocol covering the
+ *    selected parameters is sent ([MultispeqProtocolType.select]), progress shown.
  * 5. Raw JSON response is processed by [MultispeqCalculator]; only the selected
  *    parameters are displayed and saved as the observation.
  *
@@ -57,6 +58,9 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
     private var connectedDisplayName: String = ""
     private var connectedDeviceInfoText: String = ""
     private var connectedFirmware: String = "--"
+
+    /** Protocol of the measurement in flight; the response is parsed according to it. */
+    private var pendingProtocol = MultispeqProtocolType.RIDES
 
     // Re-bound on every init()
     private lateinit var connectButton: FloatingActionButton
@@ -101,40 +105,12 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
     }
 
     // -------------------------------------------------------------------------
-    // Protocol assembly
+    // Protocol selection
     // -------------------------------------------------------------------------
 
-    /**
-     * Loads the RIDES 2.1 protocol from raw resources and filters `_protocol_set_`
-     * to include only `no_leaf_baseline` plus sub-protocols required for the
-     * currently selected parameters.
-     */
-    private fun buildProtocol(): JSONArray {
-        val rawText = context.resources
-            .openRawResource(R.raw.`photosynthesis_rides_2_1`)
-            .bufferedReader().readText()
-
-        val base = JSONArray(rawText)
-        val protocolObj = base.getJSONObject(0)
-        val protocolSet = protocolObj.getJSONArray("_protocol_set_")
-
-        val raw = MultispeqParameter.fromJsonString(currentTrait.categories)
-        val selectedParameters = raw.ifEmpty { MultispeqParameter.defaultSelection() }
-        val neededSubProtocols = selectedParameters
-            .mapNotNull { it.group.subProtocol }
-            .toSet()
-
-        val filtered = JSONArray()
-        for (i in 0 until protocolSet.length()) {
-            val sub = protocolSet.getJSONObject(i)
-            val label = sub.optString("label")
-            if (label == "no_leaf_baseline" || label in neededSubProtocols) {
-                filtered.put(sub)
-            }
-        }
-        protocolObj.put("_protocol_set_", filtered)
-        return base
-    }
+    private fun selectedParameters(): Set<MultispeqParameter> =
+        MultispeqParameter.fromJsonString(currentTrait.categories)
+            .ifEmpty { MultispeqParameter.defaultSelection() }
 
     // -------------------------------------------------------------------------
     // UI setup
@@ -254,8 +230,9 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
         resultContainer.removeAllViews()
         deviceNameText.text = context.getString(R.string.multispeq_measuring)
 
+        val protocolType = MultispeqProtocolType.select(selectedParameters())
         val protocol = try {
-            buildProtocol()
+            MultispeqProtocolLoader.commandFor(context, protocolType)
         } catch (e: Exception) {
             progressBar.visibility = View.GONE
             measureButton.isEnabled = true
@@ -263,6 +240,7 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
             return
         }
 
+        pendingProtocol = protocolType
         multispeqManager?.sendCommand(protocol)
     }
 
@@ -320,11 +298,10 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
             } catch (_: JSONException) { /* non-JSON result — leave as-is */ }
 
             // Calculate and display selected parameters
-            val rawParams = MultispeqParameter.fromJsonString(currentTrait.categories)
-            val selectedParameters = rawParams.ifEmpty { MultispeqParameter.defaultSelection() }
+            val selectedParameters = selectedParameters()
             Log.d(TAG, "Selected parameters (${selectedParameters.size}): ${selectedParameters.map { it.name }}")
 
-            val results = MultispeqCalculator.calculate(rawJson, selectedParameters)
+            val results = MultispeqCalculator.calculate(rawJson, selectedParameters, pendingProtocol)
             Log.d(TAG, "Calculation results (${results.size} entries): ${results.map { (k, v) -> "${k.name}=$v" }}")
 
             val naCount = results.values.count { it == "N/A" }

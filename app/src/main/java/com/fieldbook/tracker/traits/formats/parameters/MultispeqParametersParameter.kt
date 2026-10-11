@@ -14,6 +14,7 @@ import android.widget.TextView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.devices.multispeq.MultispeqParameter
+import com.fieldbook.tracker.devices.multispeq.MultispeqProtocolType
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.ValidationResult
 
@@ -22,7 +23,7 @@ import com.fieldbook.tracker.traits.formats.ValidationResult
  *
  * The selection is stored as a JSON array of [MultispeqParameter] names in
  * [TraitObject.categories]. During collection, [MultispeqTraitLayout] reads
- * this field to assemble the dynamic RIDES 2.1 sub-protocol set and to know
+ * this field to pick the protocol to send ([MultispeqProtocolType.select]) and to know
  * which values to display after measurement.
  *
  * Editing is done via the Options chip on the Trait Details page, which calls
@@ -95,9 +96,8 @@ class MultispeqParametersParameter : BaseFormatParameter(
         /**
          * Shows the grouped parameter selection dialog.
          *
-         * Group headers are non-interactive bold labels. Environment parameters are
-         * automatically selected and disabled whenever any non-Environment parameter
-         * is checked (since [no_leaf_baseline] always runs and provides environment data).
+         * Group headers are non-interactive bold labels. Parameters are independent:
+         * selecting fewer lets a faster protocol be used ([MultispeqProtocolType.select]).
          *
          * @param ctx      Android context for building the dialog.
          * @param currentJson  Current JSON string from [TraitObject.categories].
@@ -116,9 +116,6 @@ class MultispeqParametersParameter : BaseFormatParameter(
                     .forEach { items.add(ListItem(it, null)) }
             }
 
-            fun isEnvForced() =
-                selected.any { it.group != MultispeqParameter.Group.ENVIRONMENT }
-
             val listView = ListView(ctx)
 
             val adapter = object : BaseAdapter() {
@@ -132,11 +129,7 @@ class MultispeqParametersParameter : BaseFormatParameter(
                 override fun getItemViewType(pos: Int) =
                     if (items[pos].param == null) TYPE_HEADER else TYPE_PARAM
 
-                override fun isEnabled(pos: Int): Boolean {
-                    val item = items[pos]
-                    if (item.param == null) return false
-                    return !(item.param.group == MultispeqParameter.Group.ENVIRONMENT && isEnvForced())
-                }
+                override fun isEnabled(pos: Int) = items[pos].param != null
 
                 override fun areAllItemsEnabled() = false
 
@@ -163,10 +156,7 @@ class MultispeqParametersParameter : BaseFormatParameter(
                             "${item.param.displayName} (${item.param.unit})"
                         else item.param.displayName
                         ctv.text = label
-                        val envForced = isEnvForced()
-                        val isEnv = item.param.group == MultispeqParameter.Group.ENVIRONMENT
-                        ctv.isChecked = isEnv && envForced || selected.contains(item.param)
-                        ctv.isEnabled = !(isEnv && envForced)
+                        ctv.isChecked = selected.contains(item.param)
                         val hPad = (16 * density).toInt()
                         val vPad = (10 * density).toInt()
                         ctv.setPadding(hPad, vPad, hPad, vPad)
@@ -180,26 +170,9 @@ class MultispeqParametersParameter : BaseFormatParameter(
             listView.setOnItemClickListener { _, view, pos, _ ->
                 val item = items[pos]
                 val param = item.param ?: return@setOnItemClickListener
-                // Ignore taps on forced-disabled environment params
-                if (param.group == MultispeqParameter.Group.ENVIRONMENT && isEnvForced()) return@setOnItemClickListener
                 val ctv = view as? CheckedTextView ?: return@setOnItemClickListener
-                val nowChecked = !ctv.isChecked
-                ctv.isChecked = nowChecked
-                if (nowChecked) {
-                    selected.add(param)
-                    // Non-environment selection forces all environment params
-                    if (param.group != MultispeqParameter.Group.ENVIRONMENT) {
-                        selected.addAll(
-                            MultispeqParameter.values()
-                                .filter { it.group == MultispeqParameter.Group.ENVIRONMENT }
-                        )
-                        adapter.notifyDataSetChanged()
-                    }
-                } else {
-                    selected.remove(param)
-                    // Unchecking a non-env param may release the env lock
-                    adapter.notifyDataSetChanged()
-                }
+                ctv.isChecked = !ctv.isChecked
+                if (ctv.isChecked) selected.add(param) else selected.remove(param)
             }
 
             AlertDialog.Builder(ctx, R.style.AppAlertDialog)

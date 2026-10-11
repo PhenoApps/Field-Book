@@ -20,7 +20,7 @@
             android:layout_width="@dimen/fb_trait_fab_size"
             android:layout_height="@dimen/fb_trait_fab_size"
             android:layout_margin="16dp"
-            android:src="@drawable/ic_bluetooth_black_24dp"
+            android:src="@drawable/connection"
             android:contentDescription="@string/multispeq_connect_button_description"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

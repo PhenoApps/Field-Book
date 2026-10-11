@@ -3,25 +3,27 @@ package com.fieldbook.tracker.devices.multispeq
 import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
+import java.math.BigDecimal
 import kotlin.math.abs
 import kotlin.math.exp
-import kotlin.math.ln
-import kotlin.math.max
-import kotlin.math.min
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.pow
 
 /**
- * Calculates output parameters from a raw RIDES 2.1 device response.
+ * Calculates output parameters from a raw MultispeQ device response.
  *
- * The device returns JSON with a `set` array (one entry per sub-protocol that was
- * executed). Each entry has a `label` field matching the sub-protocol name.
+ * RIDES values reproduce the openJII "Photosynthesis RIDES 2.1" macro
+ * (res/raw/photosynthesis_rides_2_1_macro.js) as run with the openJII helper library:
+ * the same trace windows, multi-phase flash correction, log10 absorbance and rounding.
+ * PAR, SPAD and Phi2 follow the JII-MultispeQ-Protocols analyses for those protocols.
  *
- * PAM fluorescence calculations follow the multi-phase flash approach from the
- * RIDES 2.1 macro (photosynthesis_rides_2.1_macro.js).
- * For a simplified first-pass the strongest saturation-flash Fm' is used directly.
+ * Values are returned as plain decimal strings, or "N/A" when they can't be calculated.
  */
 object MultispeqCalculator {
 
     private const val TAG = "MultispeqCalculator"
+    private const val NA = "N/A"
 
     // -------------------------------------------------------------------------
     // Public API
@@ -30,432 +32,392 @@ object MultispeqCalculator {
     /**
      * @param rawJson   JSON string received from the MultispeQ device
      * @param params    parameters to calculate
+     * @param protocol  protocol the response was measured with
      * @return map from requested parameter to formatted value string (or "N/A" on failure)
      */
     fun calculate(
         rawJson: String,
-        params: Set<MultispeqParameter>
+        params: Set<MultispeqParameter>,
+        protocol: MultispeqProtocolType = MultispeqProtocolType.RIDES
     ): Map<MultispeqParameter, String> {
-        val result = mutableMapOf<MultispeqParameter, String>()
-        if (params.isEmpty()) return result
+        if (params.isEmpty()) return emptyMap()
 
-        Log.d(TAG, "calculate: rawJson length=${rawJson.length}, params=${params.map { it.name }}")
+        Log.d(TAG, "calculate: protocol=$protocol, rawJson length=${rawJson.length}, params=${params.map { it.name }}")
 
-        val root = try { JSONObject(rawJson) } catch (e: Exception) {
-            Log.w(TAG, "Failed to parse response JSON", e); return result
+        val measurement = try {
+            measurement(JSONObject(rawJson))
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to parse response JSON", e)
+            return params.associateWith { NA }
         }
 
-        // Locate the sub-protocol set array.
-        // Device response structure: { "sample": [{ "protocol_id": ..., "set": [...] }] }
-        // Fallbacks for older/alternate firmware: { "set": [...] } at root level.
-        val sampleArray = root.optJSONArray("sample")
-        val setArray: JSONArray? = root.optJSONArray("set")
-            ?: sampleArray?.optJSONObject(0)?.optJSONArray("set")  // sample[0].set (standard RIDES 2.1)
-            ?: sampleArray?.optJSONArray(0)                        // sample = [[{sub-protocols}]]
-            ?: sampleArray                                         // sample = [{sub-protocols}] directly
-        if (setArray == null) {
-            Log.w(TAG, "No 'set' or 'sample' array in response; top-level keys: ${root.keys().asSequence().toList()}")
-            return result
-        }
-
-        val byLabel = buildLabelMap(setArray)
-        Log.d(TAG, "Sub-protocol labels found: ${byLabel.keys.toList()}")
-
-        // Log keys of each sub-protocol to diagnose missing fields
-        for ((label, obj) in byLabel) {
-            Log.d(TAG, "  sub-protocol '$label' keys: ${obj.keys().asSequence().toList()}")
-        }
-
-        // Grab PAR once since several calculations need it
-        val par = extractPar(byLabel)
-        Log.d(TAG, "PAR extracted: $par")
-
-        for (param in params) {
-            val value = try {
-                when (param) {
-                    // ---- Environment ----
-                    MultispeqParameter.PAR         -> formatNumber(par)
-                    MultispeqParameter.TEMPERATURE -> extractThp(byLabel, 0)
-                    MultispeqParameter.HUMIDITY    -> extractThp(byLabel, 1)
-                    MultispeqParameter.PRESSURE    -> extractThp(byLabel, 2)
-                    MultispeqParameter.LEAF_TEMP   -> extractContactlessTemp(byLabel)
-                    MultispeqParameter.ANGLE       -> extractAngle(byLabel)
-                    // ---- Fluorescence (PAM) ----
-                    MultispeqParameter.PHI2        -> calcPhi2(byLabel, par)?.let { formatNumber(it) }
-                    MultispeqParameter.PHI_NPQ     -> calcPhiNpq(byLabel, par)
-                    MultispeqParameter.PHI_NO      -> calcPhiNo(byLabel, par)
-                    MultispeqParameter.NPQT        -> calcNpqt(byLabel)
-                    MultispeqParameter.QL          -> calcQl(byLabel)
-                    MultispeqParameter.LEF         -> calcLef(byLabel, par)
-                    // ---- ECS ----
-                    MultispeqParameter.ECST        -> calcEcst(byLabel)
-                    MultispeqParameter.VHP         -> calcVhp(byLabel)
-                    MultispeqParameter.GHP         -> calcGhp(byLabel)
-                    // ---- PS1 ----
-                    MultispeqParameter.PS1_ACTIVE       -> calcPs1Active(byLabel)
-                    MultispeqParameter.PS1_OPEN         -> calcPs1Open(byLabel)
-                    MultispeqParameter.PS1_OXIDIZED     -> calcPs1Oxidized(byLabel)
-                    MultispeqParameter.PS1_OVER_REDUCED -> calcPs1OverReduced(byLabel)
-                    // ---- SPAD ----
-                    MultispeqParameter.SPAD_VALUE      -> extractSpad(byLabel)
-                    MultispeqParameter.LEAF_THICKNESS  -> extractThickness(byLabel)
-                }
-            } catch (e: Exception) {
-                Log.w(TAG, "Error calculating ${param.name}", e); null
+        val values: Map<MultispeqParameter, String?> = try {
+            when (protocol) {
+                MultispeqProtocolType.PAR -> mapOf(
+                    MultispeqParameter.PAR to plain(number(measurement, "light_intensity"))
+                )
+                MultispeqProtocolType.SPAD -> mapOf(
+                    MultispeqParameter.SPAD_VALUE to plain(spad(labelMap(measurement)))
+                )
+                MultispeqProtocolType.PHI2 -> phi2Protocol(measurement)
+                MultispeqProtocolType.RIDES -> rides(labelMap(measurement), params)
             }
-            val finalValue = value ?: "N/A"
-            Log.d(TAG, "  ${param.name} = $finalValue")
-            result[param] = finalValue
+        } catch (e: Exception) {
+            Log.w(TAG, "Error calculating $protocol parameters", e)
+            emptyMap()
         }
 
-        return result
+        return params.associateWith { param ->
+            (values[param] ?: NA).also { Log.d(TAG, "  ${param.name} = $it") }
+        }
     }
 
     // -------------------------------------------------------------------------
-    // Helpers — response parsing
+    // Response parsing
     // -------------------------------------------------------------------------
 
-    private fun buildLabelMap(setArray: JSONArray): Map<String, JSONObject> {
-        val map = mutableMapOf<String, JSONObject>()
-        for (i in 0 until setArray.length()) {
-            val obj = setArray.optJSONObject(i) ?: continue
-            val label = obj.optString("label").ifBlank { i.toString() }
-            map[label] = obj
+    /**
+     * The measurement object holding either the protocol `set` or, for single protocols,
+     * `data_raw` and `light_intensity` directly. Firmware wraps it as `sample[0]` or `sample[0][0]`.
+     */
+    private fun measurement(root: JSONObject): JSONObject {
+        val sample = root.opt("sample") as? JSONArray ?: return root
+        return when (val first = sample.opt(0)) {
+            is JSONObject -> first
+            is JSONArray -> first.optJSONObject(0) ?: root
+            else -> root
         }
+    }
+
+    private fun labelMap(measurement: JSONObject): Map<String, JSONObject> {
+        val set = measurement.optJSONArray("set") ?: return emptyMap()
+        val map = mutableMapOf<String, JSONObject>()
+        for (i in 0 until set.length()) {
+            val obj = set.optJSONObject(i) ?: continue
+            map.putIfAbsent(obj.optString("label"), obj)
+        }
+        Log.d(TAG, "Sub-protocol labels found: ${map.keys.toList()}")
         return map
     }
 
-    /** Returns the baseline sub-protocol; falls back to first entry. */
-    private fun baseline(byLabel: Map<String, JSONObject>): JSONObject? =
-        byLabel["no_leaf_baseline"] ?: byLabel.values.firstOrNull()
-
-    private fun pam(byLabel: Map<String, JSONObject>): JSONObject? = byLabel["PAM"]
-
-    private fun ecs(byLabel: Map<String, JSONObject>): JSONObject? = byLabel["DIRK_ECS"]
-
-    private fun spad(byLabel: Map<String, JSONObject>): JSONObject? = byLabel["SPAD"]
-
-    // -------------------------------------------------------------------------
-    // Environment extraction
-    // -------------------------------------------------------------------------
-
-    private fun extractPar(byLabel: Map<String, JSONObject>): Double? {
-        val bl = ecs(byLabel) ?: return null
-        val li = bl.opt("light_intensity")
-        return when (li) {
-            is Number -> li.toDouble()
-            is JSONArray -> if (li.length() > 0) li.optDouble(0) else null
+    /** A numeric field, or the first element when the device reports it as an array. */
+    private fun number(obj: JSONObject?, key: String): Double? {
+        val v = when (val raw = obj?.opt(key)) {
+            is Number -> raw.toDouble()
+            is JSONArray -> raw.optDouble(0)
             else -> null
-        }.takeIf { it != null && !it.isNaN() }
+        }
+        return v?.takeIf { it.isFinite() }
     }
 
-    private fun extractThp(byLabel: Map<String, JSONObject>, index: Int): String? {
-        val key = when (index) {
-            0 -> "temperature"
-            1 -> "humidity"
-            2 -> "pressure"
-            else -> return null
-        }
-        for (label in listOf("no_leaf_baseline", "DIRK_ECS", "PAM")) {
-            val obj = byLabel[label] ?: continue
-            val v = obj.optDouble(key)
-            if (!v.isNaN()) return formatNumber(v)
-        }
-        return null
+    private fun dataRaw(obj: JSONObject?): DoubleArray? {
+        val raw = obj?.optJSONArray("data_raw") ?: return null
+        return DoubleArray(raw.length()) { raw.optDouble(it) }
     }
 
-    private fun extractContactlessTemp(byLabel: Map<String, JSONObject>): String? {
-        for (label in listOf("no_leaf_baseline", "DIRK_ECS", "PAM")) {
-            val obj = byLabel[label] ?: continue
-            val v = when (val raw = obj.opt("contactless_temp")) {
-                is Number -> raw.toDouble()
-                is JSONArray -> raw.optDouble(0)
-                else -> null
+    /** SPAD is labelled "SPAD" in RIDES and "spad" in the stand-alone protocol. */
+    private fun spad(byLabel: Map<String, JSONObject>): Double? =
+        number(byLabel.entries.firstOrNull { it.key.equals("spad", ignoreCase = true) }?.value, "spad")
+
+    // -------------------------------------------------------------------------
+    // Phi2 protocol (JII-MultispeQ-Protocols phi2.py)
+    //
+    // 20 pulses under ambient light, 50 under a saturating pulse, 20 under ambient light again.
+    // -------------------------------------------------------------------------
+
+    private fun phi2Protocol(measurement: JSONObject): Map<MultispeqParameter, String?> {
+        val par = number(measurement, "light_intensity")
+        val data = dataRaw(measurement)?.takeIf { it.size >= 68 }
+            ?: return mapOf(MultispeqParameter.PAR to plain(par))
+
+        val fs = data.meanOf(1, 5)
+        val fmPrime = data.meanOf(63, 68)
+        val phi2 = (fmPrime - fs) / fmPrime
+        val lef = par?.let { phi2 * it * 0.45 }
+
+        return mapOf(
+            MultispeqParameter.PHI2 to rounded(phi2, 3),
+            MultispeqParameter.LEF to lef?.let { rounded(it, 2) },
+            MultispeqParameter.PAR to plain(par)
+        )
+    }
+
+    // -------------------------------------------------------------------------
+    // RIDES 2.1
+    // -------------------------------------------------------------------------
+
+    private fun rides(
+        byLabel: Map<String, JSONObject>,
+        params: Set<MultispeqParameter>
+    ): Map<MultispeqParameter, String?> {
+        val baseline = byLabel["no_leaf_baseline"]
+        val ecs = byLabel["DIRK_ECS"]
+        val p700 = byLabel["DIRK_P700"]
+        val pam = byLabel["PAM"]
+
+        // The macro reads PAR from DIRK_ECS and ambient conditions from json.set[3], which is PAM
+        val par = number(ecs, "light_intensity")
+        val ambient = pam ?: baseline
+
+        val out = mutableMapOf<MultispeqParameter, String?>(
+            MultispeqParameter.PAR to plain(par),
+            MultispeqParameter.TEMPERATURE to plain(number(ambient, "temperature")),
+            MultispeqParameter.HUMIDITY to plain(number(ambient, "humidity")),
+            MultispeqParameter.PRESSURE to plain(number(ambient, "pressure")),
+            MultispeqParameter.LEAF_TEMP to plain(number(ecs, "contactless_temp")),
+            MultispeqParameter.ANGLE to plain(number(p700 ?: baseline, "angle")),
+            MultispeqParameter.LEAF_THICKNESS to plain(number(ecs, "thickness")),
+            MultispeqParameter.SPAD_VALUE to plain(spad(byLabel))
+        )
+
+        val needsPam = params.any {
+            it.group == MultispeqParameter.Group.FLUORESCENCE || it.group == MultispeqParameter.Group.PS1
+        }
+        val pamData = if (needsPam) dataRaw(pam)?.let { deinterleave(it) } else null
+
+        if (pamData != null && params.any { it.group == MultispeqParameter.Group.FLUORESCENCE }) {
+            fluorescence(pamData)?.let { f ->
+                // Phi2 at or above 0.85 is flagged as out of range and not reported
+                val phi2 = f.phi2.takeIf { it < 0.85 }
+                out[MultispeqParameter.PHI2] = phi2?.let { rounded(it, 3) }
+                out[MultispeqParameter.PHI_NPQ] = rounded(f.phiNpq, 3)
+                out[MultispeqParameter.PHI_NO] = rounded(f.phiNo, 3)
+                out[MultispeqParameter.NPQT] = rounded(f.npqt, 3)
+                out[MultispeqParameter.QL] = rounded(f.qL, 3)
+                out[MultispeqParameter.LEF] = if (phi2 != null && par != null) {
+                    rounded(0.45 * jsRound(phi2, 3) * par, 2)
+                } else null
             }
-            if (v != null && !v.isNaN()) return formatNumber(v)
         }
-        return null
+
+        if (pamData != null && params.any { it.group == MultispeqParameter.Group.PS1 }) {
+            ps1(pamData)?.let { p ->
+                out[MultispeqParameter.PS1_ACTIVE] = rounded(p.active, 3)
+                out[MultispeqParameter.PS1_OPEN] = rounded(p.open, 3)
+                out[MultispeqParameter.PS1_OXIDIZED] = rounded(p.oxidized, 3)
+                out[MultispeqParameter.PS1_OVER_REDUCED] = rounded(p.overReduced, 3)
+            }
+        }
+
+        if (params.any { it.group == MultispeqParameter.Group.ECS }) {
+            dataRaw(ecs)?.let { ecsDecayFit(it) }?.let { fit ->
+                val ecst = jsRound(fit.a, 5)
+                val ghp = jsRound(1000.0 / fit.c, 3)
+                out[MultispeqParameter.ECST] = rounded(fit.a, 5)
+                out[MultispeqParameter.GHP] = rounded(1000.0 / fit.c, 3)
+                out[MultispeqParameter.VHP] = rounded(ecst * ghp, 3)
+            }
+        }
+
+        return out
     }
 
-    private fun extractAngle(byLabel: Map<String, JSONObject>): String? {
-        for (label in listOf("no_leaf_baseline", "DIRK_P700", "PAM")) {
-            val obj = byLabel[label] ?: continue
-            val v = obj.optDouble("angle")
-            if (!v.isNaN()) return formatNumber(v)
+    /**
+     * PAM detectors fire alternately, so data_raw is [d1, d2, d1, d2, ...].
+     * Returns [d1..., d2...]: chlorophyll fluorescence at 0..309, P700 at 310..619.
+     */
+    private fun deinterleave(raw: DoubleArray): DoubleArray {
+        val half = (raw.size + 1) / 2
+        val out = DoubleArray(raw.size)
+        for (i in raw.indices) {
+            out[if (i % 2 == 0) i / 2 else half + i / 2] = raw[i]
         }
-        return null
+        return out
     }
 
     // -------------------------------------------------------------------------
-    // PAM fluorescence calculations
+    // PAM fluorescence
     //
-    // PAM trace structure (RIDES 2.1):
-    //   Two detectors [1,1] fire alternately → raw data interleaved [d1,d2,d1,d2,...]
-    //   Detected pulse segments: 100 Fs + 30 Fm_flash + 15×5 MPF steps + 0(600 dark) + 15 Fo' + ...
-    //   Total detected pulses ≈ 310 per detector → 620 raw values
-    //   Reshape: first 310 = det1 (Chl/red), last 310 = det2 (P700/NIR)
+    // Chlorophyll trace (first 310 points of the de-interleaved PAM data):
+    //   1..3     Fs, steady state under actinic light
+    //   101..129 apparent Fm' under the strongest saturating pulse
+    //   131..144, 146..159, 161..174  Fm' steps at decreasing intensity (multi-phase flash)
+    //   206..219 Fo' after far-red
     //
-    //   Indices into reshaped det1 (Chl) trace:
-    //     0–99   : Fs (steady state under actinic light)
-    //     100–129: Fm_flash (saturating pulse at 8000)
-    //     130–144: Fm_step1 (7000)
-    //     145–159: Fm_step2 (6000)
-    //     160–174: Fm_step3 (5000)
-    //     175–189: Fm_step4 (4000)
-    //     190–204: dark (actinic off)
-    //     205–219: Fo' (far-red recovery)
-    //
-    //   Indices into det2 (P700/NIR) for PS1 (offset by 310):
-    //     310–624 total; PSI_trace_beg=310 in full reshaped array → index 0 in det2
+    // Fm' is extrapolated to infinite intensity by regressing the four Fm' values against
+    // inverse intensity (Avenson multi-phase flash). If that slope is positive the
+    // extrapolation is unreliable and the apparent Fm' is used instead.
     // -------------------------------------------------------------------------
 
-    private fun reshapePam(pamObj: JSONObject): DoubleArray? {
-        val raw = pamObj.optJSONArray("data_raw") ?: return null
-        val n = raw.length()
-        if (n < 2) return null
-        val arr = DoubleArray(n) { raw.optDouble(it) }
-        // Reshape: even indices → first half, odd indices → second half
-        val reshaped = DoubleArray(n)
-        var i1 = 0; var i2 = n / 2
-        for (i in arr.indices) {
-            if (i % 2 == 0) reshaped[i1++] = arr[i] else reshaped[i2++] = arr[i]
-        }
-        return reshaped
-    }
-
-    private data class PamValues(
-        val fs: Double,
-        val fmPrime: Double,
-        val foPrime: Double,
-        val par: Double?
+    private class Fluorescence(
+        val phi2: Double,
+        val npqt: Double,
+        val qL: Double,
+        val phiNo: Double,
+        val phiNpq: Double
     )
 
-    private fun getPamValues(byLabel: Map<String, JSONObject>, par: Double?): PamValues? {
-        val pamObj = pam(byLabel) ?: return null
-        val data = reshapePam(pamObj) ?: return null
-        if (data.size < 310) return null
+    private val INVERSE_INTENSITY = doubleArrayOf(1 / 8000.0, 1 / 7000.0, 1 / 6000.0, 1 / 5000.0)
 
-        val d = data  // det1 occupies indices 0..309
+    private fun fluorescence(pam: DoubleArray): Fluorescence? {
+        if (pam.size < 310) return null
+        val d = pam.copyOfRange(0, 310)
 
-        // Fs = mean of indices 1..4 (skip index 0 which may have artifact)
-        val fs = mean(d.slice(1..4))
+        val fs = d.meanOf(1, 4)
+        val foPrime = d.copyOfRange(206, 220).min()
 
-        // Fm_flash = top-20 percentile mean of indices 100..129 (30-pulse saturation)
-        val fmSlice = d.slice(100..129).sortedDescending()
-        val fmPrime = fmSlice.take(max(1, fmSlice.size / 5)).average()
+        // Mean of the sorted values in [from, to) — the macro's "drop the two lowest" averaging
+        fun sortedMean(begin: Int, end: Int, from: Int, to: Int) =
+            d.copyOfRange(begin, end).sorted().subList(from, to).average()
 
-        // Fo' = minimum of indices 205..219 (after dark period)
-        val foSlice = d.slice(205..minOf(219, d.size - 1))
-        val foPrime = if (foSlice.isNotEmpty()) foSlice.min() else fs * 0.5
+        val apparentFmPrime = sortedMean(101, 130, 2, 20)
+        val steps = listOf(
+            apparentFmPrime,
+            sortedMean(131, 145, 2, 6),
+            sortedMean(146, 160, 2, 6),
+            sortedMean(161, 175, 2, 6)
+        )
+        val (slope, intercept) = linearRegression(INVERSE_INTENSITY, steps.toDoubleArray())
+        val fmPrime = if (slope > 0) apparentFmPrime else intercept
 
-        return PamValues(fs, fmPrime, foPrime, par)
-    }
+        val phi2 = (fmPrime - fs) / fmPrime
+        val npqt = 4.88 / (fmPrime / foPrime - 1) - 1
+        val qL = ((fmPrime - fs) * foPrime) / ((fmPrime - foPrime) * fs)
+        // Kramer et al. 2004, equations 52 and 53
+        val phiNo = 1 / (npqt + 1 + qL * 4.88)
+        val phiNpq = 1 - phi2 - phiNo
 
-    private fun calcPhi2(byLabel: Map<String, JSONObject>, par: Double?): Double? {
-        val pv = getPamValues(byLabel, par) ?: return null
-        val phi2 = (pv.fmPrime - pv.fs) / pv.fmPrime
-        return phi2.takeIf { it in -0.1..0.95 }
-    }
-
-    private fun calcNpqt(byLabel: Map<String, JSONObject>): String? {
-        val pv = getPamValues(byLabel, null) ?: return null
-        if (pv.foPrime <= 0) return null
-        val npqt = (4.88 / ((pv.fmPrime / pv.foPrime) - 1.0)) - 1.0
-        return formatNumber(max(0.0, npqt))
-    }
-
-    private fun calcQl(byLabel: Map<String, JSONObject>): String? {
-        val pv = getPamValues(byLabel, null) ?: return null
-        val denom = (pv.fmPrime - pv.foPrime) * pv.fs
-        if (abs(denom) < 1e-9) return null
-        val qL = ((pv.fmPrime - pv.fs) * pv.foPrime) / denom
-        return formatNumber(qL.coerceIn(0.0, 1.0))
-    }
-
-    private fun calcPhiNo(byLabel: Map<String, JSONObject>, par: Double?): String? {
-        val pv = getPamValues(byLabel, par) ?: return null
-        val phi2 = (pv.fmPrime - pv.fs) / pv.fmPrime
-        if (pv.foPrime <= 0) return null
-        val npqt = (4.88 / ((pv.fmPrime / pv.foPrime) - 1.0)) - 1.0
-        val denom = (pv.fmPrime - pv.foPrime) * pv.fs
-        val qL = if (abs(denom) > 1e-9)
-            ((pv.fmPrime - pv.fs) * pv.foPrime) / denom
-        else 0.0
-        val phiNo = 1.0 / (npqt + 1.0 + qL * 4.88)
-        return formatNumber(phiNo.coerceIn(0.0, 1.0))
-    }
-
-    private fun calcPhiNpq(byLabel: Map<String, JSONObject>, par: Double?): String? {
-        val pv = getPamValues(byLabel, par) ?: return null
-        val phi2 = (pv.fmPrime - pv.fs) / pv.fmPrime
-        if (pv.foPrime <= 0) return null
-        val npqt = (4.88 / ((pv.fmPrime / pv.foPrime) - 1.0)) - 1.0
-        val denom = (pv.fmPrime - pv.foPrime) * pv.fs
-        val qL = if (abs(denom) > 1e-9)
-            ((pv.fmPrime - pv.fs) * pv.foPrime) / denom
-        else 0.0
-        val phiNo = 1.0 / (npqt + 1.0 + qL * 4.88)
-        val phiNpq = 1.0 - phi2 - phiNo
-        return formatNumber(phiNpq.coerceIn(0.0, 1.0))
-    }
-
-    private fun calcLef(byLabel: Map<String, JSONObject>, par: Double?): String? {
-        val phi2 = calcPhi2(byLabel, par) ?: return null
-        val lightPar = par ?: return null
-        if (lightPar <= 0) return null
-        return formatNumber(phi2 * 0.45 * lightPar)
+        return Fluorescence(phi2, npqt, qL, phiNo, phiNpq)
     }
 
     // -------------------------------------------------------------------------
-    // ECS calculations (DIRK_ECS)
-    //
-    // Data structure: 100-point baseline, then 6 × 220-point subtraces.
-    // Subtraces are summed (not averaged — ratio makes scaling irrelevant).
-    // Spike artifact at index 120 (light-on transition) is corrected before
-    // the absorbance conversion.
-    //
-    // Baseline: linear regression on indices 75..144, applied as m*j+b for
-    // ALL j (proper extrapolation, matching JS: baseline_offset[j] = j*m + b).
-    //
-    // Fit window for ECSt/gH+: indices 100..119 (20 points = 30 ms at 1.5 ms/pt).
-    // This matches the JS NonLinearRegression window exactly.
-    //
-    // ECSt ≈ mean absorbance at the start of the fit window (amplitude proxy).
-    // gH+  = 1/tau via log-linear regression on the same window.
+    // PS1 (P700 channel of the de-interleaved PAM data, points 310..614)
     // -------------------------------------------------------------------------
 
-    /** Builds the ECS absorbance trace shared by calcEcst and calcGhp. */
-    private fun ecsAbsTrace(byLabel: Map<String, JSONObject>): DoubleArray? {
-        val ecsObj = ecs(byLabel) ?: return null
-        val raw = ecsObj.optJSONArray("data_raw") ?: return null
-        val n = raw.length()
-        if (n < 320) return null
+    private class Ps1(val active: Double, val open: Double, val oxidized: Double, val overReduced: Double)
 
-        val beginning = 100
-        val subLength = 220
-        val numSubtraces = min(6, (n - beginning) / subLength)
-        if (numSubtraces < 1) return null
+    private fun ps1(pam: DoubleArray): Ps1? {
+        if (pam.size < 615) return null
+        val psi = pam.copyOfRange(310, 615)
 
-        // Sum all subtraces (JS initialises with first slice then adds i=1..5)
-        val summed = DoubleArray(subLength)
-        for (i in 0 until numSubtraces) {
-            val offset = beginning + i * subLength
-            for (j in 0 until subLength) {
-                summed[j] += raw.optDouble(offset + j)
-            }
-        }
+        val dark = psi.meanOf(195, 200)
+        val absorbance = DoubleArray(psi.size) { log10(dark / psi[it]) }
 
-        // Correct spike artifact at index 120 (matches JS: trace[120]=trace[119])
-        summed[120] = summed[119]
+        val ss = 1000 * absorbance.meanOf(1, 18)
+        // Top 20% of each saturation window
+        val sat1 = 1000 * absorbance.copyOfRange(25, 170).sorted().subList(116, 145).average()
+        val sat2 = 1000 * absorbance.copyOfRange(220, 270).sorted().subList(40, 50).average()
 
-        // Linear baseline on indices 75..144 using ACTUAL j as the x-axis.
-        // Matches JS: baseline_offset[j] = j * reg.m + reg.b
-        val bsStart = 75; val bsEnd = 145   // JS: slice(75, 145) → 75..144
-        val xMean = (bsStart until bsEnd).map { it.toDouble() }.average()
-        val yMean = (bsStart until bsEnd).map { summed[it] }.average()
-        var rNum = 0.0; var rDen = 0.0
-        for (j in bsStart until bsEnd) {
-            rNum += (j - xMean) * (summed[j] - yMean)
-            rDen += (j - xMean) * (j - xMean)
-        }
-        val slope = if (rDen != 0.0) rNum / rDen else 0.0
-        val intercept = yMean - slope * xMean
-
-        return DoubleArray(subLength) { j ->
-            val bOff = slope * j + intercept
-            if (bOff > 0) -ln(summed[j] / bOff) else Double.NaN
-        }
+        return Ps1(
+            active = sat2,
+            open = (sat1 - ss) / sat2,
+            oxidized = ss / sat2,
+            overReduced = 1 - sat1 / sat2
+        )
     }
 
-    private data class ExpDecayFit(val a: Double, val b: Double, val cMs: Double)
+    // -------------------------------------------------------------------------
+    // ECS (DIRK_ECS)
+    //
+    // 100 baseline points, then 6 × 220-point subtraces which are summed.
+    // A line fitted to points 75..144 of the summed trace is the I0 baseline; the macro fits it
+    // against a 1-based time axis, rounds slope and intercept, then evaluates it at the 0-based
+    // index. Absorbance is -log10(I / I0) and point 120 is a light-off spike replaced by 119.
+    // The decay at points 100..119 (1.5 ms apart) is fitted to b + a·exp(−t/c).
+    // -------------------------------------------------------------------------
 
-    /**
-     * Extracts decay window points from the ECS absorbance trace and fits
-     * y = b + a·exp(−x/c) via Gauss-Newton NLR, matching the JS
-     * NonLinearRegression(b + a*exp(-x/c)) call on absTrace[100..119].
-     * x is in ms (1.5 ms per index step).
-     */
-    private fun ecsDecayFit(byLabel: Map<String, JSONObject>): ExpDecayFit? {
-        val absTrace = ecsAbsTrace(byLabel) ?: return null
-        val xs = mutableListOf<Double>()
-        val ys = mutableListOf<Double>()
-        for (j in 100 until 120) {
-            val y = absTrace[j]
-            if (!y.isNaN()) {
-                xs.add((j - 100).toDouble() * 1.5)
-                ys.add(y)
-            }
+    private class ExpDecayFit(val a: Double, val b: Double, val c: Double)
+
+    private fun ecsDecayFit(raw: DoubleArray): ExpDecayFit? {
+        val begin = 100
+        val length = 220
+        val subtraces = 6
+        if (raw.size < begin + subtraces * length) return null
+
+        val summed = DoubleArray(length) { j ->
+            (0 until subtraces).sumOf { raw[begin + it * length + j] }
         }
-        if (xs.size < 4) {
-            Log.d(TAG, "ecsDecayFit: insufficient valid points (${xs.size})")
-            return null
+
+        val (m, b) = linearRegression(
+            DoubleArray(70) { 76.0 + it },
+            summed.copyOfRange(75, 145)
+        )
+        val slope = jsRound(m, 3)
+        val intercept = jsRound(b, 2)
+
+        val absorbance = DoubleArray(length) { j ->
+            val ratio = summed[j] / (j * slope + intercept)
+            if (ratio > 0) -log10(ratio) else Double.NaN
         }
-        return fitExpDecay(xs.toDoubleArray(), ys.toDoubleArray()).also {
-            Log.d(TAG, "ecsDecayFit: a=${it?.a}, b=${it?.b}, c=${it?.cMs} ms")
-        }
+        absorbance[120] = absorbance[119]
+
+        val ys = absorbance.copyOfRange(100, 120)
+        if (ys.any { !it.isFinite() }) return null
+        val xs = DoubleArray(ys.size) { it * 1.5 }
+
+        return fitExpDecay(xs, ys, doubleArrayOf(1.0, 1.0, 1.0))
+            ?: fitExpDecay(xs, ys, doubleArrayOf(ys.first() - ys.last(), ys.last(), 10.0))
     }
 
     /**
-     * Fits y = b + a·exp(−x/c) using Gauss-Newton NLR iteration.
-     * Returns null if the fit fails or parameters are non-physical (a≤0, c≤0).
+     * Fits y = b + a·exp(−x/c) by Levenberg-Marquardt from [start] = (a, b, c).
+     * Returns null if the fit doesn't produce finite parameters.
      */
-    private fun fitExpDecay(xs: DoubleArray, ys: DoubleArray): ExpDecayFit? {
-        val n = xs.size
-        if (n < 4) return null
-
-        // Initial estimates: b from tail, a from head−b, c from log-linear
-        var b = ys.takeLast(minOf(5, n)).average()
-        var a = ys.take(minOf(3, n)).average() - b
-        if (a <= 0) return null
-
-        var c = run {
-            val pairs = xs.zip(ys.toList()).mapNotNull { (x, y) ->
-                val s = y - b; if (s > 0) Pair(x, ln(s)) else null
+    private fun fitExpDecay(xs: DoubleArray, ys: DoubleArray, start: DoubleArray): ExpDecayFit? {
+        fun sse(params: DoubleArray): Double {
+            val (a, b, c) = params
+            if (c == 0.0) return Double.POSITIVE_INFINITY
+            var sum = 0.0
+            for (i in xs.indices) {
+                val r = ys[i] - (b + a * exp(-xs[i] / c))
+                sum += r * r
             }
-            if (pairs.size < 2) return@run 10.0
-            val xM = pairs.map { it.first }.average()
-            val yM = pairs.map { it.second }.average()
-            var num = 0.0; var den = 0.0
-            for ((x, ly) in pairs) { num += (x - xM) * (ly - yM); den += (x - xM) * (x - xM) }
-            val slope = if (den != 0.0) num / den else 0.0
-            if (slope >= 0) 10.0 else -1.0 / slope
-        }
-        if (c <= 0) c = 10.0
-
-        // Gauss-Newton: minimise sum((y_i − f(x_i))²) for f(x) = b + a·exp(−x/c)
-        // Jacobian columns: ∂f/∂a = exp(−x/c), ∂f/∂b = 1, ∂f/∂c = a·x/c²·exp(−x/c)
-        repeat(100) {
-            val r  = DoubleArray(n)
-            val Ja = DoubleArray(n); val Jb = DoubleArray(n); val Jc = DoubleArray(n)
-            for (i in 0 until n) {
-                val e = exp(-xs[i] / c)
-                r[i]  = ys[i] - (b + a * e)
-                Ja[i] = e; Jb[i] = 1.0; Jc[i] = a * xs[i] / (c * c) * e
-            }
-            val cols = arrayOf(Ja, Jb, Jc)
-            val jtj = Array(3) { row ->
-                DoubleArray(3) { col -> (0 until n).sumOf { cols[row][it] * cols[col][it] } }
-            }
-            val jtr = DoubleArray(3) { row -> (0 until n).sumOf { cols[row][it] * r[it] } }
-            val delta = gaussianSolve3(jtj, jtr) ?: return@repeat
-            a += delta[0]; b += delta[1]; c += delta[2]
-            if (c <= 0) c = 1e-6
+            return if (sum.isNaN()) Double.POSITIVE_INFINITY else sum
         }
 
-        return if (a > 0 && c > 0 && !a.isNaN() && !b.isNaN() && !c.isNaN())
-            ExpDecayFit(a, b, c) else null
+        var p = start.copyOf()
+        var cost = sse(p)
+        if (!cost.isFinite()) return null
+        var lambda = 1e-3
+        var iterations = 0
+
+        while (iterations++ < 200) {
+            val jtj = Array(3) { DoubleArray(3) }
+            val jtr = DoubleArray(3)
+            for (i in xs.indices) {
+                val e = exp(-xs[i] / p[2])
+                val grad = doubleArrayOf(e, 1.0, p[0] * xs[i] / (p[2] * p[2]) * e)
+                val r = ys[i] - (p[1] + p[0] * e)
+                for (row in 0..2) {
+                    jtr[row] += grad[row] * r
+                    for (col in 0..2) jtj[row][col] += grad[row] * grad[col]
+                }
+            }
+
+            var improved = false
+            while (lambda <= 1e12) {
+                val damped = Array(3) { row ->
+                    DoubleArray(3) { col -> if (row == col) jtj[row][col] * (1 + lambda) else jtj[row][col] }
+                }
+                val delta = solve3(damped, jtr) ?: break
+                val candidate = DoubleArray(3) { p[it] + delta[it] }
+                val candidateCost = sse(candidate)
+                if (candidateCost < cost) {
+                    val converged = cost - candidateCost <= 1e-12 * cost
+                    p = candidate
+                    cost = candidateCost
+                    lambda = maxOf(lambda / 10, 1e-12)
+                    improved = !converged
+                    break
+                }
+                lambda *= 10
+            }
+            if (!improved) break
+        }
+
+        return if (p.all { it.isFinite() } && p[2] != 0.0) ExpDecayFit(p[0], p[1], p[2]) else null
     }
 
-    /** Solves 3×3 linear system Ax = b via Gaussian elimination with partial pivoting. */
-    private fun gaussianSolve3(A: Array<DoubleArray>, b: DoubleArray): DoubleArray? {
-        val m = Array(3) { i -> DoubleArray(4) { j -> if (j < 3) A[i][j] else b[i] } }
+    /** Solves a 3×3 linear system by Gaussian elimination with partial pivoting. */
+    private fun solve3(a: Array<DoubleArray>, b: DoubleArray): DoubleArray? {
+        val m = Array(3) { i -> DoubleArray(4) { j -> if (j < 3) a[i][j] else b[i] } }
         for (col in 0..2) {
-            var maxRow = col
-            for (row in col + 1..2) if (abs(m[row][col]) > abs(m[maxRow][col])) maxRow = row
-            val tmp = m[col]; m[col] = m[maxRow]; m[maxRow] = tmp
-            if (abs(m[col][col]) < 1e-14) return null
-            val piv = m[col][col]
-            for (j in col..3) m[col][j] /= piv
+            var pivotRow = col
+            for (row in col + 1..2) if (abs(m[row][col]) > abs(m[pivotRow][col])) pivotRow = row
+            val tmp = m[col]; m[col] = m[pivotRow]; m[pivotRow] = tmp
+            val pivot = m[col][col]
+            if (pivot == 0.0 || !pivot.isFinite()) return null
+            for (j in col..3) m[col][j] /= pivot
             for (row in 0..2) {
                 if (row == col) continue
                 val f = m[row][col]
@@ -465,134 +427,39 @@ object MultispeqCalculator {
         return DoubleArray(3) { m[it][3] }
     }
 
-    private fun calcEcst(byLabel: Map<String, JSONObject>): String? {
-        val fit = ecsDecayFit(byLabel) ?: return null
-        // ECSt = NLR amplitude 'a' (raw absorbance AU), matching JS NonLinearRegression
-        return formatNumber(fit.a, 5)
-    }
-
-    private fun calcGhp(byLabel: Map<String, JSONObject>): String? {
-        val fit = ecsDecayFit(byLabel) ?: return null
-        // gH⁺ = 1000 / c [s⁻¹], c in ms
-        return formatNumber(1000.0 / fit.cMs, 3)
-    }
-
-    private fun calcVhp(byLabel: Map<String, JSONObject>): String? {
-        val fit = ecsDecayFit(byLabel) ?: return null
-        return formatNumber(fit.a * (1000.0 / fit.cMs), 5)
-    }
-
-    // -------------------------------------------------------------------------
-    // PS1 calculations (from PAM dual-detector, P700/NIR channel)
-    // Reshaped PAM.data_raw: det2 (P700) is at indices 310..619 in the full array
-    // -------------------------------------------------------------------------
-
-    private fun calcPs1(byLabel: Map<String, JSONObject>): DoubleArray? {
-        val pamObj = pam(byLabel) ?: return null
-        val data = reshapePam(pamObj) ?: return null
-        if (data.size < 615) return null
-
-        // P700/NIR data starts at index 310 in the reshaped array (det2 portion)
-        // Relative to PSI_trace_beg=310: use indices 310..614
-        val psiData = data.slice(310..614).toDoubleArray()
-        val psiLength = psiData.size  // 305
-
-        // Convert to absorbance relative to dark reference
-        // PSI_dark_beg=195, PSI_dark_end=200 → slice(195,200) = indices 195..199 (5 pts)
-        val darkRef = mean(psiData.slice(195 until 200))
-        if (darkRef <= 0) return null
-        val abs = DoubleArray(psiLength) { ln(darkRef / psiData[it]) }
-
-        // PSI steady state: PSI_ss_beg=1, PSI_ss_end=18 → slice(1,18) = indices 1..17
-        val psiSs = mean(abs.slice(1 until 18)) * 1000.0
-
-        // PSI sat1: PSI_sat1_beg=25, PSI_sat1_end=170 → slice(25,170) = 145 pts, top 20% = 29
-        val sat1Vals = abs.slice(25 until 170).sortedDescending()
-        val psiSat1 = mean(sat1Vals.take(max(1, sat1Vals.size / 5))) * 1000.0
-
-        // PSI sat2: PSI_sat2_beg=220, PSI_sat2_end=270 → slice(220,270) = 50 pts, top 20% = 10
-        val sat2Vals = abs.slice(220 until minOf(270, abs.size)).sortedDescending()
-        val psiSat2 = mean(sat2Vals.take(max(1, sat2Vals.size / 5))) * 1000.0
-
-        if (psiSat2 <= 0) return null
-
-        val psiOx = psiSs / psiSat2
-        val psiAct = psiSat2
-        val psiOpen = (psiSat1 - psiSs) / psiSat2
-        val psiOr = 1.0 - psiSat1 / psiSat2
-
-        return doubleArrayOf(psiAct, psiOpen, psiOx, psiOr)
-    }
-
-    private fun calcPs1Active(byLabel: Map<String, JSONObject>): String? =
-        calcPs1(byLabel)?.let { formatNumber(it[0], 3) }
-
-    private fun calcPs1Open(byLabel: Map<String, JSONObject>): String? =
-        calcPs1(byLabel)?.let { formatNumber(it[1], 3) }
-
-    private fun calcPs1Oxidized(byLabel: Map<String, JSONObject>): String? =
-        calcPs1(byLabel)?.let { formatNumber(it[2], 3) }
-
-    private fun calcPs1OverReduced(byLabel: Map<String, JSONObject>): String? =
-        calcPs1(byLabel)?.let { formatNumber(it[3], 3) }
-
-    // -------------------------------------------------------------------------
-    // SPAD extraction
-    // -------------------------------------------------------------------------
-
-    private fun extractSpad(byLabel: Map<String, JSONObject>): String? {
-        val spadObj = spad(byLabel) ?: return null
-        val spadArr = spadObj.optJSONArray("spad")
-        if (spadArr != null) {
-            val v = spadArr.optDouble(0)
-            if (!v.isNaN()) return formatNumber(v, 1)
-        }
-        // Some firmware returns spad as a direct number
-        val spadDirect = spadObj.optDouble("spad")
-        if (!spadDirect.isNaN()) return formatNumber(spadDirect, 1)
-        return null
-    }
-
-    private fun extractThickness(byLabel: Map<String, JSONObject>): String? {
-        // thickness from DIRK_ECS or SPAD
-        for (label in listOf("DIRK_ECS", "PAM", "SPAD")) {
-            val v = byLabel[label]?.optDouble("thickness")
-            if (v != null && !v.isNaN() && v > 0) return formatNumber(v, 3)
-        }
-        return null
-    }
-
     // -------------------------------------------------------------------------
     // Math helpers
     // -------------------------------------------------------------------------
 
-    private fun mean(values: Collection<Double>): Double =
-        if (values.isEmpty()) 0.0 else values.sum() / values.size
-
-    private fun mean(arr: DoubleArray): Double =
-        if (arr.isEmpty()) 0.0 else arr.sum() / arr.size
-
-    private fun DoubleArray.slice(range: IntRange): List<Double> =
-        range.filter { it in indices }.map { this[it] }
-
-    /** Simple linear fit returning an array of fitted values over [0, n-1]. */
-    private fun linearFit(points: List<Double>): DoubleArray {
-        val n = points.size
-        if (n < 2) return DoubleArray(1) { points.firstOrNull() ?: 0.0 }
-        val xMean = (n - 1) / 2.0
-        val yMean = mean(points)
-        var num = 0.0; var den = 0.0
-        for (i in points.indices) {
-            num += (i - xMean) * (points[i] - yMean)
-            den += (i - xMean) * (i - xMean)
+    /** Least-squares line through (x, y); returns (slope, intercept). */
+    private fun linearRegression(x: DoubleArray, y: DoubleArray): Pair<Double, Double> {
+        val n = x.size
+        val xSum = x.sum()
+        val ySum = y.sum()
+        var xySum = 0.0
+        var xxSum = 0.0
+        for (i in 0 until n) {
+            xySum += x[i] * y[i]
+            xxSum += x[i] * x[i]
         }
-        val m = if (den != 0.0) num / den else 0.0
-        val b = yMean - m * xMean
-        return DoubleArray(n) { i -> m * i + b }
+        val slope = (n * xySum - xSum * ySum) / (n * xxSum - xSum * xSum)
+        return slope to (ySum - slope * xSum) / n
     }
 
-    private fun formatNumber(v: Double?, decimals: Int = 2): String {
-        if (v == null || v.isNaN() || v.isInfinite()) return "N/A"
-        return String.format("%.${decimals}f", v)
+    /** Mean of the values in [from, to). */
+    private fun DoubleArray.meanOf(from: Int, to: Int): Double = copyOfRange(from, to).average()
+
+    /** The macro's MathROUND: JavaScript Math.round, which rounds halves toward +∞. */
+    private fun jsRound(v: Double, decimals: Int): Double {
+        val scale = 10.0.pow(decimals)
+        return floor(v * scale + 0.5) / scale
+    }
+
+    private fun rounded(v: Double, decimals: Int): String? = plain(jsRound(v, decimals))
+
+    /** Locale-independent decimal string without trailing zeros or exponent, or null if not finite. */
+    private fun plain(v: Double?): String? {
+        if (v == null || !v.isFinite()) return null
+        return BigDecimal.valueOf(v).stripTrailingZeros().toPlainString()
     }
 }

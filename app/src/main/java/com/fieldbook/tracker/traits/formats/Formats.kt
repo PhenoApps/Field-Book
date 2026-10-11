@@ -31,7 +31,7 @@ enum class Formats {
 
         fun getCameraFormats() = entries.filter { it in setOf(CAMERA, USB_CAMERA, GO_PRO, CANON, VIDEO) }
 
-        fun getExperimentalFormats() = entries.filter { it in setOf(CANOPY_COVER) }
+        fun getExperimentalFormats() = entries.filter { it in setOf(CANOPY_COVER, MULTISPEQ) }
 
         fun getMainFormats() = entries - getCameraFormats().toSet() - getSpectralFormats().toSet() -
             getHardwareFormats().toSet() - getCustomFormats().toSet() - getExperimentalFormats().toSet() -
