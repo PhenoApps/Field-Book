@@ -169,8 +169,10 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
             //if no filter is set, use all attributes
             attributeSet.addAll(models.filter { it.trait == null }.toSet())
         } else {
-            //otherwise add all attributes
-            attributeSet.addAll((filter.first ?: setOf()).filter { it.trait == null })
+            //otherwise add the filtered attributes, dropping any persisted names the field no longer has
+            //(e.g. after a database import reuses the study id), which would otherwise be queried as missing columns
+            val validAttributes = models.filter { it.trait == null }.map { it.label }.toSet()
+            attributeSet.addAll((filter.first ?: setOf()).filter { it.trait == null && it.label in validAttributes })
         }
 
         if (filter.second == null) {
