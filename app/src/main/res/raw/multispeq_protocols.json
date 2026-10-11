@@ -1,0 +1,45 @@
+[
+  {
+    "id": "phi2",
+    "name": "Phi2 (Photosystem II Efficiency)",
+    "code": [
+      {
+        "pulses": [20, 50, 20],
+        "pulse_distance": [10000, 10000, 10000],
+        "pulse_length": [[30], [30], [30]],
+        "pulsed_lights": [[3], [3], [3]],
+        "pulsed_lights_brightness": [[2000], [2000], [2000]],
+        "nonpulsed_lights": [[2], [2], [2]],
+        "nonpulsed_lights_brightness": [["light_intensity"], [4500], ["light_intensity"]],
+        "detectors": [[1], [1], [1]],
+        "environmental": [["light_intensity"]],
+        "open_close_start": 1
+      }
+    ]
+  },
+  {
+    "id": "spad",
+    "name": "SPAD (Relative Chlorophyll Content)",
+    "code": [
+      {
+        "_protocol_set_": [
+          {
+            "label": "spad",
+            "spad": [[2, 3, 6], [-1]],
+            "protocol_repeats": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "par",
+    "name": "PAR (Photosynthetically Active Radiation)",
+    "code": [
+      {
+        "averages": 1,
+        "environmental": [["light_intensity"]]
+      }
+    ]
+  }
+]

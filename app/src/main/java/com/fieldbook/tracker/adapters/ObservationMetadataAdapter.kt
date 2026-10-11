@@ -8,6 +8,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
 
 /**
  * Reference:
@@ -40,8 +43,36 @@ class ObservationMetadataAdapter :
         // contents of the view with that element
         with(currentList[position]) {
             viewHolder.keyTextView.text = key
-            viewHolder.valueTextView.text = value
+            viewHolder.valueTextView.text = formatValueIfJson(value)
         }
+    }
+
+    private fun formatValueIfJson(value: String): String {
+        val trimmed = value.trim()
+        try {
+            if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+                val obj = JSONObject(trimmed)
+                val sb = StringBuilder()
+                val keys = obj.keys()
+                while (keys.hasNext()) {
+                    val k = keys.next()
+                    if (sb.isNotEmpty()) sb.append("\n")
+                    sb.append("$k: ${obj.get(k)}")
+                }
+                return sb.toString()
+            } else if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+                val arr = JSONArray(trimmed)
+                val sb = StringBuilder()
+                for (i in 0 until arr.length()) {
+                    if (sb.isNotEmpty()) sb.append("\n")
+                    sb.append(arr.get(i).toString())
+                }
+                return sb.toString()
+            }
+        } catch (e: JSONException) {
+            // not valid JSON, fall through to return as-is
+        }
+        return value
     }
 
     // Return the size of your dataset (invoked by the layout manager)
