@@ -31,7 +31,7 @@ jobs:
       bump_type: ${{ steps.release-check.outputs.bump_type }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           token: ${{ secrets.ACTIONS_PAT }}
           fetch-depth: 0
@@ -74,7 +74,7 @@ jobs:
     steps:
 
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           token: ${{ secrets.ACTIONS_PAT }}
           fetch-depth: 0
@@ -113,7 +113,7 @@ jobs:
           python3 .github/workflows/scripts/github-release.py "${{ github.repository }}" "CHANGELOG.md" "app/src/main/res/raw/changelog.xml"
 
       - name: Set Up Build Environment
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v6
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -145,14 +145,14 @@ jobs:
           keyPassword: ${{ secrets.KEY_PASSWORD }}
 
       - name: Upload Built APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Signed APK
           path: app/build/outputs/
 
       - name: Commit Version and Changelog Changes
         if: ${{ success() }}
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@v11
         with:
           add: "version.properties CHANGELOG.md app/src/main/res/raw/changelog.xml"
           message: "Bump ${{ needs.check-changes.outputs.bump_type }} and update changelog for v${{ env.VERSION }}"
