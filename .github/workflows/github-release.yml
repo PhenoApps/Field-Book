@@ -175,12 +175,6 @@ jobs:
           message: "Bump ${{ needs.check-changes.outputs.bump_type }} and update changelog for v${{ env.VERSION }}"
           github_token: ${{ secrets.ACTIONS_PAT }}
 
-      - name: Push Changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
-
       - name: Make GitHub Release
         uses: svenstaro/upload-release-action@v2
         with:
