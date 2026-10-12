@@ -26,6 +26,8 @@ on:
 jobs:
   check-changes:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       release_required: ${{ steps.release-check.outputs.release_required }}
       bump_type: ${{ steps.release-check.outputs.bump_type }}
@@ -33,8 +35,8 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v5
         with:
-          token: ${{ secrets.ACTIONS_PAT }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Determine Release Type and Necessity
         id: release-check
@@ -69,6 +71,8 @@ jobs:
           fi
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     needs: check-changes
     if: needs.check-changes.outputs.release_required == 'true'
     steps:
@@ -76,8 +80,8 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v5
         with:
-          token: ${{ secrets.ACTIONS_PAT }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Bump Version in version.properties
         id: bump-version
@@ -167,13 +171,25 @@ jobs:
           name: Signed APK
           path: app/build/outputs/apk/release/app-release-unsigned-signed.apk
 
+      # credentials are only configured for the push so the build can't read the PAT
+      - name: Configure Push Credentials
+        env:
+          ACTIONS_PAT: ${{ secrets.ACTIONS_PAT }}
+        run: |
+          AUTH=$(printf 'x-access-token:%s' "$ACTIONS_PAT" | base64 -w0)
+          echo "::add-mask::$AUTH"
+          git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $AUTH"
+
       - name: Commit Version and Changelog Changes
         if: ${{ success() }}
         uses: EndBug/add-and-commit@v11
         with:
           add: "version.properties CHANGELOG.md app/src/main/res/raw/changelog.xml"
           message: "Bump ${{ needs.check-changes.outputs.bump_type }} and update changelog for v${{ env.VERSION }}"
-          github_token: ${{ secrets.ACTIONS_PAT }}
+
+      - name: Remove Push Credentials
+        if: ${{ always() }}
+        run: git config --local --unset-all http.https://github.com/.extraheader || true
 
       - name: Make GitHub Release
         uses: svenstaro/upload-release-action@v2

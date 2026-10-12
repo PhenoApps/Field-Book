@@ -16,14 +16,16 @@ env:
 jobs:
   determine-pr:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       pr_number: ${{ steps.check-pr.outputs.pr_number }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
-          token: ${{ secrets.ACTIONS_PAT }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Check if this is a PR commit
         id: check-pr
@@ -44,6 +46,8 @@ jobs:
 
   update-changelog:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: determine-pr
     if: needs.determine-pr.outputs.pr_number != ''
     steps:
