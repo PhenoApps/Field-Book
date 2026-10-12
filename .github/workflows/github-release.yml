@@ -136,19 +136,36 @@ jobs:
         run: ./gradlew app:assembleRelease
 
       - name: Sign APK
-        uses: r0adkll/sign-android-release@v1
-        with:
-          releaseDirectory: app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          ALIAS: ${{ secrets.ALIAS }}
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          BUILD_TOOLS="$ANDROID_HOME/build-tools/29.0.3"
+          DIR=app/build/outputs/apk/release
+          KEYSTORE="$RUNNER_TEMP/signing.jks"
+          trap 'rm -f "$KEYSTORE"' EXIT
+
+          echo "$SIGNING_KEY" | base64 -d > "$KEYSTORE"
+
+          "$BUILD_TOOLS/zipalign" -f -p 4 "$DIR/app-release-unsigned.apk" "$DIR/app-release-aligned.apk"
+
+          "$BUILD_TOOLS/apksigner" sign \
+            --ks "$KEYSTORE" \
+            --ks-key-alias "$ALIAS" \
+            --ks-pass env:KEY_STORE_PASSWORD \
+            --key-pass env:KEY_PASSWORD \
+            --out "$DIR/app-release-unsigned-signed.apk" \
+            "$DIR/app-release-aligned.apk"
+
+          "$BUILD_TOOLS/apksigner" verify "$DIR/app-release-unsigned-signed.apk"
 
       - name: Upload Built APK
         uses: actions/upload-artifact@v7
         with:
           name: Signed APK
-          path: app/build/outputs/
+          path: app/build/outputs/apk/release/app-release-unsigned-signed.apk
 
       - name: Commit Version and Changelog Changes
         if: ${{ success() }}
