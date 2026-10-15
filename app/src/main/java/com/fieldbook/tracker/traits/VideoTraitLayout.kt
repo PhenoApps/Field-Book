@@ -10,6 +10,7 @@ import android.provider.MediaStore
 import android.util.AttributeSet
 import android.util.Log
 import android.util.Size
+import android.widget.Toast
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.video.MediaStoreOutputOptions
@@ -45,7 +46,16 @@ class VideoTraitLayout : PhotoTraitLayout {
     companion object {
         const val TAG = "VideoTrait"
         const val type = "video"
+
+        // the 32-bit FFmpegKit build only includes what UDP streaming needs (no mp4 demux/mux, h264 decode,
+        // crop filter or mpeg4/aac encoders), so video cropping only works in 64-bit processes
+        private val isVideoCropSupported = android.os.Process.is64Bit()
     }
+
+    // crop is configured for this trait but the device can't perform it
+    private fun isVideoCropUnavailable() = isCropRequired() && !isVideoCropSupported
+
+    override fun isCropOverlayEnabled() = isVideoCropSupported
 
     private var videoCaptureInstance: VideoCapture<Recorder>? = null
     private var currentRecording: androidx.camera.video.Recording? = null
@@ -80,7 +90,7 @@ class VideoTraitLayout : PhotoTraitLayout {
         // If this trait requires a crop region and one doesn't exist yet, take a single temporary picture
         // and launch the crop activity so the user can define the crop rect. Do not save this image to field storage.
         try {
-            if (isCropRequired() && !isCropExist()) {
+            if (isCropRequired() && isVideoCropSupported && !isCropExist()) {
                 // create temporary file in cache
                 val tmpFile = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
                 try {
@@ -182,6 +192,13 @@ class VideoTraitLayout : PhotoTraitLayout {
                     when (event) {
                         is VideoRecordEvent.Start -> {
                             videoRecording = true
+                            if (isVideoCropUnavailable()) {
+                                Toast.makeText(
+                                    context,
+                                    string.trait_video_crop_unsupported,
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
                             shutterButton?.setImageResource(drawable.ic_media_stop)
                             shutterButton?.setColorFilter(android.graphics.Color.BLACK)
                         }
@@ -240,7 +257,7 @@ class VideoTraitLayout : PhotoTraitLayout {
                 var inStream: FileInputStream? = null
                 try {
                     // If crop is required and exists, run FFmpeg crop; otherwise simple copy
-                    val cropRequired = isCropRequired() && isCropExist()
+                    val cropRequired = isCropRequired() && isCropExist() && isVideoCropSupported
 
                     if (cropRequired) {
                         val cropRect = preferences.getString(
@@ -314,7 +331,7 @@ class VideoTraitLayout : PhotoTraitLayout {
 
                 try {
                     // If crop is required and exists, run FFmpeg crop; otherwise simple copy
-                    val cropRequired = isCropRequired() && isCropExist()
+                    val cropRequired = isCropRequired() && isCropExist() && isVideoCropSupported
 
                     if (cropRequired) {
                         val cropRect = preferences.getString(
@@ -518,7 +535,7 @@ class VideoTraitLayout : PhotoTraitLayout {
             resolution,
             currentTrait.id,
             analysis = null,
-            showCropRegion = true
+            showCropRegion = isCropOverlayEnabled()
         ) { _, _, videoCapture ->
             videoCaptureInstance = videoCapture
         }

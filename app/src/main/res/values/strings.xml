@@ -1667,6 +1667,7 @@
     <!-- Video recording messages -->
     <string name="video_recording_started">Video recording started</string>
     <string name="video_recording_saved">Video recording saved</string>
+    <string name="trait_video_crop_unsupported">Video cropping isn\'t available on this device. Videos will be saved without cropping.</string>
 
     <!-- Audio pause not supported message -->
     <string name="field_audio_pause_not_supported">Pause/resume is not supported on this device</string>
