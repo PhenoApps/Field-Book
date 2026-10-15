@@ -224,7 +224,7 @@
         <item name="fb_color_accent">@color/high_contrast_color_accent</item>
         <item name="fb_color_text_light">@color/high_contrast_color_text_light</item>
         <item name="fb_color_text_dark">@color/high_contrast_color_text_dark</item>
-        <item name="fb_color_text_high_contrast_inverted">@color/high_contrast_primary</item>
+        <item name="fb_color_text_high_contrast_inverted">@color/high_contrast_primary_dark</item>
         <item name="fb_color_hint_text">@color/high_contrast_color_hint_text</item>
         <item name="fb_color_background">@color/high_contrast_color_background</item>
         <item name="fb_color_text_button_background">?attr/fb_color_primary</item>

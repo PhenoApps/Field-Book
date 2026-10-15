@@ -41,6 +41,12 @@
             app:layout_constraintTop_toBottomOf="@id/camera_fragment_rv"
             app:layout_constraintBottom_toTopOf="@id/camera_fragment_capture_btn">
 
+            <com.serenegiant.widget.UVCCameraTextureView
+                android:id="@+id/trait_camera_uvc_tv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
             <ImageView
                 android:visibility="gone"
                 android:id="@+id/trait_camera_iv"

@@ -26,7 +26,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
@@ -63,12 +62,13 @@ fun BrapiServerCard(
     )
 
     val statusIcon = if (hasToken) R.drawable.pheno_brapi_ic_lock else R.drawable.pheno_brapi_ic_unlock
+    val inactiveTint = MaterialTheme.colorScheme.onSurfaceVariant
     val statusTint = when {
-        isActive && hasToken -> Color(0xFF4CAF50)
-        isActive -> Color(0xFFF44336)
-        else -> Color(0xFF787878)
+        isActive && hasToken -> MaterialTheme.colorScheme.primary
+        isActive -> MaterialTheme.colorScheme.error
+        else -> inactiveTint
     }
-    val chipStroke = if (isActive) MaterialTheme.colorScheme.primary else Color(0xFF787878)
+    val chipStroke = if (isActive) MaterialTheme.colorScheme.primary else inactiveTint
 
     Card(
         modifier = modifier

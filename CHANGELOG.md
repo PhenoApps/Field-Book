@@ -10,9 +10,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+
+### Fixed
+
+## [v7.3.2] - 2026-10-06
+
+### Changed
+- Improved USB camera integration (https://github.com/PhenoApps/Field-Book/pull/1544)
+
+### Fixed
+- Slashes in trait names no longer stop images from saving (https://github.com/PhenoApps/Field-Book/pull/1556)
+
+## [v7.3.1] - 2026-09-29
+
+### Added
+- Sync now lists observations that cannot be sent via BrAPI (https://github.com/PhenoApps/Field-Book/pull/1542)
+
+### Changed
 - User is now notified of failed database writes (https://github.com/PhenoApps/Field-Book/pull/1515)
 
 ### Fixed
+- Boox barcode scanning and theme improvements (https://github.com/PhenoApps/Field-Book/pull/1532)
+- InnoSpectra and Nix trait improvements and bug fixes (https://github.com/PhenoApps/Field-Book/pull/1529)
+- GoPro connection improvements (https://github.com/PhenoApps/Field-Book/pull/1522)
 - Canopy trait improvements and bug fixes (https://github.com/PhenoApps/Field-Book/pull/1514)
 - BrAPI account manager improvements and optimizations (https://github.com/PhenoApps/Field-Book/pull/1524)
 - Traits imported via BrAPI are now filtered to match the correct observation unit level (https://github.com/PhenoApps/Field-Book/pull/1513)
@@ -986,3 +1006,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v7.2.3]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.3
 
 [v7.3.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.3.0
+[v7.3.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.3.1
+[v7.3.2]: https://github.com/PhenoApps/Field-Book/releases/tag/7.3.2

@@ -205,6 +205,16 @@ class TraitBoxView : ConstraintLayout {
     private var previousSelection = 0
     private var lastInflatedFormat: String? = null
 
+    /**
+     * Forces the next [loadLayout] to re-inflate even if the format is unchanged.
+     *
+     * Needed when the underlying data changes out from under the layout, such as a field switch,
+     * where reusing the inflated layout would leave it bound to the previous field.
+     */
+    fun resetInflatedFormat() {
+        lastInflatedFormat = null
+    }
+
     private fun getSelectedItemPosition(): Int {
         return visibleTraitsList.indexOf(currentTrait)
     }

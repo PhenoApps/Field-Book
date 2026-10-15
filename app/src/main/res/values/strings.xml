@@ -720,7 +720,8 @@
 
     <!-- Trait Layout: GoPro -->
     <string name="trait_go_pro_capture_button_text">Capture\n</string>
-    <string name="trait_go_pro_await_device_title">Scanning for GoPros</string>
+    <string name="trait_go_pro_await_device_title">Select a paired GoPro</string>
+    <string name="trait_go_pro_no_paired_devices">No paired GoPro found. Pair the camera in Android Bluetooth settings first.</string>
     <string name="trait_go_pro_await_ble_title">Awaiting GoPro BLE Connection</string>
     <string name="trait_go_pro_await_ble_message">Communicating with GoPro BLE, this may take a minute.</string>
     <string name="trait_go_pro_await_ap_title">Awaiting GoPro AP</string>
@@ -730,6 +731,23 @@
     <string name="go_pro_layout_black_11_not_detected">This trait was made for a GoPro Black 11, please contact developers to implement your GoPro model.\n</string>
     <string name="go_pro_frag_connect_btn_content_description">Connect to a GoPro camera.\n</string>
     <string name="trait_go_pro_capture_content_description">Capture a picture from a connected GoPro device.\n</string>
+    <string name="gopro_error_ble_failed">Could not connect to the GoPro over Bluetooth.</string>
+    <string name="gopro_error_ble_timeout">Timed out connecting to the GoPro over Bluetooth.</string>
+    <string name="gopro_error_ble_disconnected">Lost the Bluetooth connection to the GoPro.</string>
+    <string name="gopro_error_wifi_unavailable">Could not join the GoPro Wi-Fi network.</string>
+    <string name="gopro_error_wifi_lost">Lost the GoPro Wi-Fi network.</string>
+    <string name="gopro_error_stream_failed">Could not start the GoPro live preview.</string>
+    <string name="gopro_error_stream_timeout">The GoPro live preview did not start. Power the camera off and on, then try again.</string>
+    <string name="gopro_stage_bluetooth">Connecting over Bluetooth…</string>
+    <string name="gopro_stage_enabling_ap">Turning on the camera Wi‑Fi…</string>
+    <string name="gopro_stage_joining_wifi">Joining the camera Wi‑Fi…</string>
+    <string name="gopro_stage_starting_preview">Starting the live preview…</string>
+    <string name="gopro_error_not_connected">The GoPro is not connected.</string>
+    <string name="gopro_error_capture_busy">Still saving the previous photo.</string>
+    <string name="gopro_error_capture_timeout">The GoPro did not finish capturing in time.</string>
+    <string name="gopro_error_capture_failed">The GoPro capture failed.</string>
+    <string name="gopro_error_no_new_photo">The GoPro did not produce a new photo.</string>
+    <string name="gopro_error_download_failed">Could not copy the photo from the GoPro.</string>
 
     <!-- Trait Layout: USB Camera -->
     <string name="trait_usb_camera_zoom_in_button_text">Zoom in</string>
@@ -1710,6 +1728,15 @@
     <string name="inno_spectra_save_failed">Save failed</string>
     <string name="inno_spectra_hardware_incompatible">Hardware incompatible</string>
     <string name="inno_spectra_function_locked">Function locked</string>
+
+    <!-- stages reported while the inno spectra device is connecting -->
+    <string name="inno_spectra_connect_connecting">Connecting</string>
+    <string name="inno_spectra_connect_handshake">Starting up</string>
+    <string name="inno_spectra_connect_device_info">Reading device info</string>
+    <string name="inno_spectra_connect_device_uuid">Identifying device</string>
+    <string name="inno_spectra_connect_device_status">Reading status</string>
+    <string name="inno_spectra_connect_scan_configs">Loading scan configs</string>
+    <string name="inno_spectra_connect_ready">Ready</string>
     <string name="header_temperature">Temperature</string>
     <string name="header_humidity">Humidity</string>
     <string name="header_firmware">Firmware</string>
@@ -1917,6 +1944,7 @@
     <string name="nix_error_bluetooth_permissions">You must accept bluetooth permissions or try restarting the app.</string>
     <string name="nix_error_bluetooth_unavailable">Bluetooth is unavailable.</string>
     <string name="nix_error_bluetooth_disabled">Bluetooth is disabled on the device.</string>
+    <string name="nix_error_connect_failed">Could not connect to the device, try again.</string>
     <string name="list_item_color_placeholder_content_description">Placeholder for new scan</string>
     <string name="loading">Loading</string>
     <string name="nix_error_no_network">Nix may require internet to work properly.</string>
@@ -2009,6 +2037,10 @@
     <string name="edited_images">Edited Images</string>
     <string name="include_images">Include Images</string>
     <string name="no_observations_to_upload">No observations to upload</string>
+    <plurals name="brapi_unsyncable_observations">
+        <item quantity="one">%1$d observation cannot be synced because its trait was not imported from %2$s.</item>
+        <item quantity="other">%1$d observations cannot be synced because their traits were not imported from %2$s.</item>
+    </plurals>
     <string name="sync_statistics">Sync Statistics</string>
     <string name="synced_observations">Synced Observations</string>
     <string name="synced_images">Synced Images</string>

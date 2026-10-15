@@ -90,6 +90,7 @@ import com.fieldbook.tracker.traits.AbstractCameraTrait;
 import com.fieldbook.tracker.traits.AudioTraitLayout;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.CanonTraitLayout;
+import com.fieldbook.tracker.traits.GoProTraitLayout;
 import com.fieldbook.tracker.traits.GNSSTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
@@ -162,7 +163,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
@@ -318,10 +319,16 @@ public class CollectActivity extends ThemedActivity
     private View composeMissingAnchor = null;
     private View composeDeleteAnchor = null;
 
+    // Single executor reused for every onPause backup. Creating a pool per pause leaked its
+    // non daemon threads for the life of the process, and collection sessions pause often.
+    private final ExecutorService backupExecutor = Executors.newSingleThreadExecutor();
+
     /**
      * Trait layouts
      */
     LayoutCollections traitLayouts;
+    /** The layout currently inflated into the trait holder, so it can be exited when replaced. */
+    private BaseTraitLayout currentInflatedLayout;
     private String inputPlotId = "";
     private AlertDialog goToId;
 
@@ -444,6 +451,13 @@ public class CollectActivity extends ThemedActivity
     protected void onStop() {
         super.onStop();
         usbCameraApi.onStop();
+
+        //the bound wifi network, the ffmpeg pipeline and the camera's access point do not survive
+        //backgrounding, so release the session rather than leaving a half open one that blocks the
+        //next connect attempt
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !isChangingConfigurations()) {
+            goProApi.teardownAsync();
+        }
     }
 
     public void triggerTts(String text) {
@@ -456,6 +470,13 @@ public class CollectActivity extends ThemedActivity
 
         try {
 
+            //release any connected camera before the trait layouts are rebuilt, otherwise the
+            //session leaks and the camera cannot be reconnected in the new field
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                goProApi.teardownAsync();
+            }
+            canonApi.stopSession();
+
             fieldSwitcher.switchField(studyId);
 
             rangeBox.setAllRangeID();
@@ -464,6 +485,9 @@ public class CollectActivity extends ThemedActivity
             //refresh collect activity UI
             rangeBox.reload();
             rangeBox.refresh();
+            //the trait format may be unchanged across the switch, so drop the memo that would
+            //otherwise skip re-inflating and leave the layout bound to the previous field
+            traitBox.resetInflatedFormat();
             initWidgets(false);
 
             if (obsUnitId != null) {
@@ -967,25 +991,46 @@ public class CollectActivity extends ThemedActivity
                         // positions: 1/6, 3/6, 5/6 of width (centered horizontally)
                         float[] fractions = new float[]{1f/6f, 3f/6f, 5f/6f};
 
-                        View[] anchors = new View[3];
+                        // initToolbars runs from initWidgets, so this block executes on every plot
+                        // navigation. Reposition the existing anchors instead of adding three more
+                        // views to the root each pass, which previously left every earlier set
+                        // attached and grew the view tree for the length of the session.
+                        View[] anchors = new View[]{composeMediaAnchor, composeMissingAnchor, composeDeleteAnchor};
+
                         for (int i = 0; i < 3; i++) {
-                            View v = new View(CollectActivity.this);
-                            v.setBackgroundColor(android.graphics.Color.TRANSPARENT);
-                            v.setClickable(false);
-                            v.setFocusable(false);
-                            v.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-                            int id = View.generateViewId();
-                            v.setId(id);
 
-                            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(size, size);
+                            View v = anchors[i];
 
-                            root.addView(v, lp);
+                            if (v == null || v.getParent() != root) {
+
+                                if (v != null && v.getParent() instanceof ViewGroup) {
+                                    ((ViewGroup) v.getParent()).removeView(v);
+                                }
+
+                                v = new View(CollectActivity.this);
+                                v.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+                                v.setClickable(false);
+                                v.setFocusable(false);
+                                v.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+                                v.setId(View.generateViewId());
+
+                                root.addView(v, new FrameLayout.LayoutParams(size, size));
+
+                                anchors[i] = v;
+
+                            } else {
+
+                                ViewGroup.LayoutParams lp = v.getLayoutParams();
+                                if (lp != null && (lp.width != size || lp.height != size)) {
+                                    lp.width = size;
+                                    lp.height = size;
+                                    v.setLayoutParams(lp);
+                                }
+                            }
 
                             float cx = fractions[i] * w;
                             v.setX(relX + cx - size / 2f);
                             v.setY(relY + (h - size) / 2f);
-
-                            anchors[i] = v;
                         }
 
                         composeMediaAnchor = anchors[0];
@@ -1319,29 +1364,26 @@ public class CollectActivity extends ThemedActivity
 
         database.updateEditDate(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        // Backup database
-        try {
+        // Backup database. The directory lookup stays off the main thread with the export:
+        // getDirectory resolves through the storage access framework, which lists the tree and
+        // queries each child for its name, so it is the slower half of this work and has caused
+        // ANRs on low end devices where onPause blocks long enough to miss input dispatch.
+        backupExecutor.execute(() -> {
 
-            DocumentFile databaseDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_database);
-            if (databaseDir != null) {
+            try {
 
-                Executor executor = Executors.newFixedThreadPool(2);
-                executor.execute(() -> {
+                DocumentFile databaseDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_database);
+                if (databaseDir != null) {
 
-                    try {
+                    database.exportDatabase(this, "backup");
+                }
 
-                        database.exportDatabase(this,"backup");
-
-                    } catch (IOException io) {
-                        Log.e(TAG, "Error exporting database.", io);
-                    }
-
-                });
+            } catch (IOException io) {
+                Log.e(TAG, "Error exporting database.", io);
+            } catch (Exception e) {
+                Log.e(TAG, "Error backing up database.", e);
             }
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error backing up database.", e);
-        }
+        });
 
         geoNavHelper.stopGeoNav();
 
@@ -1370,11 +1412,14 @@ public class CollectActivity extends ThemedActivity
             Log.e(TAG, "Error closing TTS Helper.", e);
         }
 
-        getTraitLayout().onExit();
+        if (currentInflatedLayout != null) {
+            currentInflatedLayout.onExit();
+        }
 
         traitLayoutRefresh();
 
-        //nixSensorHelper.disconnect();
+        //release resources every trait layout owns, not just the one on screen
+        traitLayouts.onDestroy();
 
         bleScanner.stopScanning();
 
@@ -1391,6 +1436,9 @@ public class CollectActivity extends ThemedActivity
         }
 
         sensorHelper.unregister();
+
+        //lets an in flight backup finish, but stops the pool from outliving the activity
+        backupExecutor.shutdown();
 
         super.onDestroy();
     }
@@ -2959,6 +3007,11 @@ public class CollectActivity extends ThemedActivity
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                                 wifiHelper.disconnect();
                             }
+                        } else if (format.equals(GoProTraitLayout.type)
+                                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            //start releasing the camera before finish() so the stop stream and
+                            //access point commands still have a live link to travel over
+                            goProApi.teardownAsync();
                         }
                         finish();
                 } else {
@@ -3139,7 +3192,12 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public void inflateTrait(@NonNull BaseTraitLayout layout) {
-        getTraitLayout().onExit();
+        //getTraitLayout() resolves through the *current* trait, which by this point is already the
+        //incoming one, so track the inflated layout directly to exit the one being left behind
+        if (currentInflatedLayout != null && currentInflatedLayout != layout) {
+            currentInflatedLayout.onExit();
+        }
+        currentInflatedLayout = layout;
         View v = LayoutInflater.from(this).inflate(layout.layoutId(), null);
         LinearLayout holder = findViewById(R.id.traitHolder);
         holder.removeAllViews();

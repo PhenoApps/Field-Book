@@ -355,6 +355,7 @@ Karaktärer och fält som skapats manuellt eller importerats via CSV kommer beh�
     <!-- canon camera strings -->
     <!-- spectral trait strings -->
     <!-- inno spectra -->
+    <!-- stages reported while the inno spectra device is connecting -->
     <string name="brapi_traits_filter_title">Karaktärer</string>
     <string name="dialog_quick_goto_title">Snabbhopp</string>
     <string name="traits_sort_default">Standard</string>

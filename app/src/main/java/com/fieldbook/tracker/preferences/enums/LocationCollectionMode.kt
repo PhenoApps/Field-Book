@@ -1,21 +1,21 @@
 package com.fieldbook.tracker.preferences.enums
 
 sealed class LocationCollectionMode(val value: String) {
-    object OFF : LocationCollectionMode("off")
-    object STUDY : LocationCollectionMode("study")
-    object OBSERVATION_UNIT : LocationCollectionMode("observation_unit")
-    object OBSERVATION : LocationCollectionMode("observation")
+    object OFF : LocationCollectionMode("0")
+    object STUDY : LocationCollectionMode("1")
+    object OBSERVATION_UNIT : LocationCollectionMode("2")
+    object OBSERVATION : LocationCollectionMode("3")
 
     companion object {
         @JvmField
-        val DEFAULT: LocationCollectionMode = OBSERVATION
+        val DEFAULT: LocationCollectionMode = OFF
 
         fun fromValue(value: String?): LocationCollectionMode {
             return when (value) {
-                "off" -> OFF
-                "study" -> STUDY
-                "observation_unit" -> OBSERVATION_UNIT
-                "observation" -> OBSERVATION
+                "0" -> OFF
+                "1" -> STUDY
+                "2" -> OBSERVATION_UNIT
+                "3" -> OBSERVATION
                 else -> DEFAULT
             }
         }

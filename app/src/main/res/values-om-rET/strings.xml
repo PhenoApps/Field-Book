@@ -227,6 +227,7 @@
     <!-- canon camera strings -->
     <!-- spectral trait strings -->
     <!-- inno spectra -->
+    <!-- stages reported while the inno spectra device is connecting -->
     <string name="brapi_traits_filter_title">Wanta ideefanonn guuramuuf</string>
     <string name="traits_sort_default">Akkuma jirutti</string>
     <!--  NearbyShare  -->
