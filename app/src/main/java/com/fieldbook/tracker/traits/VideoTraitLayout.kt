@@ -4,34 +4,37 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.MediaMetadataRetriever
+import android.net.Uri
 import android.provider.MediaStore
 import android.util.AttributeSet
+import android.util.Log
 import android.util.Size
-import android.net.Uri
+import android.widget.Toast
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
 import androidx.camera.video.MediaStoreOutputOptions
 import androidx.camera.video.Recorder
 import androidx.camera.video.VideoCapture
 import androidx.camera.video.VideoRecordEvent
 import androidx.core.content.ContextCompat
+import com.arthenica.ffmpegkit.FFmpegKit
+import com.fieldbook.tracker.R.drawable
+import com.fieldbook.tracker.R.string
+import com.fieldbook.tracker.R.style
 import com.fieldbook.tracker.activities.CameraActivity
 import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.activities.CropImageActivity
 import com.fieldbook.tracker.database.internalTimeFormatter
+import com.fieldbook.tracker.fragments.CropImageFragment
+import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.provider.GenericFileProvider
 import com.fieldbook.tracker.utilities.FileUtil
+import com.fieldbook.tracker.views.CropImageView
 import com.fieldbook.tracker.views.VideoCameraSettingsView
 import org.threeten.bp.OffsetDateTime
 import java.io.File
 import java.io.FileInputStream
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageCaptureException
-import com.fieldbook.tracker.activities.CropImageActivity
-import com.fieldbook.tracker.fragments.CropImageFragment
-import com.fieldbook.tracker.provider.GenericFileProvider
-import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.views.CropImageView
-import android.media.MediaMetadataRetriever
-import android.util.Log
-import com.arthenica.ffmpegkit.FFmpegKit
-import com.fieldbook.tracker.R.*
 
 /**
  * The Video trait uses the same UI as the photo trait but not has a capture start/stop toggle button.
@@ -43,7 +46,16 @@ class VideoTraitLayout : PhotoTraitLayout {
     companion object {
         const val TAG = "VideoTrait"
         const val type = "video"
+
+        // the 32-bit FFmpegKit build only includes what UDP streaming needs (no mp4 demux/mux, h264 decode,
+        // crop filter or mpeg4/aac encoders), so video cropping only works in 64-bit processes
+        private val isVideoCropSupported = android.os.Process.is64Bit()
     }
+
+    // crop is configured for this trait but the device can't perform it
+    private fun isVideoCropUnavailable() = isCropRequired() && !isVideoCropSupported
+
+    override fun isCropOverlayEnabled() = isVideoCropSupported
 
     private var videoCaptureInstance: VideoCapture<Recorder>? = null
     private var currentRecording: androidx.camera.video.Recording? = null
@@ -57,7 +69,11 @@ class VideoTraitLayout : PhotoTraitLayout {
 
     constructor(context: android.content.Context?) : super(context)
     constructor(context: android.content.Context?, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: android.content.Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    constructor(context: android.content.Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    )
 
     override fun type() = type
 
@@ -74,7 +90,7 @@ class VideoTraitLayout : PhotoTraitLayout {
         // If this trait requires a crop region and one doesn't exist yet, take a single temporary picture
         // and launch the crop activity so the user can define the crop rect. Do not save this image to field storage.
         try {
-            if (isCropRequired() && !isCropExist()) {
+            if (isCropRequired() && isVideoCropSupported && !isCropExist()) {
                 // create temporary file in cache
                 val tmpFile = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
                 try {
@@ -176,9 +192,17 @@ class VideoTraitLayout : PhotoTraitLayout {
                     when (event) {
                         is VideoRecordEvent.Start -> {
                             videoRecording = true
+                            if (isVideoCropUnavailable()) {
+                                Toast.makeText(
+                                    context,
+                                    string.trait_video_crop_unsupported,
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
                             shutterButton?.setImageResource(drawable.ic_media_stop)
                             shutterButton?.setColorFilter(android.graphics.Color.BLACK)
                         }
+
                         is VideoRecordEvent.Finalize -> {
                             videoRecording = false
                             shutterButton?.setImageResource(drawable.camera_24px)
@@ -193,6 +217,7 @@ class VideoTraitLayout : PhotoTraitLayout {
                                 ex.printStackTrace()
                             }
                         }
+
                         else -> {}
                     }
                 }
@@ -232,10 +257,13 @@ class VideoTraitLayout : PhotoTraitLayout {
                 var inStream: FileInputStream? = null
                 try {
                     // If crop is required and exists, run FFmpeg crop; otherwise simple copy
-                    val cropRequired = isCropRequired() && isCropExist()
+                    val cropRequired = isCropRequired() && isCropExist() && isVideoCropSupported
 
                     if (cropRequired) {
-                        val cropRect = preferences.getString(GeneralKeys.getCropCoordinatesKey(currentTrait.id.toInt()), "") ?: ""
+                        val cropRect = preferences.getString(
+                            GeneralKeys.getCropCoordinatesKey(currentTrait.id.toInt()),
+                            ""
+                        ) ?: ""
                         val rect = CropImageView.parseRectCoordinates(cropRect)
 
                         if (rect != null) {
@@ -276,7 +304,10 @@ class VideoTraitLayout : PhotoTraitLayout {
                 } catch (e: Exception) {
                     e.printStackTrace()
                 } finally {
-                    try { inStream?.close() } catch (_: Exception) {}
+                    try {
+                        inStream?.close()
+                    } catch (_: Exception) {
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -300,15 +331,21 @@ class VideoTraitLayout : PhotoTraitLayout {
 
                 try {
                     // If crop is required and exists, run FFmpeg crop; otherwise simple copy
-                    val cropRequired = isCropRequired() && isCropExist()
+                    val cropRequired = isCropRequired() && isCropExist() && isVideoCropSupported
 
                     if (cropRequired) {
-                        val cropRect = preferences.getString(GeneralKeys.getCropCoordinatesKey(currentTrait.id.toInt()), "") ?: ""
+                        val cropRect = preferences.getString(
+                            GeneralKeys.getCropCoordinatesKey(currentTrait.id.toInt()),
+                            ""
+                        ) ?: ""
                         val rect = CropImageView.parseRectCoordinates(cropRect)
 
                         if (rect != null) {
                             // copy srcUri to temp input file
-                            val tmpIn = File(context.cacheDir, "fb_video_in_${System.currentTimeMillis()}.mp4")
+                            val tmpIn = File(
+                                context.cacheDir,
+                                "fb_video_in_${System.currentTimeMillis()}.mp4"
+                            )
 
                             activity?.contentResolver?.openInputStream(srcUri)?.use { ins ->
                                 tmpIn.outputStream().use { out ->
@@ -323,12 +360,16 @@ class VideoTraitLayout : PhotoTraitLayout {
                                 e.printStackTrace()
                                 // fallback to simple copy
                                 activity?.contentResolver?.openInputStream(srcUri)?.use { ins ->
-                                    activity?.contentResolver?.openOutputStream(destUri)?.use { out ->
-                                        ins.copyTo(out)
-                                    }
+                                    activity?.contentResolver?.openOutputStream(destUri)
+                                        ?.use { out ->
+                                            ins.copyTo(out)
+                                        }
                                 }
                             } finally {
-                                try { tmpIn.delete() } catch (_: Exception) {}
+                                try {
+                                    tmpIn.delete()
+                                } catch (_: Exception) {
+                                }
                             }
 
                         } else {
@@ -369,10 +410,15 @@ class VideoTraitLayout : PhotoTraitLayout {
             val mmr = MediaMetadataRetriever()
             mmr.setDataSource(tmpIn.absolutePath)
 
-            val rotation = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0
+            val rotation = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)
+                ?.toIntOrNull() ?: 0
 
-            val w = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull() ?: 0
-            val h = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull() ?: 0
+            val w =
+                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull()
+                    ?: 0
+            val h =
+                mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull()
+                    ?: 0
 
             val displayW = if (rotation == 90 || rotation == 270) h else w
             val displayH = if (rotation == 90 || rotation == 270) w else h
@@ -413,10 +459,16 @@ class VideoTraitLayout : PhotoTraitLayout {
 
             val cropFilter = "crop=${cropW}:${cropH}:${cropX}:${cropY}"
 
-            val cmd = "-y -i \"${tmpIn.absolutePath}\" -vf \"$cropFilter\" -c:v mpeg4 -qscale:v 3 -c:a aac -b:a 64k \"${tmpOut.absolutePath}\""
+            val cmd =
+                "-y -i \"${tmpIn.absolutePath}\" -vf \"$cropFilter\" -c:v mpeg4 -qscale:v 3 -c:a aac -b:a 64k \"${tmpOut.absolutePath}\""
             Log.d(TAG, "runFfmpegCropOrCopy cmd: $cmd")
 
-            FFmpegKit.execute(cmd)
+            try {
+                FFmpegKit.execute(cmd)
+            } catch (t: Throwable) {
+                Log.e(TAG, "FFmpegKit failed during crop", t)
+                throw IllegalStateException("FFmpegKit unavailable on this device", t)
+            }
 
             // copy tmpOut into destUri if exists, otherwise throw to let caller fallback
             if (tmpOut.exists()) {
@@ -428,7 +480,10 @@ class VideoTraitLayout : PhotoTraitLayout {
             }
 
         } finally {
-            try { tmpOut.delete() } catch (_: Exception) {}
+            try {
+                tmpOut.delete()
+            } catch (_: Exception) {
+            }
         }
     }
 
@@ -448,7 +503,9 @@ class VideoTraitLayout : PhotoTraitLayout {
                 activity?.runOnUiThread {
                     try {
                         (activity as? CollectActivity)?.traitLayoutRefresh()
-                    } catch (e: Exception) { e.printStackTrace() }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -478,7 +535,7 @@ class VideoTraitLayout : PhotoTraitLayout {
             resolution,
             currentTrait.id,
             analysis = null,
-            showCropRegion = true
+            showCropRegion = isCropOverlayEnabled()
         ) { _, _, videoCapture ->
             videoCaptureInstance = videoCapture
         }

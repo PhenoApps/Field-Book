@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -500,13 +501,14 @@ class DataGridActivity : ThemedActivity() {
                     val propColumns = database.getAllObservationUnitAttributeNames(studyId).toList()
                     val coreColumns = database.existingObservationUnitCoreColumns
                     units.count { !it.geo_coordinates.isNullOrBlank() } to
-                        (propColumns + coreColumns.filter { it !in propColumns }).toTypedArray()
+                            (propColumns + coreColumns.filter { it !in propColumns }).toTypedArray()
                 }
 
                 if (allColumns.isEmpty()) return@launch
 
                 buildMapLayoutPickerDialog(geoCount, allColumns)
-            } catch (_: CancellationException) {}
+            } catch (_: CancellationException) {
+            }
         }
     }
 
@@ -659,7 +661,8 @@ class DataGridActivity : ThemedActivity() {
 
             val unitAttributeNames = database.getAllObservationUnitAttributeNames(studyId).toList()
             val coreFieldNames = database.existingObservationUnitCoreColumns
-            val allValidNames = unitAttributeNames + coreFieldNames.filter { it !in unitAttributeNames }
+            val allValidNames =
+                unitAttributeNames + coreFieldNames.filter { it !in unitAttributeNames }
 
             val defaultRowAttr = guessRowAttr(allValidNames) ?: "position_coordinate_y"
 
@@ -668,7 +671,8 @@ class DataGridActivity : ThemedActivity() {
             val rowAttrName = savedRowAttr.ifBlank { defaultRowAttr }
             val colAttrName = savedColAttr.ifBlank { defaultColAttr }
 
-            val isSpatialMode = (rowAttrName == "geo_coordinates" && colAttrName == "geo_coordinates")
+            val isSpatialMode =
+                (rowAttrName == "geo_coordinates" && colAttrName == "geo_coordinates")
 
             val invertRow = preferences.getBoolean(GeneralKeys.MAP_INVERT_ROW, false)
             val invertCol = preferences.getBoolean(GeneralKeys.MAP_INVERT_COL, false)

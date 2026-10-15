@@ -245,10 +245,37 @@ open class PhotoTraitLayout : CameraTrait {
         return resolution
     }
 
+    // whether the crop region overlay should be drawn on the inline preview
+    protected open fun isCropOverlayEnabled() = true
+
+    protected open fun updateCropRegion() {
+        val pv = previewHolder?.previewView ?: getPreviewViewHolder()?.previewView
+        if (pv != null) {
+            controller.getCameraXFacade().updateCropRegion(
+                pv,
+                currentTrait.id,
+                showCropRegion = isCropOverlayEnabled()
+            )
+        } else if (isPreviewable()) {
+            awaitPreviewHolder {
+                val view = previewHolder?.previewView ?: getPreviewViewHolder()?.previewView
+                if (view != null) {
+                    controller.getCameraXFacade().updateCropRegion(
+                        view,
+                        currentTrait.id,
+                        showCropRegion = isCropOverlayEnabled()
+                    )
+                }
+            }
+        }
+    }
+
     override fun loadLayout() {
         super.loadLayout()
         if (!isCameraActive) {
             setup()
+        } else {
+            updateCropRegion()
         }
     }
 
@@ -411,6 +438,8 @@ open class PhotoTraitLayout : CameraTrait {
         super.onRefresh()
         if (!isCameraActive) {
             setup()
+        } else {
+            updateCropRegion()
         }
     }
 
