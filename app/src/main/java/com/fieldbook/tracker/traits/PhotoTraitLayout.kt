@@ -245,10 +245,34 @@ open class PhotoTraitLayout : CameraTrait {
         return resolution
     }
 
+    protected open fun updateCropRegion() {
+        val pv = previewHolder?.previewView ?: getPreviewViewHolder()?.previewView
+        if (pv != null) {
+            controller.getCameraXFacade().updateCropRegion(
+                pv,
+                currentTrait.id,
+                showCropRegion = true
+            )
+        } else if (isPreviewable()) {
+            awaitPreviewHolder {
+                val view = previewHolder?.previewView ?: getPreviewViewHolder()?.previewView
+                if (view != null) {
+                    controller.getCameraXFacade().updateCropRegion(
+                        view,
+                        currentTrait.id,
+                        showCropRegion = true
+                    )
+                }
+            }
+        }
+    }
+
     override fun loadLayout() {
         super.loadLayout()
         if (!isCameraActive) {
             setup()
+        } else {
+            updateCropRegion()
         }
     }
 
@@ -411,6 +435,8 @@ open class PhotoTraitLayout : CameraTrait {
         super.onRefresh()
         if (!isCameraActive) {
             setup()
+        } else {
+            updateCropRegion()
         }
     }
 
