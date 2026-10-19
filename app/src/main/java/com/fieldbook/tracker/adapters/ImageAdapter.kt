@@ -2,6 +2,7 @@ package com.fieldbook.tracker.adapters
 
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
@@ -101,13 +102,10 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
                     if (model.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                         (view.context.resources.getDimensionPixelSize(R.dimen.camera_preview_landscape_width)
                                 to view.context.resources.getDimensionPixelSize(R.dimen.camera_preview_landscape_height))
-                    } else (view.context.resources.getDimensionPixelSize(R.dimen.camera_preview_portrait_height)
+                    } else (view.context.resources.getDimensionPixelSize(R.dimen.camera_preview_portrait_width)
                             to view.context.resources.getDimensionPixelSize(R.dimen.camera_preview_portrait_height))
 
-                (cardView.layoutParams as ConstraintLayout.LayoutParams).apply {
-                    width = actualWidth
-                    height = actualHeight
-                }
+                sizeCard(actualWidth, actualHeight)
 
                 val isVideo = model.uri?.lowercase()?.endsWith(".mp4") == true || (model.uri?.startsWith("content://") == true && view.context.contentResolver.getType(android.net.Uri.parse(model.uri))?.startsWith("video/") == true)
 
@@ -138,10 +136,12 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
 
                     if (thumbBmp != null) {
                         imageView.setImageBitmap(thumbBmp)
+                        fitCardToImage(thumbBmp, actualHeight)
                     } else if (model.uri == "NA") {
                         val data = context.resources.assets.open("na_placeholder.jpg").readBytes()
                         val bmp = BitmapFactory.decodeByteArray(data, 0, data.size)
                         imageView.setImageBitmap(bmp)
+                        fitCardToImage(bmp, actualHeight)
                     } else {
                         // if no thumbnail, just clear imageView background to a neutral color
                         imageView.setImageDrawable(null)
@@ -290,6 +290,7 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
                         }
 
                         preview?.let { imageView.setImageBitmap(it) } ?: imageView.setImageDrawable(null)
+                        preview?.let { fitCardToImage(it, actualHeight) }
                         videoView?.visibility = View.GONE
                         playButton?.visibility = View.GONE
                         pauseButton?.visibility = View.GONE
@@ -307,12 +308,33 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
 
             }
         }
+
+        private fun sizeCard(width: Int, height: Int) {
+            (cardView.layoutParams as ConstraintLayout.LayoutParams).apply {
+                this.width = width
+                this.height = height
+            }
+            cardView.requestLayout()
+        }
+
+        /**
+         * Matches the card's width to the image's aspect ratio at [height], so the image fills the
+         * card instead of being letterboxed inside a fixed-size box (crops can be any shape).
+         */
+        private fun fitCardToImage(bmp: Bitmap, height: Int) {
+            if (bmp.width <= 0 || bmp.height <= 0) return
+            val width = (height.toLong() * bmp.width / bmp.height).toInt()
+            // keep very wide images (e.g. narrow crops) from taking over the strip
+            sizeCard(width.coerceIn(height / 3, height * 2), height)
+        }
     }
 
     class PreviewViewHolder(view: View) : ViewHolder(view) {
 
         val previewView: PreviewView = view.findViewById(R.id.trait_camera_pv)
         val embiggenButton: ImageButton = view.findViewById(R.id.trait_camera_expand_btn)
+        // visibility is managed by CameraZoomController once a camera is bound
+        val zoomChip: TextView = view.findViewById(R.id.trait_camera_zoom_chip)
 
         override fun bind(model: Model) {
 

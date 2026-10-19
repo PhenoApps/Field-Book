@@ -45,6 +45,14 @@ If a crop region was defined during trait creation, the "Set Crop Region" option
 
 Multiple video clips can be captured and attached to a single entry.
 
+### Zoom
+
+A zoom chip such as `1x` appears at the bottom of the preview, and tapping it moves to the next zoom level.
+The expanded camera shows every zoom level in a bar above the record button, with the current level highlighted, and tapping a level selects it.
+Zoom can be changed while recording.
+The levels offered depend on the device's lenses, for example `0.7x`, `1x`, and `2x`, and the zoom controls are hidden on cameras with only one level.
+The zoom level is saved for the current trait, so every video for the trait has the same framing.
+
 ### Playback and management
 
 Tapping a video thumbnail in the trait area allows videos to be played in the media viewer with play and pause controls.

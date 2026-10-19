@@ -43,6 +43,43 @@ Multiple photos can be captured for each entry.
 Captured photos are stored in `.jpg` format, and named by using underscores to join the entry's `unique id`, the trait name, the photo number, and a timestamp.
 The resulting files are stored in a picture folder within a field-specific subfolder of `plot_data`.
 An example photo filepath would be `plot_data/FIELD_NAME/picture/PHOTO_FILE_NAME.jpg`.
+If RAW capture is enabled, a `.dng` file with the same name is saved next to each `.jpg`.
+
+### Advanced camera settings
+
+When the Default camera is selected, the settings dialog includes additional options for consistent, comparable photos.
+These settings are saved for the current trait and are included when the trait is exported and imported.
+They do not apply to the Android camera app, which controls its own exposure and white balance.
+Options that the device's camera doesn't support are hidden.
+
+- `Exposure` controls how image brightness is chosen.
+  - `Auto` lets the camera adjust exposure for every shot.
+  - `Locked` measures exposure the first time the camera starts for the trait, then holds it.
+    The locked exposure is remembered for the trait while Field Book is open, so it stays the same when the preview is expanded or collapsed, or when moving between entries and traits.
+    Long-press the preview to measure and lock exposure again; in the expanded camera, exposure is measured at the point that was pressed.
+    Changing the exposure setting, or closing Field Book, also starts a fresh measurement.
+    On devices without manual sensor control, the exposure is measured again each time the camera starts.
+  - `Manual` sets a fixed ISO and shutter speed using sliders, and they stay the same across sessions.
+    It is only available on devices that support manual sensor control.
+    Long-press `Manual` to reset both sliders to their defaults.
+- `Lock white balance` measures white balance the first time the camera starts for the trait and holds it, so colors don't shift between photos.
+  Like locked exposure, it is remembered while Field Book is open, and a long-press on the preview measures it again.
+  On devices without manual color control, white balance is measured again each time the camera starts.
+- `Capture RAW (DNG)` saves an unprocessed `.dng` file alongside each `.jpg`.
+  It is only available on devices that support RAW capture.
+  The `.jpg` is still the recorded observation, and the `.dng` is included in media exports and deleted along with its photo.
+  DNG files are large, often 10 to 25 MB each.
+
+### Zoom
+
+When the Default camera is selected, a zoom chip such as `1x` appears at the bottom of the preview, and tapping it moves to the next zoom level.
+The expanded camera shows every zoom level in a bar above the shutter, with the current level highlighted, and tapping a level selects it.
+The levels offered depend on the device's lenses, for example `0.7x`, `1x`, and `2x`, and the zoom controls are hidden on cameras with only one level.
+Levels below `1x` use the ultrawide lens, and telephoto lenses are offered at their own magnification.
+The zoom level is saved for the current trait, so every photo for the trait has the same framing, and it is included when the trait is exported and imported.
+On another device, or after switching between the front and back cameras, the closest available level is used.
+Set the crop region at the zoom level the trait will use, because the crop is applied to the zoomed photo.
+Digital zoom does not crop `.dng` files, which always contain the full image from the lens in use.
 
 ## External devices
 

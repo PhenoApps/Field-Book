@@ -115,6 +115,9 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
     override fun type() = type
     override fun layoutId() = R.layout.trait_canopy_cover
 
+    // canopy cover analyses the JPEG only, so RAW files would just take up space
+    override fun supportsRawCapture() = false
+
     override fun init(act: Activity) {
         super.init(act)
         capturedImageView = act.findViewById(R.id.canopy_captured_iv)
@@ -145,8 +148,11 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
             resolution,
             currentTrait?.id,
             null,
-            showCropRegion = false
-        ) { _, executor, capture ->
+            showCropRegion = false,
+            controls = controlSettings()
+        ) { camera, executor, capture ->
+            boundCamera = camera
+            setupRemeterGesture(canopyPreviewView)
             shutterButton?.setOnClickListener {
                 if (!isLocked) {
                     captureWithOverwriteWarning {

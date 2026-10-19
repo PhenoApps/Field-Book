@@ -67,6 +67,7 @@ abstract class AbstractCameraTrait :
     companion object {
         const val TAG = "Camera"
         const val TEMPORARY_IMAGE_NAME = "temp.jpg"
+        const val TEMPORARY_RAW_NAME = "temp.dng"
     }
 
     enum class SaveState {
@@ -207,7 +208,7 @@ abstract class AbstractCameraTrait :
         saveTime: String,
         saveState: SaveState,
         offset: Int? = null,
-    ) {
+    ): Uri {
 
         // Resolve/create destination Uri synchronously so chunked writes can start immediately.
         val uri = resolveOrCreateFileUri(obsUnit, saveTime, saveState)
@@ -236,6 +237,69 @@ abstract class AbstractCameraTrait :
         } else {
 
             saveSingleShot(uri, data)
+        }
+
+        return uri
+    }
+
+    /**
+     * Copies a RAW (DNG) capture next to the JPEG at [jpegUri], using the same base file name.
+     * The DNG is a companion file only; the JPEG remains the observation value.
+     * The temporary [rawFile] is deleted once the copy finishes.
+     */
+    protected fun saveCompanionRaw(jpegUri: Uri, traitObj: TraitObject, rawFile: File) {
+
+        if (jpegUri == Uri.EMPTY) {
+            rawFile.delete()
+            return
+        }
+
+        background.launch {
+
+            try {
+
+                //use the actual JPEG name in case the provider renamed it on a collision
+                val jpegName = DocumentFile.fromSingleUri(context, jpegUri)?.name ?: return@launch
+
+                val dngName = jpegName.substringBeforeLast('.') + ".dng"
+
+                DocumentTreeUtil.getFieldMediaDirectory(context, FileUtil.sanitizeFileName(traitObj.name))
+                    ?.createFile("*/*", dngName)?.let { dest ->
+
+                        openOutputStreamSafely(dest.uri)?.use { output ->
+
+                            rawFile.inputStream().use { input -> input.copyTo(output) }
+
+                        } ?: Log.e(TAG, "saveCompanionRaw: unable to open output for ${dest.uri}")
+                    }
+
+            } catch (e: Exception) {
+
+                Log.e(TAG, "Failed to save companion DNG", e)
+
+            } finally {
+
+                rawFile.delete()
+            }
+        }
+    }
+
+    /**
+     * Deletes the companion DNG (if any) that shares a base name with [image].
+     * Must be called before [image] itself is deleted, while its name can still be resolved.
+     */
+    private fun deleteCompanionRaw(image: DocumentFile) {
+
+        try {
+
+            val base = image.name?.substringBeforeLast('.') ?: return
+
+            DocumentTreeUtil.getFieldMediaDirectory(context, FileUtil.sanitizeFileName(currentTrait.name))
+                ?.findFile("$base.dng")?.delete()
+
+        } catch (e: Exception) {
+
+            Log.w(TAG, "Failed to delete companion DNG", e)
         }
     }
 
@@ -1177,6 +1241,8 @@ abstract class AbstractCameraTrait :
 
         val traitDbId = currentTrait.id
 
+        deleteCompanionRaw(image)
+
         try {
             image.delete()
         } catch (e: Exception) {
@@ -1207,6 +1273,8 @@ abstract class AbstractCameraTrait :
                         ?.let { image ->
 
                             if (model.brapiSynced == true || setNa) {
+
+                                deleteCompanionRaw(image)
 
                                 image.delete()
 

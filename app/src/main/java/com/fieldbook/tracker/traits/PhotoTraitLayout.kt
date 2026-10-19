@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.traits
 
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
@@ -13,6 +12,7 @@ import android.util.AttributeSet
 import android.util.Size
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
+import androidx.camera.core.Camera
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.view.PreviewView
@@ -26,7 +26,13 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.provider.GenericFileProvider
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.Utils
-import com.fieldbook.tracker.views.CameraTraitSettingsView
+import com.fieldbook.tracker.utilities.camera.CameraCapabilities
+import com.fieldbook.tracker.utilities.camera.CameraControlSettings
+import com.fieldbook.tracker.utilities.camera.DualCaptureCallback
+import com.fieldbook.tracker.utilities.camera.ZoomChip
+import com.fieldbook.tracker.utilities.camera.ZoomSelector
+import com.fieldbook.tracker.ui.camera.showCameraSettingsDialog
+import com.fieldbook.tracker.utilities.camera.CameraSettingsState
 import org.threeten.bp.OffsetDateTime
 import java.io.File
 import java.util.concurrent.ExecutorService
@@ -46,6 +52,10 @@ open class PhotoTraitLayout : CameraTrait {
 
     private var supportedResolutions: List<Size> = listOf()
 
+    private var cameraCapabilities: CameraCapabilities = CameraCapabilities.NONE
+
+    protected var boundCamera: Camera? = null
+
     protected var previewHolder: ImageAdapter.PreviewViewHolder? = null
     private var isCameraActive = false
 
@@ -58,6 +68,16 @@ open class PhotoTraitLayout : CameraTrait {
     )
 
     override fun type() = type
+
+    /**
+     * Whether this trait may capture RAW (DNG) files alongside JPEGs.
+     */
+    protected open fun supportsRawCapture() = true
+
+    /**
+     * The advanced camera controls requested by the current trait.
+     */
+    protected open fun controlSettings() = CameraControlSettings.from(currentTrait, supportsRawCapture())
 
     override fun init(act: Activity) {
         super.init(act)
@@ -131,9 +151,11 @@ open class PhotoTraitLayout : CameraTrait {
     @OptIn(ExperimentalCamera2Interop::class)
     private fun bindCameraForInformation() {
 
-        controller.getCameraXFacade().bindIdentity({ _, sizes ->
+        controller.getCameraXFacade().bindIdentity({ camera, sizes ->
 
             supportedResolutions = sizes
+
+            cameraCapabilities = CameraCapabilities.from(camera.cameraInfo)
 
             settingsButton?.isEnabled = true
 
@@ -151,7 +173,13 @@ open class PhotoTraitLayout : CameraTrait {
 
             val resolution = getSupportedResolutionByPreferences()
 
-            controller.getCameraXFacade().bindFrontCapture(resolution) { _, executor, capture ->
+            controller.getCameraXFacade().bindFrontCapture(resolution, controlSettings()) { camera, executor, capture ->
+
+                boundCamera = camera
+
+                bindZoom(camera, null)
+
+                notifyIfRawUnavailable()
 
                 setupCaptureUi(executor, capture)
             }
@@ -172,14 +200,72 @@ open class PhotoTraitLayout : CameraTrait {
             val outputFileOptions = ImageCapture.OutputFileOptions.Builder(file).build()
 
             executorService?.let {
-                capture.takePicture(outputFileOptions, executorService,
-                    object : ImageCapture.OnImageSavedCallback {
-                        override fun onError(error: ImageCaptureException) {}
-                        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                            makeImage(currentTrait)
-                        }
-                    })
+
+                if (controller.getCameraXFacade().isRawCaptureActive) {
+
+                    val rawFile = File(context.cacheDir, TEMPORARY_RAW_NAME).apply { delete() }
+
+                    val rawOutputFileOptions = ImageCapture.OutputFileOptions.Builder(rawFile).build()
+
+                    capture.takePicture(rawOutputFileOptions, outputFileOptions, executorService,
+                        DualCaptureCallback { makeImage(currentTrait) })
+
+                } else {
+
+                    capture.takePicture(outputFileOptions, executorService,
+                        object : ImageCapture.OnImageSavedCallback {
+                            override fun onError(error: ImageCaptureException) {}
+                            override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                                makeImage(currentTrait)
+                            }
+                        })
+                }
             }
+        }
+    }
+
+    private fun notifyIfRawUnavailable() {
+
+        if (controller.getCameraXFacade().rawCaptureFellBack) {
+
+            Utils.makeToast(context, context.getString(R.string.camera_raw_unavailable))
+        }
+    }
+
+    /**
+     * Applies the trait's saved zoom stop to [camera], with [selector] (if any) to change it.
+     */
+    protected fun bindZoom(camera: Camera, selector: ZoomSelector?) {
+
+        val trait = currentTrait
+
+        // the expanded camera saves zoom on its own copy of the trait, so pick up the latest value
+        database.getTraitById(trait.id)?.let { trait.cameraZoomRatio = it.cameraZoomRatio }
+
+        controller.getCameraXFacade().zoom.bind(camera, trait, selector)
+    }
+
+    /**
+     * Long-pressing the preview re-meters exposure and white balance, then locks them again.
+     */
+    protected fun setupRemeterGesture(previewView: PreviewView?) {
+
+        if (!controlSettings().needsLock) {
+            previewView?.setOnLongClickListener(null)
+            return
+        }
+
+        previewView?.setOnLongClickListener {
+
+            boundCamera?.let { camera ->
+
+                controller.getCameraXFacade().remeterAndLock(camera, null, controlSettings()) {
+
+                    Utils.makeToast(context, context.getString(R.string.camera_exposure_relocked))
+                }
+            }
+
+            true
         }
     }
 
@@ -220,8 +306,17 @@ open class PhotoTraitLayout : CameraTrait {
             resolution,
             currentTrait.id,
             null,
-            showCropRegion = true
-        ) { _, executor, capture ->
+            showCropRegion = true,
+            controls = controlSettings()
+        ) { camera, executor, capture ->
+
+            boundCamera = camera
+
+            bindZoom(camera, previewHolder?.zoomChip?.let(::ZoomChip))
+
+            notifyIfRawUnavailable()
+
+            setupRemeterGesture(previewHolder?.previewView)
 
             setupCaptureUi( executor, capture)
         }
@@ -254,16 +349,24 @@ open class PhotoTraitLayout : CameraTrait {
 
     override fun showSettings() {
 
-        val settingsView = CameraTraitSettingsView(context, supportedResolutions)
-        AlertDialog.Builder(context, R.style.AppAlertDialog)
-            .setTitle(R.string.trait_system_photo_settings_title)
-            .setPositiveButton(R.string.dialog_ok) { dialog, _ ->
-                settingsView.commitChanges()
-                onSettingsChanged()
-                dialog.dismiss()
-            }
-            .setView(settingsView)
-            .show()
+        val trait = currentTrait
+
+        val initial = CameraSettingsState.from(
+            prefs,
+            trait,
+            supportedResolutions,
+            cameraCapabilities,
+            supportsRawCapture()
+        )
+
+        val onCropClick = if (trait?.cropImage == true) {
+            { (context as CollectActivity).requestAndCropImage(true, false) }
+        } else null
+
+        showCameraSettingsDialog(context as Activity, initial, onCropClick) { state ->
+            state.commit(prefs, trait, initial)
+            onSettingsChanged()
+        }
     }
 
     override fun onSettingsChanged() {
@@ -345,7 +448,16 @@ open class PhotoTraitLayout : CameraTrait {
             return false
         }
 
-        file.inputStream().use { stream ->
+        // claim the DNG synchronously so a quick next shot can't overwrite it
+        val rawFile = File(context.cacheDir, TEMPORARY_RAW_NAME)
+        val claimedRaw = if (controlSettings().saveRaw && rawFile.exists() && rawFile.length() > 0L) {
+            File(context.cacheDir, "raw_${System.nanoTime()}.dng").takeIf { rawFile.renameTo(it) }
+        } else {
+            rawFile.delete()
+            null
+        }
+
+        val uri = file.inputStream().use { stream ->
 
             val data = stream.readBytes()
 
@@ -357,6 +469,8 @@ open class PhotoTraitLayout : CameraTrait {
                 SaveState.SINGLE_SHOT
             )
         }
+
+        claimedRaw?.let { saveCompanionRaw(uri, currentTrait, it) }
 
         return true
     }
@@ -371,6 +485,9 @@ open class PhotoTraitLayout : CameraTrait {
 
         file.delete()
         file.createNewFile()
+
+        // the system camera never writes a DNG, so make sure a stale one isn't picked up
+        File(context.cacheDir, TEMPORARY_RAW_NAME).delete()
 
         val uri =
             GenericFileProvider.getUriForFile(context, GenericFileProvider.AUTHORITY, file)
@@ -395,6 +512,7 @@ open class PhotoTraitLayout : CameraTrait {
 
     protected open fun launchCameraX(mode: String = CameraActivity.MODE_PHOTO) {
         controller.getCameraXFacade().unbind()
+        File(context.cacheDir, TEMPORARY_RAW_NAME).delete()
         isCameraActive = false
         val intent = Intent(context, CameraActivity::class.java)
         //set current trait id to set crop region

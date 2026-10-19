@@ -117,6 +117,30 @@ class TraitObject {
         get() = attributeValues.getString(TraitAttributes.DURATION)
         set(value) = attributeValues.setValue(TraitAttributes.DURATION, value)
 
+    var cameraExposureMode: String
+        get() = attributeValues.getString(TraitAttributes.CAMERA_EXPOSURE_MODE)
+        set(value) = attributeValues.setValue(TraitAttributes.CAMERA_EXPOSURE_MODE, value)
+
+    var cameraIso: String
+        get() = attributeValues.getString(TraitAttributes.CAMERA_ISO)
+        set(value) = attributeValues.setValue(TraitAttributes.CAMERA_ISO, value)
+
+    var cameraExposureTimeNs: String
+        get() = attributeValues.getString(TraitAttributes.CAMERA_EXPOSURE_TIME)
+        set(value) = attributeValues.setValue(TraitAttributes.CAMERA_EXPOSURE_TIME, value)
+
+    var cameraAwbLock: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.CAMERA_AWB_LOCK)
+        set(value) = attributeValues.setValue(TraitAttributes.CAMERA_AWB_LOCK, value.toString())
+
+    var cameraSaveRaw: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.CAMERA_SAVE_RAW)
+        set(value) = attributeValues.setValue(TraitAttributes.CAMERA_SAVE_RAW, value.toString())
+
+    var cameraZoomRatio: String
+        get() = attributeValues.getString(TraitAttributes.CAMERA_ZOOM_RATIO)
+        set(value) = attributeValues.setValue(TraitAttributes.CAMERA_ZOOM_RATIO, value)
+
     companion object {
 
         fun fromJson(json: TraitJson, maxPosition: Int, originalFileName: String) = TraitObject().apply {
@@ -204,7 +228,13 @@ class TraitObject {
                 attachVideo == that.attachVideo &&
                 allowOther == that.allowOther &&
                 sensitivity == that.sensitivity &&
-                duration == that.duration
+                duration == that.duration &&
+                cameraExposureMode == that.cameraExposureMode &&
+                cameraIso == that.cameraIso &&
+                cameraExposureTimeNs == that.cameraExposureTimeNs &&
+                cameraAwbLock == that.cameraAwbLock &&
+                cameraSaveRaw == that.cameraSaveRaw &&
+                cameraZoomRatio == that.cameraZoomRatio
     }
 
     override fun hashCode(): Int {
@@ -215,7 +245,8 @@ class TraitObject {
             saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms,
             maxDecimalPlaces, mathSymbolsEnabled, allowMulticat, repeatedMeasures,
             autoSwitchPlot, unit, invalidValues, attachAudio, attachPhoto, attachVideo,
-            allowOther, duration, sensitivity
+            allowOther, duration, sensitivity, cameraExposureMode, cameraIso,
+            cameraExposureTimeNs, cameraAwbLock, cameraSaveRaw, cameraZoomRatio
         )
     }
 
@@ -256,6 +287,12 @@ class TraitObject {
         t.allowOther = this.allowOther
         t.sensitivity = this.sensitivity
         t.duration = this.duration
+        t.cameraExposureMode = this.cameraExposureMode
+        t.cameraIso = this.cameraIso
+        t.cameraExposureTimeNs = this.cameraExposureTimeNs
+        t.cameraAwbLock = this.cameraAwbLock
+        t.cameraSaveRaw = this.cameraSaveRaw
+        t.cameraZoomRatio = this.cameraZoomRatio
 
         return t
     }

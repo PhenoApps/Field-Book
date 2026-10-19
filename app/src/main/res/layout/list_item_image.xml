@@ -6,6 +6,7 @@
     android:layout_margin="4dp"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:padding="1dp"
     android:background="@drawable/cell">
 
     <TextView
@@ -24,7 +25,7 @@
         android:layout_width="@dimen/camera_preview_portrait_width"
         android:layout_height="@dimen/camera_preview_portrait_height"
         android:id="@+id/list_item_image_cv"
-        app:cardCornerRadius="8dp"
+        app:cardCornerRadius="4dp"
         app:cardElevation="0dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -37,8 +38,7 @@
             android:layout_height="match_parent">
 
             <ImageView
-                android:adjustViewBounds="true"
-                android:scaleType="fitCenter"
+                android:scaleType="centerCrop"
                 tools:src="@raw/chip"
                 android:id="@+id/list_item_image_iv"
                 android:layout_width="match_parent"
