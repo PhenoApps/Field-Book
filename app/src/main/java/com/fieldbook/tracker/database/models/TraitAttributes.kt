@@ -162,12 +162,18 @@ object TraitAttributes {
         defaultValue = "false"
     )
 
+    val CAMERA_ZOOM_RATIO = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.CAMERA_ZOOM_RATIO,
+        valueType = ValueType.STRING,
+        defaultValue = ""
+    )
+
     val ALL = listOf(MIN_VALUE, MAX_VALUE, CATEGORIES, CLOSE_KEYBOARD, CROP_IMAGE, SAVE_IMAGE,
         USE_DAY_OF_YEAR, CATEGORY_DISPLAY_VALUE, RESOURCE_FILE,
         DECIMAL_PLACES_REQUIRED, MATH_SYMBOLS_ENABLED, ALLOW_MULTICAT, REPEATED_MEASURES,
         AUTO_SWITCH_PLOT, UNIT, INVALID_VALUES, MULTI_MEDIA_AUDIO, MULTI_MEDIA_VIDEO, MULTI_MEDIA_PHOTO,
         ALLOW_OTHER, CANOPY_SENSITIVITY, DURATION, CAMERA_EXPOSURE_MODE, CAMERA_ISO,
-        CAMERA_EXPOSURE_TIME, CAMERA_AWB_LOCK, CAMERA_SAVE_RAW
+        CAMERA_EXPOSURE_TIME, CAMERA_AWB_LOCK, CAMERA_SAVE_RAW, CAMERA_ZOOM_RATIO
     )
 
     fun byKey(key: String): AttributeDefinition? = ALL.find { it.key == key }

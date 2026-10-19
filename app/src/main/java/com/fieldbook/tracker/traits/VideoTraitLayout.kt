@@ -18,6 +18,7 @@ import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.camera.CameraControlSettings
+import com.fieldbook.tracker.utilities.camera.ZoomChip
 import com.fieldbook.tracker.views.VideoCameraSettingsView
 import org.threeten.bp.OffsetDateTime
 import java.io.File
@@ -483,8 +484,9 @@ class VideoTraitLayout : PhotoTraitLayout {
             currentTrait.id,
             analysis = null,
             showCropRegion = true
-        ) { _, _, videoCapture ->
+        ) { camera, _, videoCapture ->
             videoCaptureInstance = videoCapture
+            bindZoom(camera, previewHolder?.zoomChip?.let(::ZoomChip))
         }
     }
 

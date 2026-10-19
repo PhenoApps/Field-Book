@@ -47,6 +47,7 @@ import com.fieldbook.tracker.utilities.InsetHandler
 import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.utilities.camera.CameraControlSettings
 import com.fieldbook.tracker.utilities.camera.DualCaptureCallback
+import com.fieldbook.tracker.utilities.camera.ZoomBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -84,6 +85,7 @@ class CameraActivity : ThemedActivity() {
     private lateinit var viewMediaButton: FloatingActionButton
     private lateinit var switchCameraButton: FloatingActionButton
     private lateinit var mediaCompose: ComposeView
+    private lateinit var zoomBar: ZoomBar
 
     private var supportedResolutions: List<Size> = listOf()
 
@@ -101,7 +103,7 @@ class CameraActivity : ThemedActivity() {
     // flag set when CameraActivity was launched specifically from a photo-trait capture flow
     private var launchedForPhotoTrait = false
 
-    // trait that launched this activity, used for its advanced camera controls
+    // trait that launched this activity, used for its advanced camera controls and zoom
     private var trait: TraitObject? = null
 
     // advanced camera controls only apply to photo captures for a photo-type trait
@@ -187,6 +189,7 @@ class CameraActivity : ThemedActivity() {
         captureButton = findViewById(R.id.camerax_capture_btn)
         viewMediaButton = findViewById(R.id.camerax_view_btn)
         switchCameraButton = findViewById(R.id.camerax_switch_btn)
+        zoomBar = ZoomBar(findViewById(R.id.camerax_zoom_bar))
 
         // Compose host for media toggle
         mediaCompose = findViewById(R.id.media_mode_compose)
@@ -266,6 +269,13 @@ class CameraActivity : ThemedActivity() {
                 }
 
             } else {
+
+                // the crop region should be defined at the trait's zoom, so load it for the zoom pill
+                if (currentMode == MODE_CROP) {
+                    trait = traitId?.takeIf { it != "-1" }?.let { id ->
+                        database.getTraitById(id)
+                    }
+                }
 
                 mediaCompose.visibility = View.GONE
                 ViewCompat.requestApplyInsets(mediaCompose)
@@ -814,6 +824,9 @@ class CameraActivity : ThemedActivity() {
 
                         imageCapture = capture
 
+                        // trait is null in barcode mode, so zoom there isn't saved
+                        cameraXFacade.zoom.bind(camera, trait, zoomBar)
+
                         if (cameraXFacade.rawCaptureFellBack) {
                             Utils.makeToast(this, getString(R.string.camera_raw_unavailable))
                         }
@@ -897,6 +910,7 @@ class CameraActivity : ThemedActivity() {
                         // facade provides the VideoCapture configured with the correct Recorder
                         boundCamera = camera
                         videoCapture = vc
+                        cameraXFacade.zoom.bind(camera, trait, zoomBar)
                         previewView.visibility = View.VISIBLE
                         barcodeOverlay.visibility = View.VISIBLE
                     }

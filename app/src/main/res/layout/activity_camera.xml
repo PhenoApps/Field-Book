@@ -45,6 +45,21 @@
         app:layout_constraintEnd_toEndOf="@id/act_camera_pv"
         android:visibility="visible" />
 
+    <!-- Zoom pill (above capture), one segment per zoom stop; filled in by ZoomBar -->
+    <LinearLayout
+        android:id="@+id/camerax_zoom_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="2dp"
+        android:background="@drawable/camera_zoom_chip_background"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/camerax_capture_btn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- View Media button (left of capture) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         style="@style/FloatingActionButtonStyle.SmallTraitButtons"

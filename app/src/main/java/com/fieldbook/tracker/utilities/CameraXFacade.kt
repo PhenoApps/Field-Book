@@ -45,6 +45,7 @@ import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.camera.CameraCapabilities
 import com.fieldbook.tracker.utilities.camera.CameraControlSettings
+import com.fieldbook.tracker.utilities.camera.CameraZoomController
 import com.fieldbook.tracker.utilities.camera.ExposureMode
 import com.fieldbook.tracker.utilities.camera.LockedCameraValues
 import com.fieldbook.tracker.utilities.camera.LockedCameraValuesStore
@@ -93,8 +94,12 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
         }, ContextCompat.getMainExecutor(context))
     }
 
+    /** Applies the trait's zoom stop to the bound camera; released on every [unbind]. */
+    val zoom by lazy { CameraZoomController(context as LifecycleOwner) }
+
     fun unbind() {
         monitor?.cancel()
+        zoom.release()
         cameraXInstance.get().unbindAll()
     }
 

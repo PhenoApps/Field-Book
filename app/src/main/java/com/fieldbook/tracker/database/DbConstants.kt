@@ -89,4 +89,5 @@ object ObservationVariableAttributeDetailsView {
     const val CAMERA_EXPOSURE_TIME = "cameraExposureTimeNs"
     const val CAMERA_AWB_LOCK = "cameraAwbLock"
     const val CAMERA_SAVE_RAW = "cameraSaveRaw"
+    const val CAMERA_ZOOM_RATIO = "cameraZoomRatio"
 }

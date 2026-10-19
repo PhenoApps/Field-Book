@@ -29,6 +29,8 @@ import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.utilities.camera.CameraCapabilities
 import com.fieldbook.tracker.utilities.camera.CameraControlSettings
 import com.fieldbook.tracker.utilities.camera.DualCaptureCallback
+import com.fieldbook.tracker.utilities.camera.ZoomChip
+import com.fieldbook.tracker.utilities.camera.ZoomSelector
 import com.fieldbook.tracker.ui.camera.showCameraSettingsDialog
 import com.fieldbook.tracker.utilities.camera.CameraSettingsState
 import org.threeten.bp.OffsetDateTime
@@ -175,6 +177,8 @@ open class PhotoTraitLayout : CameraTrait {
 
                 boundCamera = camera
 
+                bindZoom(camera, null)
+
                 notifyIfRawUnavailable()
 
                 setupCaptureUi(executor, capture)
@@ -226,6 +230,19 @@ open class PhotoTraitLayout : CameraTrait {
 
             Utils.makeToast(context, context.getString(R.string.camera_raw_unavailable))
         }
+    }
+
+    /**
+     * Applies the trait's saved zoom stop to [camera], with [selector] (if any) to change it.
+     */
+    protected fun bindZoom(camera: Camera, selector: ZoomSelector?) {
+
+        val trait = currentTrait
+
+        // the expanded camera saves zoom on its own copy of the trait, so pick up the latest value
+        database.getTraitById(trait.id)?.let { trait.cameraZoomRatio = it.cameraZoomRatio }
+
+        controller.getCameraXFacade().zoom.bind(camera, trait, selector)
     }
 
     /**
@@ -294,6 +311,8 @@ open class PhotoTraitLayout : CameraTrait {
         ) { camera, executor, capture ->
 
             boundCamera = camera
+
+            bindZoom(camera, previewHolder?.zoomChip?.let(::ZoomChip))
 
             notifyIfRawUnavailable()
 

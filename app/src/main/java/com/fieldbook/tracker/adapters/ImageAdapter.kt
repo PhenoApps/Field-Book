@@ -313,6 +313,8 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
 
         val previewView: PreviewView = view.findViewById(R.id.trait_camera_pv)
         val embiggenButton: ImageButton = view.findViewById(R.id.trait_camera_expand_btn)
+        // visibility is managed by CameraZoomController once a camera is bound
+        val zoomChip: TextView = view.findViewById(R.id.trait_camera_zoom_chip)
 
         override fun bind(model: Model) {
 

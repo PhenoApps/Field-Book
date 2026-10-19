@@ -32,6 +32,26 @@
                 android:scaleType="fitCenter"
                 app:implementationMode="compatible"/>
 
+            <!-- cycles through the camera's zoom stops; shown once a camera is bound -->
+            <TextView
+                android:id="@+id/trait_camera_zoom_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="8dp"
+                android:minWidth="48dp"
+                android:minHeight="32dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:gravity="center"
+                android:background="@drawable/camera_zoom_chip_background"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:text="1x"
+                tools:visibility="visible" />
+
         </FrameLayout>
 
     </androidx.cardview.widget.CardView>

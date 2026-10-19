@@ -70,6 +70,17 @@ Options that the device's camera doesn't support are hidden.
   The `.jpg` is still the recorded observation, and the `.dng` is included in media exports and deleted along with its photo.
   DNG files are large, often 10 to 25 MB each.
 
+### Zoom
+
+When the Default camera is selected, a zoom chip such as `1x` appears at the bottom of the preview, and tapping it moves to the next zoom level.
+The expanded camera shows every zoom level in a bar above the shutter, with the current level highlighted, and tapping a level selects it.
+The levels offered depend on the device's lenses, for example `0.7x`, `1x`, and `2x`, and the zoom controls are hidden on cameras with only one level.
+Levels below `1x` use the ultrawide lens, and telephoto lenses are offered at their own magnification.
+The zoom level is saved for the current trait, so every photo for the trait has the same framing, and it is included when the trait is exported and imported.
+On another device, or after switching between the front and back cameras, the closest available level is used.
+Set the crop region at the zoom level the trait will use, because the crop is applied to the zoomed photo.
+Digital zoom does not crop `.dng` files, which always contain the full image from the lens in use.
+
 ## External devices
 
 Capturing photos using external cameras requires initial connection setup using the <img class="icon" src="_static/icons/formats/connection.png"> button.

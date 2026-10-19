@@ -137,6 +137,10 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.CAMERA_SAVE_RAW)
         set(value) = attributeValues.setValue(TraitAttributes.CAMERA_SAVE_RAW, value.toString())
 
+    var cameraZoomRatio: String
+        get() = attributeValues.getString(TraitAttributes.CAMERA_ZOOM_RATIO)
+        set(value) = attributeValues.setValue(TraitAttributes.CAMERA_ZOOM_RATIO, value)
+
     companion object {
 
         fun fromJson(json: TraitJson, maxPosition: Int, originalFileName: String) = TraitObject().apply {
@@ -229,7 +233,8 @@ class TraitObject {
                 cameraIso == that.cameraIso &&
                 cameraExposureTimeNs == that.cameraExposureTimeNs &&
                 cameraAwbLock == that.cameraAwbLock &&
-                cameraSaveRaw == that.cameraSaveRaw
+                cameraSaveRaw == that.cameraSaveRaw &&
+                cameraZoomRatio == that.cameraZoomRatio
     }
 
     override fun hashCode(): Int {
@@ -241,7 +246,7 @@ class TraitObject {
             maxDecimalPlaces, mathSymbolsEnabled, allowMulticat, repeatedMeasures,
             autoSwitchPlot, unit, invalidValues, attachAudio, attachPhoto, attachVideo,
             allowOther, duration, sensitivity, cameraExposureMode, cameraIso,
-            cameraExposureTimeNs, cameraAwbLock, cameraSaveRaw
+            cameraExposureTimeNs, cameraAwbLock, cameraSaveRaw, cameraZoomRatio
         )
     }
 
@@ -287,6 +292,7 @@ class TraitObject {
         t.cameraExposureTimeNs = this.cameraExposureTimeNs
         t.cameraAwbLock = this.cameraAwbLock
         t.cameraSaveRaw = this.cameraSaveRaw
+        t.cameraZoomRatio = this.cameraZoomRatio
 
         return t
     }

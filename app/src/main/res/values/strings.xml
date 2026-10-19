@@ -1698,6 +1698,8 @@
     <string name="camera_exposure_relocked">Exposure and white balance re-metered</string>
     <string name="camera_controls_locked">Camera settings locked</string>
     <string name="camera_raw_unavailable">RAW capture is not available with the current camera configuration</string>
+    <string name="camera_zoom_content_description">Zoom %1$s, tap to change</string>
+    <string name="camera_zoom_option_content_description">Zoom %1$s</string>
 
     <!-- usb camera trait -->
     <string name="usb_camera_resolution_options_title">Supported Resolutions</string>
