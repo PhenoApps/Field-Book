@@ -1502,6 +1502,13 @@ public class DataHelper {
         return ObservationDao.Companion.getAllRepeatedValues(studyId, plotId, traitDbId);
     }
 
+    public List<Double> getNumericValuesForTrait(String studyId, String traitDbId, String excludePlotId) {
+
+        open();
+
+        return ObservationDao.Companion.getNumericValuesForTrait(studyId, traitDbId, excludePlotId);
+    }
+
     public java.util.Map<kotlin.Pair<String, String>, ObservationDao.RepeatSummary> getBatchRepeatSummaries(String studyId) {
 
         open();

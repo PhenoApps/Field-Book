@@ -66,6 +66,7 @@ import com.fieldbook.tracker.devices.camera.UsbCameraApi;
 import com.fieldbook.tracker.devices.spectrometers.innospectra.InnoSpectraViewModel;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.dialogs.InvalidValueDialog;
+import com.fieldbook.tracker.dialogs.OutlierValueDialog;
 import com.fieldbook.tracker.dialogs.ObservationMetadataFragment;
 import com.fieldbook.tracker.dialogs.SearchDialog;
 import com.fieldbook.tracker.fragments.CropImageFragment;
@@ -119,6 +120,7 @@ import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.MediaKeyCodeActionHelper;
 import com.fieldbook.tracker.utilities.NixSensorHelper;
+import com.fieldbook.tracker.utilities.OutlierDetector;
 import com.fieldbook.tracker.utilities.SensorHelper;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
@@ -200,6 +202,9 @@ public class CollectActivity extends ThemedActivity
     public static final int REQUEST_VIEW_MEDIA_CODE = 203;
     // pending media values used when we start a crop activity and need to show the confirm dialog
     private final PendingMedia pendingMedia = new PendingMedia();
+
+    // outliers the user chose to keep, so scrolling past them again doesn't re-prompt
+    private final Set<String> acceptedOutliers = new HashSet<>();
 
     private static class PendingMedia {
         String type = null;
@@ -754,6 +759,23 @@ public class CollectActivity extends ThemedActivity
 
         if (validateData(data)) {
 
+            String outlierKey = getOutlierKey(data);
+
+            if (outlierKey != null) {
+
+                new OutlierValueDialog(this).show(
+                        () -> {
+                            acceptedOutliers.add(outlierKey);
+                            onValidNavigation.invoke();
+                        },
+                        () -> {
+                            // do not navigate or delete observation
+                        }
+                );
+
+                return;
+            }
+
             onValidNavigation.invoke();
 
             return;
@@ -774,6 +796,38 @@ public class CollectActivity extends ThemedActivity
             );
 
         }
+    }
+
+    /**
+     * Checks a value that already passed validation against the trait's other values in this field.
+     * @return a key identifying the flagged value, or null when it isn't an outlier, detection is
+     * off, or the user already accepted this value
+     */
+    @Nullable
+    private String getOutlierKey(@Nullable String data) {
+
+        TraitObject currentTrait = traitBox.getCurrentTrait();
+
+        if (currentTrait == null || data == null) return null;
+
+        // the parameter is only offered for numeric traits, but imported trait files can set it on any format
+        if (!currentTrait.getOutlierDetection() || !currentTrait.getFormat().equals("numeric")) return null;
+
+        double value;
+        try {
+            value = Double.parseDouble(data);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+
+        String obsUnit = getObservationUnit();
+        String key = obsUnit + "|" + currentTrait.getId() + "|" + getCollectInputView().getRep() + "|" + data;
+
+        if (acceptedOutliers.contains(key)) return null;
+
+        List<Double> reference = database.getNumericValuesForTrait(getStudyId(), currentTrait.getId(), obsUnit);
+
+        return OutlierDetector.INSTANCE.isOutlier(value, reference) ? key : null;
     }
 
     private void setNaText() {
