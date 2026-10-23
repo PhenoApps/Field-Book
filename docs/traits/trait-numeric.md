@@ -14,6 +14,9 @@ The numeric trait format is used for quantitative traits like height.
 `Allow decimal input` will limit input to a user-defined number of values after the decimal (between 1-10).
 - `Mathematical Symbols` toggles visibility of the mathematical symbol buttons ( **;** , **+** , **-** and **\*** ) in the trait layout.
 - `Allow Invalid Value` will prompt users with an option to save data that violate any set restrictions when collecting data.
+- `Outlier Detection` will prompt users to confirm a value that is unusual compared to the other observations of the trait in the field.
+Checking starts once five other entries have values.
+Only extreme values are flagged at first, and the check becomes stricter as more data is collected.
 - `Details` text is displayed under the trait name on the Collect screen.
 - `Unit` text can be set to denote the unit for the observation.
 - `Repeated Measures` toggles repeated measure for the trait.

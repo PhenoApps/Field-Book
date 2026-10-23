@@ -149,6 +149,30 @@ class ObservationDao {
 
             } ?: emptyArray()
 
+        /**
+         * Numeric values of a trait in a study, used as the reference for outlier detection.
+         * Every rep of [excludeObsUnit] is left out so the value being checked can't skew it, and
+         * values that aren't plain numbers (NA, math expressions) are dropped.
+         */
+        fun getNumericValuesForTrait(studyId: String, traitDbId: String, excludeObsUnit: String): List<Double> = withDatabase { db ->
+
+            val query = """
+                SELECT value
+                FROM observations
+                WHERE study_id = ? AND observation_variable_db_id = ? AND observation_unit_id != ?
+            """.trimIndent()
+
+            db.rawQuery(query, arrayOf(studyId, traitDbId, excludeObsUnit)).use { cursor ->
+
+                buildList {
+                    while (cursor.moveToNext()) {
+                        cursor.getString(0)?.toDoubleOrNull()?.takeIf { it.isFinite() }?.let { add(it) }
+                    }
+                }
+            }
+
+        } ?: emptyList()
+
 //        fun getAllFromAYear(startDate: String, endDate: String): Array<ObservationModel> = withDatabase { db ->
 //
 //            db.query(

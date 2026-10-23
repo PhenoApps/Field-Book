@@ -53,6 +53,7 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
                         attributes[AUTO_SWITCH_PLOT]?.let { trait.autoSwitchPlot = it.toBoolean() }
                         attributes[UNIT]?.let { trait.unit = it }
                         attributes[INVALID_VALUES]?.let { trait.invalidValues = it.toBoolean() }
+                        attributes[OUTLIER_DETECTION]?.let { trait.outlierDetection = it.toBoolean() }
                     }
                 }
             }
