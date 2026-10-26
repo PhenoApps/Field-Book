@@ -48,6 +48,7 @@ import com.fieldbook.tracker.utilities.BrapiAccountHelper
 import com.fieldbook.tracker.utilities.SnackbarUtils
 import com.fieldbook.tracker.utilities.TapTargetUtil
 import com.fieldbook.tracker.utilities.Utils
+import com.fieldbook.tracker.utilities.sort.FieldSortSpec
 import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetSequence
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -57,7 +58,6 @@ import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.io.IOException
 import java.util.Locale
-import java.util.StringJoiner
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -832,44 +832,18 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
     }
 
     override fun showSortDialog(field: FieldObject?) {
-        val order = field?.sortColumnsStringArray
-        val sortOrderList = ArrayList<String>()
-
-        if (order != null) {
-            val orderList = order.split(",")
-            if (orderList.isNotEmpty() && orderList.first().isNotEmpty()) {
-                sortOrderList.addAll(orderList)
-            }
-        }
-
-        // initialize: initial items are the current sort order, selectable items are the obs. unit attributes.
-        val dialogFragment = field?.let { field ->
-            FieldSortDialogFragment().newInstance(
-                this,
-                field,
-                sortOrderList.toTypedArray(),
-                db.getAllObservationUnitAttributeNames(field.studyId)
-            )
-        }
-
-        dialogFragment?.show(this.supportFragmentManager, "FieldSortDialogFragment")
-    }
-
-    override fun submitSortList(field: FieldObject?, attributes: Array<String?>?) {
         if (field == null) return
 
-        val joiner = StringJoiner(",")
-        attributes?.filterNotNull()?.forEach { joiner.add(it) }
+        FieldSortDialogFragment.newInstance(field.studyId)
+            .show(supportFragmentManager, FieldSortDialogFragment.TAG)
+    }
 
-        val sortOrder = joiner.toString()
-
+    override fun submitSort(studyId: Int, sortSpec: FieldSortSpec) {
         try {
-            db.updateStudySort(sortOrder, field.studyId)
+            db.updateStudySort(sortSpec, studyId)
 
-            field.sortColumnsStringArray = sortOrder
-
-            if (mPrefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0) == field.studyId) {
-                fieldSwitcher.switchField(field)
+            if (mPrefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0) == studyId) {
+                fieldSwitcher.switchField(db.getFieldObject(studyId))
                 CollectActivity.reloadData = true
             }
 

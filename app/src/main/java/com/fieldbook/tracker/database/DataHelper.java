@@ -47,6 +47,7 @@ import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.ZipUtil;
 import com.fieldbook.tracker.utilities.export.SpectralFileProcessor;
 import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter;
+import com.fieldbook.tracker.utilities.sort.FieldSortSpec;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.threeten.bp.OffsetDateTime;
@@ -1404,6 +1405,36 @@ public class DataHelper {
         open();
 
         StudyDao.Companion.updateStudySort(sortString, studyId);
+    }
+
+    /**
+     * Saves a field's entry sort. The direction now lives in the sort itself, so the legacy per-field preference is removed.
+     */
+    public void updateStudySort(FieldSortSpec sortSpec, int studyId) {
+
+        updateStudySort(sortSpec.encode(), studyId);
+
+        deleteFieldSortOrder(studyId);
+
+        // cached data grid snapshots hold their rows in sort order
+        ObservationChangeTracker.INSTANCE.markChanged();
+    }
+
+    public FieldSortSpec getStudySort(int studyId) {
+
+        open();
+
+        return ObservationUnitPropertyDao.Companion.getSortSpec(context, studyId);
+    }
+
+    /**
+     * Every observation unit of a study in import order, with the value of each attribute in the same order as attributes.
+     */
+    public List<String[]> getObservationUnitAttributeValues(int studyId, List<String> attributes) {
+
+        open();
+
+        return ObservationUnitPropertyDao.Companion.getAttributeValues(studyId, attributes);
     }
 
     public String[] getAllObservationUnitAttributeNames(int studyId) {

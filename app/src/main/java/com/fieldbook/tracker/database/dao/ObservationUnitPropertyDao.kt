@@ -23,6 +23,8 @@ import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.formats.presenters.UriPresenter
 import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
+import com.fieldbook.tracker.utilities.sort.FieldSortSpec
+import com.fieldbook.tracker.utilities.sort.FieldSorter
 
 class ObservationUnitPropertyDao {
 
@@ -116,7 +118,11 @@ class ObservationUnitPropertyDao {
             MatrixCursor(requiredFields).also { cursor ->
                 val placeholders = traits.joinToString(", ") { it.id }
 
-                val unitSelectAttributes = fieldList.joinToString(", ") { attributeName ->
+                //the sort columns are pivoted too, even when they aren't exported, so rows can be sorted by them
+                val sortSpec = getSortSpec(context, db, studyId.toString())
+                val unitAttributes = (fieldList.filterNotNull() + sortSpec.columns).distinct()
+
+                val unitSelectAttributes = unitAttributes.joinToString(", ") { attributeName ->
                     "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
                 }
 
@@ -126,7 +132,6 @@ class ObservationUnitPropertyDao {
                 val varSelectAttributes =
                     arrayOf("observation_variable_name", "observation_variable_field_book_format")
 
-                val sortOrderClause = getSortOrderClause(context, studyId.toString()) ?: ""
                 val query = """
                     SELECT $unitSelectAttributes, ${obsSelectAttributes.joinToString { "obs.`$it` AS `$it`" }}, ${varSelectAttributes.joinToString { "vars.`$it` AS `$it`" }}
                     FROM observations AS obs
@@ -137,13 +142,15 @@ class ObservationUnitPropertyDao {
                     WHERE obs.study_id = $studyId
                       AND vars.internal_id_observation_variable IN ($placeholders)
                     GROUP BY obs.internal_id_observation
-                    $sortOrderClause
                 """.trimIndent()
 
                 Log.d("getExportDbData", "Final Query: $query")
-                val table = db.rawQuery(query, null).toTable()
+                val table = db.rawQuery(query, null).use { it.toTable() }
+                val order = FieldSorter.order(table.size, sortSpec.keys) { row, key ->
+                    table[row][sortSpec.keys[key].column]?.toString()
+                }
                 val attachedMediaUriPresenter = UriPresenter()
-                table.forEach { row ->
+                order.map { table[it] }.forEach { row ->
                     cursor.addRow(fieldList.map { row[it] } + traitRequiredFields.map {
                         when (it) {
                             "trait" -> row["observation_variable_name"]
@@ -261,7 +268,7 @@ class ObservationUnitPropertyDao {
 
             val combinedSelection = listOf(selectAttributes, selectObservations).filter { it.isNotEmpty() }.joinToString(", ")
 
-            val orderByClause = getSortOrderClause(context, studyId.toString())
+            val sortSpec = getSortSpec(context, db, studyId.toString())
             //                SELECT units.internal_id_observation_unit AS id, $combinedSelection
             val query = """
                 SELECT $combinedSelection, observation_variable_field_book_format
@@ -272,34 +279,37 @@ class ObservationUnitPropertyDao {
                 LEFT JOIN observation_variables AS vars ON vars.${ObservationVariable.PK} = obs.${ObservationVariable.FK}
                 WHERE units.study_id = $studyId
                 GROUP BY units.internal_id_observation_unit
-                $orderByClause
+                ORDER BY units.internal_id_observation_unit
             """.trimIndent()
 
             Log.d("getExportTableData", "Executing query: $query")
             val cursor = db.rawQuery(query, null)
 
-            val matrixCursor = MatrixCursor(cursor.columnNames).also {
-                while (cursor.moveToNext()) {
-                    val row = mutableListOf<String?>()
-                    for (i in 0 until cursor.columnCount) {
-                        val columnName = cursor.getColumnName(i)
-                        val value = cursor.getStringOrNull(i)
-                        if (value != null && columnName in traitNames) {
-                            // Process trait values using the processor
-                            // must get obs trait by name here since the table query has multiple traits per row
-                            val trait = ObservationVariableDao.getTraitByName(columnName)
-                            if (trait == null) {
-                                Log.w("getExportTableData", "Trait not found for column: $columnName")
-                                row.add(value)
-                                continue
-                            }
-                            row.add(processor.processValue(value, trait))
-                        } else {
+            val rows = mutableListOf<Array<String?>>()
+            while (cursor.moveToNext()) {
+                val row = mutableListOf<String?>()
+                for (i in 0 until cursor.columnCount) {
+                    val columnName = cursor.getColumnName(i)
+                    val value = cursor.getStringOrNull(i)
+                    if (value != null && columnName in traitNames) {
+                        // Process trait values using the processor
+                        // must get obs trait by name here since the table query has multiple traits per row
+                        val trait = ObservationVariableDao.getTraitByName(columnName)
+                        if (trait == null) {
+                            Log.w("getExportTableData", "Trait not found for column: $columnName")
                             row.add(value)
+                            continue
                         }
+                        row.add(processor.processValue(value, trait))
+                    } else {
+                        row.add(value)
                     }
-                    it.addRow(row.toTypedArray())
                 }
+                rows.add(row.toTypedArray())
+            }
+
+            val matrixCursor = MatrixCursor(cursor.columnNames, rows.size).also { matrix ->
+                sortRows(rows, cursor.columnNames, sortSpec).forEach { matrix.addRow(it) }
             }
 
             cursor.close()
@@ -309,10 +319,10 @@ class ObservationUnitPropertyDao {
         /**
          * Lightweight variant of getExportTableData for use by DataGridActivity only.
          *
-         * Returns the raw SQLite cursor directly, skipping the MatrixCursor copy and the
-         * ValueProcessorFormatAdapter pass (which calls getTraitByName() per cell).
+         * Skips the ValueProcessorFormatAdapter pass (which calls getTraitByName() per cell).
          * This eliminates O(rows × traits) extra DB queries that the export path requires for
          * value formatting, but which the DataGrid doesn't need.
+         * Rows are still copied into a MatrixCursor, since the study's sort is applied in memory.
          *
          * The caller is responsible for closing the returned cursor.
          */
@@ -325,12 +335,11 @@ class ObservationUnitPropertyDao {
             // Use only the requested attributes (unique id + row header + extra headers).
             // Fall back to all attributes only if none were specified (e.g. legacy callers).
             // The study's sort column(s) are also pulled in even if not requested, since the
-            // ORDER BY clause below references them by name and would otherwise fail with
-            // "no such column" when the sort attribute isn't one of the displayed columns.
+            // rows are sorted by their values after the query.
             val baseHeaders: List<String> = if (requiredAttributes.isNotEmpty()) requiredAttributes
                           else ObservationUnitAttributeDao.getAllNames(studyId).toList()
-            val sortColumnNames = getSortColumnNames(db, studyId.toString())
-            val headers: List<String> = (baseHeaders + sortColumnNames).distinct()
+            val sortSpec = getSortSpec(context, db, studyId.toString())
+            val headers: List<String> = (baseHeaders + sortSpec.columns).distinct()
 
             val coreColumns = listOf("primary_id", "secondary_id", "observation_unit_db_id", "geo_coordinates")
 
@@ -351,8 +360,6 @@ class ObservationUnitPropertyDao {
                 .filter { it.isNotEmpty() }
                 .joinToString(", ")
 
-            val orderByClause = getSortOrderClause(context, studyId.toString())
-
             val query = """
                 SELECT $combinedSelection
                 FROM observation_units AS units
@@ -362,10 +369,10 @@ class ObservationUnitPropertyDao {
                 LEFT JOIN observation_variables AS vars ON vars.${ObservationVariable.PK} = obs.${ObservationVariable.FK}
                 WHERE units.study_id = ?
                 GROUP BY units.internal_id_observation_unit
-                $orderByClause
+                ORDER BY units.internal_id_observation_unit
             """.trimIndent()
 
-            db.rawQuery(query, arrayOf(studyId.toString(), studyId.toString()))
+            db.rawQuery(query, arrayOf(studyId.toString(), studyId.toString())).toSortedMatrixCursor(sortSpec)
         }
 
         /**
@@ -465,14 +472,11 @@ class ObservationUnitPropertyDao {
             db.rawQuery(query, null)
         }
 
+        /** The study's observation units in sort order, with an id column and a column for each sort attribute. */
         fun getSortedObservationUnitData(context: Context, studyId: Int): Cursor? = withDatabase { db ->
-            val headers = ObservationUnitAttributeDao.getAllNames(studyId).filter { it != "geo_coordinates" }
+            val sortSpec = getSortSpec(context, db, studyId.toString())
 
-            val selectStatement = headers.joinToString(", ") { col ->
-                "MAX(CASE WHEN attr.observation_unit_attribute_name = \"$col\" THEN vals.observation_unit_value_name ELSE NULL END) AS \"$col\""
-            }
-
-            val orderByClause = getSortOrderClause(context, studyId.toString())
+            val selectStatement = selectAttributeColumns(sortSpec.columns.filter { it != "geo_coordinates" })
 
             val query = """
                 SELECT ${if (selectStatement.isNotEmpty()) "$selectStatement, " else ""} units.internal_id_observation_unit AS id, units.geo_coordinates
@@ -481,34 +485,90 @@ class ObservationUnitPropertyDao {
                 LEFT JOIN ${ObservationUnitAttribute.tableName} AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
                 WHERE units.study_id = $studyId
                 GROUP BY units.internal_id_observation_unit
-                $orderByClause
+                ORDER BY units.internal_id_observation_unit
             """.trimIndent()
 
             Log.d("getSortedObsUnitData", "Executing dynamic query: $query")
 
-            db.rawQuery(query, null)
+            db.rawQuery(query, null).toSortedMatrixCursor(sortSpec)
         }
 
-        /** The study's configured sort column name(s), e.g. from a "study_sort_name" of "Plot,Rep". */
-        private fun getSortColumnNames(db: SQLiteDatabase, studyId: String): List<String> {
+        /**
+         * Every observation unit of a study in import order, with the value of each of [attributes] in the same order.
+         * Used to preview a sort before it is saved.
+         */
+        fun getAttributeValues(studyId: Int, attributes: List<String>): List<Array<String?>> = withDatabase { db ->
+
+            if (attributes.isEmpty()) return@withDatabase emptyList()
+
+            val query = """
+                SELECT ${selectAttributeColumns(attributes)}
+                FROM ${ObservationUnit.tableName} AS units
+                LEFT JOIN ${ObservationUnitValue.tableName} AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
+                LEFT JOIN ${ObservationUnitAttribute.tableName} AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
+                WHERE units.study_id = ?
+                GROUP BY units.internal_id_observation_unit
+                ORDER BY units.internal_id_observation_unit
+            """.trimIndent()
+
+            db.rawQuery(query, arrayOf(studyId.toString())).use { cursor ->
+                val rows = ArrayList<Array<String?>>(cursor.count)
+                while (cursor.moveToNext()) {
+                    rows.add(Array(attributes.size) { cursor.getStringOrNull(it) })
+                }
+                rows
+            }
+        } ?: emptyList()
+
+        fun getSortSpec(context: Context, studyId: Int): FieldSortSpec = withDatabase { db ->
+            getSortSpec(context, db, studyId.toString())
+        } ?: FieldSortSpec()
+
+        /**
+         * The study's sort, from study_sort_name.
+         * A legacy comma separated column list takes its direction from the per-field preference it was saved with.
+         */
+        private fun getSortSpec(context: Context, db: SQLiteDatabase, studyId: String): FieldSortSpec {
             val sortName = db.query(
                 Study.tableName,
                 select = arrayOf("study_sort_name"),
                 where = "${Study.PK} = ?",
                 whereArgs = arrayOf(studyId)
-            ).toFirst()["study_sort_name"]?.toString()
+            ).use { it.toFirst()["study_sort_name"]?.toString() }
 
-            return if (!sortName.isNullOrEmpty() && sortName != "null") sortName.split(',') else emptyList()
+            val legacyAscending = PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean("${GeneralKeys.SORT_ORDER}.$studyId", true)
+
+            return FieldSortSpec.parse(sortName, legacyAscending)
         }
 
-        private fun getSortOrderClause(context: Context, studyId: String): String? = withDatabase { db ->
-            val sortOrder = if (PreferenceManager.getDefaultSharedPreferences(context)
-                    .getBoolean("${GeneralKeys.SORT_ORDER}.$studyId", true)) "ASC" else "DESC"
+        /** Pivots each attribute into a column of the same name, for queries joining units to vals and attr. */
+        private fun selectAttributeColumns(attributes: List<String>) = attributes.joinToString(", ") { name ->
+            val literal = name.replace("'", "''")
+            val alias = name.replace("\"", "\"\"")
+            "MAX(CASE WHEN attr.observation_unit_attribute_name = '$literal' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$alias\""
+        }
 
-            val sortCols = getSortColumnNames(db, studyId)
-                .joinToString(",") { col -> "cast(`$col` as integer), `$col`" }
+        /** Reorders [rows] by [sortSpec], reading each key from the column of the same name. Keys without a column are skipped. */
+        private fun sortRows(rows: List<Array<String?>>, columns: Array<String>, sortSpec: FieldSortSpec): List<Array<String?>> {
+            val keys = sortSpec.keys.filter { it.column in columns }
+            val keyColumns = keys.map { columns.indexOf(it.column) }
+            return FieldSorter.order(rows.size, keys) { row, key -> rows[row][keyColumns[key]] }.map { rows[it] }
+        }
 
-            if (sortCols.isNotEmpty()) "ORDER BY $sortCols COLLATE NOCASE $sortOrder" else ""
+        /**
+         * Copies this cursor into a MatrixCursor in [sortSpec] order and closes it.
+         * Rows are read sequentially, since jumping around a large SQLite cursor re-runs the query for each window it loads.
+         */
+        private fun Cursor.toSortedMatrixCursor(sortSpec: FieldSortSpec): MatrixCursor = use { cursor ->
+            val columns = cursor.columnNames
+            val rows = ArrayList<Array<String?>>(cursor.count)
+            while (cursor.moveToNext()) {
+                rows.add(Array(columns.size) { cursor.getStringOrNull(it) })
+            }
+            MatrixCursor(columns, rows.size).also { matrix ->
+                sortRows(rows, columns, sortSpec).forEach { matrix.addRow(it) }
+            }
         }
     }
 }
