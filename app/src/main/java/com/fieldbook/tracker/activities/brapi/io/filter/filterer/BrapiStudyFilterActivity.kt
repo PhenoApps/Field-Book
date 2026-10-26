@@ -90,7 +90,11 @@ class BrapiStudyFilterActivity(
     override fun BrapiCacheModel.filterByPreferences(): BrapiCacheModel {
 
         val programDbIds = getIds("${defaultRootFilterKey}${BrapiProgramFilterActivity.FILTER_NAME}")
-        val trialDbIds = getModels(BrapiTrialsFilterActivity.FILTER_NAME).filter { it.checked }.map { it.id }
+        //saved under this screen's root like the other filters, but when choosing studies for the trait screen
+        //the trait screen's trial filter is used, getModels prefixes its root
+        val trialFilterKey = if (isFilterMode) BrapiTrialsFilterActivity.FILTER_NAME
+            else "${defaultRootFilterKey}${BrapiTrialsFilterActivity.FILTER_NAME}"
+        val trialDbIds = getModels(trialFilterKey).filter { it.checked }.map { it.id }
         val seasonDbIds = getIds("${defaultRootFilterKey}${BrapiSeasonsFilterActivity.FILTER_NAME}")
         val commonCropNames = getIds("${defaultRootFilterKey}${BrapiCropsFilterActivity.FILTER_NAME}")
         val listDbIds = getIds("${defaultRootFilterKey}${BrapiStudyListsFilterActivity.FILTER_NAME}")
