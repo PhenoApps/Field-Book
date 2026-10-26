@@ -218,6 +218,15 @@ open class ThemedActivity: AppCompatActivity() {
     }
 
     /**
+     * Keeps the screen on during long downloads so the device doesn't sleep and drop the connection.
+     * Window flag only, so no wake lock permission is needed, and it's cleared when the activity finishes.
+     */
+    protected fun setKeepScreenOn(keepOn: Boolean) {
+        if (keepOn) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }
+
+    /**
      * Register this callback in activities where you would have called super.onBackPressed()
      * Do not register in activities which already have custom OnBackPressedCallback eg. Config, CollectActivity
      */

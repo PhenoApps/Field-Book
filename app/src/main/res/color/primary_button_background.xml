@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- fill for full width primary MaterialButtons, faded while disabled -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:alpha="0.38" android:color="?attr/fb_color_primary" android:state_enabled="false" />
+    <item android:color="?attr/fb_color_primary" />
+</selector>

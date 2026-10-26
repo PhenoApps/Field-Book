@@ -2,8 +2,9 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!-- keep in step with BrAPIService.DEFAULT_PAGE_SIZE -->
     <com.fieldbook.tracker.preferences.BetterEditTextPreference
-        android:defaultValue="50"
+        android:defaultValue="250"
         android:icon="@drawable/ic_pref_brapi_pagination"
         android:inputType="number"
         android:key="BRAPI_PAGE_SIZE"
@@ -56,5 +57,15 @@
         android:key="BRAPI_CACHE_INVALIDATE_INTERVAL"
         android:summary="@string/preferences_brapi_cache_invalidate_summary"
         android:title="@string/preferences_brapi_cache_invalidate_title" />
+
+    <ListPreference
+        android:defaultValue="ask"
+        android:dialogTitle="@string/preferences_brapi_import_observations_dialog_title"
+        android:entries="@array/pref_brapi_import_observations_entries"
+        android:entryValues="@array/pref_brapi_import_observations_values"
+        android:icon="@drawable/download"
+        android:key="BRAPI_IMPORT_OBSERVATIONS"
+        android:summary="@string/preferences_brapi_import_observations_summary"
+        android:title="@string/preferences_brapi_import_observations_title" />
 
 </PreferenceScreen>

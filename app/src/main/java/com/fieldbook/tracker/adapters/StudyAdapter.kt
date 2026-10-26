@@ -1,9 +1,13 @@
 package com.fieldbook.tracker.adapters
 
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
+import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.CheckBox
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.DiffUtil
@@ -11,11 +15,10 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.google.android.material.chip.Chip
-import org.brapi.v2.model.germ.BrAPIGermplasm
-import org.brapi.v2.model.pheno.BrAPIObservationUnit
-import org.brapi.v2.model.pheno.BrAPIObservationVariable
+import com.google.android.material.progressindicator.CircularProgressIndicator
 
 /**
+ * One card per study being imported, listing the study's importable observation levels as checkboxes.
  * Reference:
  * https://developer.android.com/guide/topics/ui/layout/recyclerview
  */
@@ -23,16 +26,41 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
     ListAdapter<StudyAdapter.Model, StudyAdapter.ViewHolder>(DiffCallback()) {
 
     interface StudyLoader {
-        fun getObservationVariables(id: String, position: Int): HashSet<BrAPIObservationVariable>?
-        fun getObservationUnits(id: String, position: Int): HashSet<BrAPIObservationUnit>?
-        fun getGermplasm(id: String, position: Int): HashSet<BrAPIGermplasm>?
+        fun isLoading(id: String): Boolean
+
+        /**
+         * Steps finished and steps expected while loading, or null before loading starts.
+         */
+        fun getProgress(id: String): Pair<Int, Int>?
+        fun getLevels(id: String): List<Level>
+        fun onLevelChecked(id: String, levelName: String, checked: Boolean)
         fun getLocation(id: String): String
         fun getTrialName(id: String): String
+
+        /**
+         * Observations on the server for the whole study, shown on the location and trial row.
+         * Null hides the chip, while counting or when the levels carry their own counts.
+         */
+        fun getObservationCount(id: String): Int?
+
+        /**
+         * Why the study couldn't be loaded, shown on its card instead of its levels, or null if it loaded.
+         */
+        fun getError(id: String): String?
     }
 
     data class Model(
         val id: String,
         val title: String,
+    )
+
+    data class Level(
+        val name: String,
+        val unitCount: Int,
+        val traitCount: Int,
+        val checked: Boolean,
+        //observations on the server at this level, null hides the chip
+        val observationCount: Int? = null,
     )
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -44,22 +72,146 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
         with(currentList[position]) {
+
             holder.titleTextView.text = title
-            holder.traitCountChip.text = studyLoader.getObservationVariables(id, position)?.size?.toString() ?: "0"
-            holder.unitCountChip.text = studyLoader.getObservationUnits(id, position)?.size?.toString() ?: ""
+
             holder.locationChip.text = studyLoader.getLocation(id)
             holder.trialChip.text = studyLoader.getTrialName(id)
-            if (holder.traitCountChip.text.isNotBlank()
-                && holder.unitCountChip.text.isNotBlank()) {
-                holder.progressBar.visibility = View.GONE
+            holder.locationChip.visibility = if (holder.locationChip.text.isNotBlank()) View.VISIBLE else View.GONE
+            holder.trialChip.visibility = if (holder.trialChip.text.isNotBlank()) View.VISIBLE else View.GONE
+
+            bindObservationCount(holder.observationsChip, studyLoader.getObservationCount(id))
+
+            val loading = studyLoader.isLoading(id)
+            val error = if (loading) null else studyLoader.getError(id)
+
+            //invisible rather than gone under the error icon, so the title keeps clear of the icon
+            holder.progressBar.visibility = when {
+                loading -> View.VISIBLE
+                error != null -> View.INVISIBLE
+                else -> View.GONE
+            }
+            if (loading) bindProgress(holder.progressBar, studyLoader.getProgress(id))
+
+            holder.errorIcon.visibility = if (error != null) View.VISIBLE else View.GONE
+            holder.errorTextView.visibility = if (error != null) View.VISIBLE else View.GONE
+            holder.errorTextView.text = error
+
+            bindLevels(holder.levelsLayout, id, if (loading || error != null) emptyList() else studyLoader.getLevels(id))
+        }
+    }
+
+    /**
+     * Payload updates rebind the existing card in place, a change without a payload
+     * cross-fades the whole card, which pulses when progress arrives page by page.
+     */
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
+
+        if (payloads.isNotEmpty() && payloads.all { it == PAYLOAD_PROGRESS }) {
+
+            val id = currentList[position].id
+
+            if (studyLoader.isLoading(id)) bindProgress(holder.progressBar, studyLoader.getProgress(id))
+
+            return
+        }
+
+        onBindViewHolder(holder, position)
+    }
+
+    /**
+     * Spins until loading starts, then fills as the steps of the load finish.
+     */
+    private fun bindProgress(indicator: CircularProgressIndicator, progress: Pair<Int, Int>?) {
+
+        if (progress == null) {
+            indicator.isIndeterminate = true
+            return
+        }
+
+        val (received, total) = progress
+
+        indicator.isIndeterminate = false
+        indicator.max = total
+        indicator.setProgressCompat(received.coerceAtMost(total), true)
+    }
+
+    private fun bindLevels(layout: LinearLayout, id: String, levels: List<Level>) {
+
+        layout.removeAllViews()
+
+        val inflater = LayoutInflater.from(layout.context)
+
+        levels.forEach { level ->
+
+            val pill = inflater.inflate(R.layout.list_item_study_level, layout, false)
+
+            pill.findViewById<Chip>(R.id.list_item_study_level_chip).text = level.name
+            pill.findViewById<Chip>(R.id.list_item_study_level_units_chip).text = level.unitCount.toString()
+            pill.findViewById<Chip>(R.id.list_item_study_level_traits_chip).text = level.traitCount.toString()
+            bindObservationCount(pill.findViewById(R.id.list_item_study_level_observations_chip), level.observationCount)
+
+            pill.accessibilityDelegate = pillAccessibilityDelegate
+
+            setPillSelected(pill, level.checked)
+
+            pill.setOnClickListener {
+                val selected = !pill.isSelected
+                setPillSelected(pill, selected)
+                studyLoader.onLevelChecked(id, level.name, selected)
             }
 
-            if (holder.trialChip.text.isNotBlank()) {
-                holder.trialChip.visibility = View.VISIBLE
-            } else {
-                holder.trialChip.visibility = View.GONE
-            }
+            layout.addView(pill)
         }
+
+        layout.visibility = if (levels.isEmpty()) View.GONE else View.VISIBLE
+    }
+
+    private fun bindObservationCount(chip: Chip, count: Int?) {
+
+        chip.visibility = if (count == null) View.GONE else View.VISIBLE
+
+        if (count != null) {
+            chip.text = count.toString()
+            chip.contentDescription = chip.resources.getQuantityString(
+                R.plurals.act_brapi_study_import_observations_on_server, count, count
+            )
+        }
+    }
+
+    /**
+     * Selected pills use the highlighted background, unselected ones are grayed out.
+     */
+    private fun setPillSelected(pill: View, selected: Boolean) {
+        pill.isSelected = selected
+        pill.alpha = if (selected) 1f else unselectedAlpha(pill)
+    }
+
+    /**
+     * Themes can opt out of fading unselected pills, the high contrast theme does.
+     */
+    private fun unselectedAlpha(view: View): Float {
+        val value = TypedValue()
+        return if (view.context.theme.resolveAttribute(R.attr.fb_unselected_pill_alpha, value, true)
+            && value.type == TypedValue.TYPE_FLOAT
+        ) value.float else DEFAULT_UNSELECTED_ALPHA
+    }
+
+    //announces a pill as a checkbox so screen readers read its selected state
+    private val pillAccessibilityDelegate = object : View.AccessibilityDelegate() {
+        override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfo) {
+            super.onInitializeAccessibilityNodeInfo(host, info)
+            info.className = CheckBox::class.java.name
+            info.isCheckable = true
+            info.isChecked = host.isSelected
+        }
+    }
+
+    companion object {
+        private const val DEFAULT_UNSELECTED_ALPHA = 0.5f
+
+        //notifyItemChanged payload for loading progress, see onBindViewHolder(holder, position, payloads)
+        const val PAYLOAD_PROGRESS = "progress"
     }
 
     override fun getItemCount(): Int {
@@ -68,11 +220,13 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
 
     inner class ViewHolder(v: CardView) : RecyclerView.ViewHolder(v) {
         var titleTextView: TextView = v.findViewById(R.id.list_item_study_title_tv)
-        var unitCountChip: Chip = v.findViewById(R.id.list_item_study_units_chip)
-        var traitCountChip: Chip = v.findViewById(R.id.list_item_study_traits_chip)
         var locationChip: Chip = v.findViewById(R.id.list_item_study_location_chip)
-        var progressBar: ProgressBar = v.findViewById(R.id.list_item_study_pb)
+        var progressBar: CircularProgressIndicator = v.findViewById(R.id.list_item_study_pb)
         var trialChip: Chip = v.findViewById(R.id.list_item_trial_chip)
+        var observationsChip: Chip = v.findViewById(R.id.list_item_study_observations_chip)
+        var errorIcon: ImageView = v.findViewById(R.id.list_item_study_error_iv)
+        var errorTextView: TextView = v.findViewById(R.id.list_item_study_error_tv)
+        var levelsLayout: LinearLayout = v.findViewById(R.id.list_item_study_levels_ll)
     }
 
     class DiffCallback : DiffUtil.ItemCallback<Model>() {

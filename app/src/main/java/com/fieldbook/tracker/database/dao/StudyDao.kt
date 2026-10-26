@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.database.dao
 
 import android.content.ContentValues
+import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.util.Log
 import androidx.core.content.contentValuesOf
@@ -224,6 +225,7 @@ class StudyDao {
                 null, "null" -> ""
                 else -> observationLevel
             }
+            it.studyDbLevels = this["study_db_levels"]?.toString()
             it.attributeCount = this["attribute_count"]?.toString()
             it.traitCount = this["trait_count"]?.toString()
             it.observationCount = this["observation_count"]?.toString()
@@ -399,7 +401,8 @@ class StudyDao {
                 field.studyDbId
             ) else -1
 
-            val nameExists = getAllFieldObjects("study_name").any { it.name == field.name }
+            //brapi studies may share a name, one field per observation level, uniqueness is checked above
+            val nameExists = !fromBrapi && getAllFieldObjects("study_name").any { it.name == field.name }
 
             if (sid == -1 && !nameExists) {
 
@@ -424,6 +427,7 @@ class StudyDao {
                     put("study_source", field.dataSource)
                     put("count", field.entryCount)
                     put("observation_levels", field.observationLevel)
+                    put("study_db_levels", field.studyDbLevels)
                     put("trial_name", field.trialName)
                     put("start_corner", field.startCorner)
                     put("walking_direction", field.walkingDirection)
@@ -461,12 +465,38 @@ class StudyDao {
         /**
          * This function should always be called within a transaction.
          */
-        fun createFieldData(studyId: Int, columns: List<String>, data: List<String>) = withDatabase { db ->
+        fun createFieldData(studyId: Int, columns: List<String>, data: List<String>) =
+            createFieldDataRows(studyId, columns, listOf(data))
+
+        /**
+         * Inserts many rows, looking up the unique column and attribute ids once rather than per row.
+         * This function should always be called within a transaction.
+         */
+        fun createFieldDataRows(studyId: Int, columns: List<String>, rows: List<List<String>>) = withDatabase { db ->
 
             val names = getNames(studyId)!!
 
             //input data corresponds to original database column names
             val uniqueIndex = columns.indexOf(names.unique)
+
+            //geo coordinates are stored on the unit rather than as an attribute value
+            val attrIds = columns.map {
+                if (it == "geo_coordinates") -1 else ObservationUnitAttributeDao.getIdByName(it)
+            }
+
+            rows.forEach { data ->
+                insertFieldDataRow(db, studyId, columns, data, uniqueIndex, attrIds)
+            }
+        }
+
+        private fun insertFieldDataRow(
+            db: SQLiteDatabase,
+            studyId: Int,
+            columns: List<String>,
+            data: List<String>,
+            uniqueIndex: Int,
+            attrIds: List<Int>
+        ) {
 
             //check if data size matches the columns size, on mismatch fill with dummy data
             //mainly fixes issues with BrAPI when xtype/ytype and row/col values are not given
@@ -496,12 +526,11 @@ class StudyDao {
             columns.forEachIndexed { index, it ->
 
                 if (it != "geo_coordinates") {
-                    val attrId = ObservationUnitAttributeDao.getIdByName(it)
 
                     db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
                         Study.FK to studyId,
                         ObservationUnit.FK to rowid,
-                        ObservationUnitAttribute.FK to attrId,
+                        ObservationUnitAttribute.FK to attrIds[index],
                         "observation_unit_value_name" to actualData[index]
                     ))
                 }
@@ -514,6 +543,16 @@ class StudyDao {
                 put("count", getCount(studyId))
                 put("date_import", getTime())
             }, "${Study.PK} = ?", arrayOf("$studyId"))
+        }
+
+        /**
+         * Replaces the recorded observation levels (json array) on every field imported from the BrAPI study.
+         */
+        fun updateStudyDbLevels(studyDbId: String, levels: String) = withDatabase { db ->
+
+            db.update(Study.tableName, contentValuesOf(
+                "study_db_levels" to levels
+            ), "study_db_id = ?", arrayOf(studyDbId))
         }
 
         fun updateEditDate(studyId: Int) = withDatabase { db ->

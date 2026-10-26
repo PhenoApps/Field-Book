@@ -282,6 +282,19 @@
 
     <attr name="fb_border_color" format="color" />
 
+    <!-- opacity of unselected level pills on the BrAPI study import screen, see StudyAdapter -->
+    <attr name="fb_unselected_pill_alpha" format="float" />
+
+    <!-- outline for pills and buttons whose fill matches the background in the high contrast theme,
+         transparent in the other themes -->
+    <attr name="fb_high_contrast_outline_color" format="color" />
+
+    <!-- level pills on the BrAPI study import screen and the chips inside them, see StudyAdapter -->
+    <attr name="fb_pill_selected_color" format="color" />
+    <attr name="fb_pill_unselected_color" format="color" />
+    <attr name="fb_pill_chip_selected_color" format="color" />
+    <attr name="fb_pill_chip_unselected_color" format="color" />
+
     <attr name="fb_trait_button_background_tint" format="color" />
 
     <attr name="fb_categorical_button_selected_color" format="color" />

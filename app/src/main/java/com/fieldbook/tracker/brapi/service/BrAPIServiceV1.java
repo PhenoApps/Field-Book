@@ -477,7 +477,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
             final String level = levelName;
 
             final AtomicInteger currentPage = new AtomicInteger(0);
-            final Integer pageSize = Integer.parseInt(preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
+            final Integer pageSize = BrAPIService.getPageSize(context);
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setValues(new ArrayList<>());
 

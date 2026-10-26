@@ -3,9 +3,11 @@ package com.fieldbook.tracker.views
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.AutoCompleteTextView
 import android.widget.FrameLayout
 import android.widget.ImageView
+import androidx.core.widget.doAfterTextChanged
 import com.fieldbook.tracker.R
 
 class SearchBar : FrameLayout {
@@ -40,5 +42,13 @@ class SearchBar : FrameLayout {
         clearButton.setOnClickListener {
             editText.text.clear()
         }
+
+        //only offer to clear when there's something to clear
+        updateClearButton()
+        editText.doAfterTextChanged { updateClearButton() }
+    }
+
+    private fun updateClearButton() {
+        clearButton.visibility = if (editText.text.isNullOrEmpty()) View.GONE else View.VISIBLE
     }
 }

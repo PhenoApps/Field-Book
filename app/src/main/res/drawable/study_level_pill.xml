@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- pill background for a level row in a study import card, highlighted while the level is selected.
+     Colors come from the theme, the outline is only drawn in the high contrast theme. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="999dp" />
+            <solid android:color="?attr/fb_pill_selected_color" />
+            <stroke
+                android:width="2dp"
+                android:color="?attr/fb_high_contrast_outline_color" />
+        </shape>
+    </item>
+
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="999dp" />
+            <solid android:color="?attr/fb_pill_unselected_color" />
+            <stroke
+                android:width="1dp"
+                android:color="?attr/fb_high_contrast_outline_color" />
+        </shape>
+    </item>
+
+</selector>

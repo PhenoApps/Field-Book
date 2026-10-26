@@ -22,7 +22,7 @@ open class BrapiTrialsFilterActivity(override val titleResId: Int = R.string.bra
         fun List<TrialStudyModel>.filterByProgram(programs: List<String>, seasons: List<String>): List<TrialStudyModel> {
 
             return filter { if (programs.isNotEmpty()) it.programDbId in programs else true }
-                .filter { if (seasons.isNotEmpty()) it.study.seasons.any { s -> s in seasons } else true }
+                .filter { if (seasons.isNotEmpty()) it.study.seasons.orEmpty().any { s -> s in seasons } else true }
         }
     }
 

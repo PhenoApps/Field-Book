@@ -25,6 +25,7 @@ public class FieldObject {
     private String dataSource;
     private ImportFormat dataSourceFormat;
     private String observationLevel;
+    private String studyDbLevels;
     private String attributeCount;
     private String traitCount;
     private String observationCount;
@@ -227,6 +228,19 @@ public class FieldObject {
     public void setObservationLevel(String observationLevel) {
         this.observationLevel = observationLevel;
     }
+
+    /**
+     * Json array of the observation levels the BrAPI study's units had when this field was imported,
+     * null for non-BrAPI fields and fields imported before database version 22.
+     */
+    public String getStudyDbLevels() {
+        return studyDbLevels;
+    }
+
+    public void setStudyDbLevels(String studyDbLevels) {
+        this.studyDbLevels = studyDbLevels;
+    }
+
     public String getAttributeCount() {
         return attributeCount;
     }
