@@ -1,5 +1,10 @@
 <changelog>
 
+    <release date="2026-10-06" versionCode="70302" versionName="v7.3.2">
+        <info>Improved USB camera integration</info>
+        <bugfix>Slashes in trait names no longer stop images from saving</bugfix>
+    </release>
+
     <release date="2026-09-29" versionCode="70301" versionName="v7.3.1">
         <new>Sync now lists observations that cannot be sent via BrAPI</new>
         <info>User is now notified of failed database writes</info>

@@ -48,9 +48,9 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
                     if (fieldDir != null) {
                         var traitDir = fieldDir.findFile(sanitizedTraitName)
                         if (traitDir == null || !traitDir.exists()) {
-                            fieldDir.createDirectory(sanitizedTraitName)
+                            //use the returned dir, the provider may have adjusted the name
+                            traitDir = fieldDir.createDirectory(sanitizedTraitName)
                         }
-                        traitDir = fieldDir.findFile(sanitizedTraitName)
                         if (traitDir != null && traitDir.findFile(".nomedia")?.exists() != true) {
                             traitDir.createFile("*/*", ".nomedia")
                         }
@@ -80,9 +80,8 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
                     if (fieldDir != null) {
                         var attributeDir = fieldDir.findFile(attributeName)
                         if (attributeDir == null || !attributeDir.exists()) {
-                            fieldDir.createDirectory(attributeName)
+                            attributeDir = fieldDir.createDirectory(attributeName)
                         }
-                        attributeDir = fieldDir.findFile(attributeName)
                         if (attributeDir != null && attributeDir.findFile(".nomedia")?.exists() != true) {
                             attributeDir.createFile("*/*", ".nomedia")
                         }
