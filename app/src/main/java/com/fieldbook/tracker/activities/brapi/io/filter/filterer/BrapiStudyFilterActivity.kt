@@ -3,6 +3,7 @@ package com.fieldbook.tracker.activities.brapi.io.filter.filterer
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -14,18 +15,30 @@ import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterTypeAdapter
 import com.fieldbook.tracker.activities.brapi.io.BrapiImportedLevels
 import com.fieldbook.tracker.activities.brapi.io.BrapiStudyImportActivity
+import com.fieldbook.tracker.activities.brapi.io.StudyListModel
 import com.fieldbook.tracker.activities.brapi.io.TrialStudyModel
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiCropsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiProgramFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSeasonsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSeasonsFilterActivity.Companion.filterByProgramAndTrial
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiStudyListsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSubFilterListActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiTrialsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiTrialsFilterActivity.Companion.filterByProgram
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
+import com.fieldbook.tracker.brapi.service.BrAPIService
+import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.preferences.GeneralKeys
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.launch
+import org.brapi.client.v2.model.queryParams.core.ListQueryParams
+import org.brapi.v2.model.core.BrAPIListSummary
+import org.brapi.v2.model.core.BrAPIListTypes
 import org.brapi.v2.model.core.BrAPIStudy
 import javax.inject.Inject
 
@@ -50,8 +63,12 @@ class BrapiStudyFilterActivity(
         PROGRAM,
         SEASON,
         TRIAL,
-        CROP
+        CROP,
+        LIST
     }
+
+    //fetching the server's study lists, see onStorageItemsLoaded
+    private var studyListsJob: Job? = null
 
     private val studyImportLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -76,16 +93,102 @@ class BrapiStudyFilterActivity(
         val trialDbIds = getModels(BrapiTrialsFilterActivity.FILTER_NAME).filter { it.checked }.map { it.id }
         val seasonDbIds = getIds("${defaultRootFilterKey}${BrapiSeasonsFilterActivity.FILTER_NAME}")
         val commonCropNames = getIds("${defaultRootFilterKey}${BrapiCropsFilterActivity.FILTER_NAME}")
+        val listDbIds = getIds("${defaultRootFilterKey}${BrapiStudyListsFilterActivity.FILTER_NAME}")
 
         val result = this.also {
             it.studies =
-                it.studies.filter { if (programDbIds.isNotEmpty()) it.programDbId in programDbIds else true }
+                it.studies.filterByLists(listDbIds, it.studyLists.orEmpty())
+                    .filter { if (programDbIds.isNotEmpty()) it.programDbId in programDbIds else true }
                     .filter { if (trialDbIds.isNotEmpty()) it.trialDbId in trialDbIds else true }
                     .filter { if (seasonDbIds.isNotEmpty()) it.study.seasons.orEmpty().any { s -> s in seasonDbIds } else true }
                     .filter { if (commonCropNames.isNotEmpty()) it.study.commonCropName in commonCropNames else true }
         }
 
         return result
+    }
+
+    /**
+     * The studies of the chosen lists, or every study if no list is chosen.
+     * A list can hold studies the cache doesn't have, such as inactive ones. They're listed by id,
+     * the import screen fetches their details. Their program, trial, season and crop aren't known,
+     * so those filters hide them.
+     */
+    private fun List<TrialStudyModel>.filterByLists(
+        listDbIds: List<String>,
+        lists: List<StudyListModel>
+    ): List<TrialStudyModel> {
+
+        if (listDbIds.isEmpty()) return this
+
+        val studyDbIds = lists.filter { it.listDbId in listDbIds }.flatMapTo(linkedSetOf()) { it.studyDbIds.orEmpty() }
+
+        val cached = filter { it.study.studyDbId in studyDbIds }
+        val cachedDbIds = cached.mapTo(hashSetOf()) { it.study.studyDbId }
+
+        return cached + studyDbIds.filterNot { it in cachedDbIds }.map { id ->
+            TrialStudyModel(BrAPIStudy().also {
+                it.studyDbId = id
+                it.studyName = id
+            })
+        }
+    }
+
+    /**
+     * Fetches the server's study lists the first time the cache is shown, including caches saved
+     * before lists were fetched. They're saved even if there are none, or the server doesn't support lists,
+     * so they're only asked for again once the cache is reset.
+     */
+    override fun onStorageItemsLoaded() {
+
+        if (isFilterMode || studyListsJob?.isActive == true) return
+
+        studyListsJob = launch(Dispatchers.IO) {
+
+            if (!hasData() || BrapiFilterCache.getStoredModels(this@BrapiStudyFilterActivity).studyLists != null) {
+                return@launch
+            }
+
+            val lists = fetchStudyLists()
+
+            //the cache may have been reset meanwhile
+            ensureActive()
+
+            BrapiFilterCache.saveStudyLists(this@BrapiStudyFilterActivity, lists)
+        }
+    }
+
+    override fun onCacheReset() {
+        studyListsJob?.cancel()
+    }
+
+    /**
+     * @return the server's lists of studies, without their items, or empty if they couldn't be fetched
+     */
+    private suspend fun fetchStudyLists(): List<StudyListModel> {
+
+        val service = brapiService as? BrAPIServiceV2 ?: return emptyList()
+
+        return try {
+
+            val lists = arrayListOf<BrAPIListSummary>()
+
+            service.listService.fetchAll(ListQueryParams().also {
+                it.listType(BrAPIListTypes.STUDIES)
+                it.pageSize(BrAPIService.getPageSize(this))
+            }).collect { page ->
+                lists.addAll(((page as Pair<*, *>).second as List<*>).filterIsInstance<BrAPIListSummary>())
+            }
+
+            //servers that ignore the type filter send every list
+            lists.filter { it.listDbId != null && (it.listType == null || it.listType == BrAPIListTypes.STUDIES) }
+                .distinctBy { it.listDbId }
+                .map { StudyListModel(it.listDbId, it.listName, it.listOwnerName, it.listSize) }
+
+        } catch (e: Exception) {
+            currentCoroutineContext().ensureActive()
+            Log.e(TAG, "Failed to fetch study lists", e)
+            emptyList()
+        }
     }
 
     override fun List<CheckboxListAdapter.Model>.filterBySearchTextPreferences(): List<CheckboxListAdapter.Model> {
@@ -256,34 +359,38 @@ class BrapiStudyFilterActivity(
 
     override fun onFinishButtonClicked() {
 
-        val models = associateProgramStudy()
-        val programDbIds = models.map { it.programDbId }.distinct()
-
         if (isFilterMode) {
             saveFilter()
             finish()
             return
         }
 
-        if (programDbIds.isNotEmpty()) {
+        val models = associateProgramStudy()
+
+        //studies from a list that the cache doesn't have follow the cached ones, see filterByLists
+        val studyDbIds = (models.map { it.study.studyDbId } + checkedIds()).distinct()
+
+        if (studyDbIds.isNotEmpty()) {
             studyImportLauncher.launch(BrapiStudyImportActivity.getIntent(this).also { intent ->
                 intent.putExtra(
                     BrapiStudyImportActivity.EXTRA_STUDY_DB_IDS,
-                    models.map { it.study.studyDbId }.toTypedArray()
+                    studyDbIds.toTypedArray()
                 )
                 intent.putExtra(
                     BrapiStudyImportActivity.EXTRA_PROGRAM_DB_ID,
-                    programDbIds.first()
+                    models.firstNotNullOfOrNull { it.programDbId }
                 )
             })
         }
     }
 
+    private fun checkedIds() = (recyclerView.adapter as CheckboxListAdapter).selected.map { it.id }
+
     private fun associateProgramStudy(): List<TrialStudyModel> {
 
         val models = arrayListOf<TrialStudyModel>()
 
-        val checkedIds = (recyclerView.adapter as CheckboxListAdapter).selected.map { it.id }
+        val checkedIds = checkedIds()
         models.addAll(BrapiFilterCache.getStoredModels(this).studies.filter {
             it.study.studyDbId in checkedIds
         })
@@ -308,29 +415,34 @@ class BrapiStudyFilterActivity(
             .filter { it.checked }
             .map { it.id }
 
-        val models = BrapiFilterCache.getStoredModels(this).studies
+        val cacheModel = BrapiFilterCache.getStoredModels(this)
+        val models = cacheModel.studies
         val programCount = models.mapNotNull { it.programDbId }.distinct().size
         val trialCount = models.filterByProgram(pids, seasons).mapNotNull { it.trialDbId }.distinct().size
         val seasonCount = models.filterByProgramAndTrial(pids, tids)
             .map { it.study.seasons ?: listOf() }.flatten().filterNotNull().distinct().size
         val cropCount = models.map { it.study.commonCropName }.distinct().size
+        val listCount = cacheModel.studyLists.orEmpty().size
+
+        val choices = listOfNotNull(
+            FilterChoice.PROGRAM to getString(R.string.brapi_filter_type_program_count, "$programCount"),
+            FilterChoice.SEASON to getString(R.string.brapi_filter_type_season_count, "$seasonCount"),
+            FilterChoice.TRIAL to getString(R.string.brapi_filter_type_trial_count, "$trialCount"),
+            FilterChoice.CROP to getString(R.string.brapi_filter_type_crop_count, "$cropCount"),
+            //only offered when the server has lists of studies
+            (FilterChoice.LIST to getString(R.string.brapi_filter_type_list_count, "$listCount")).takeIf { listCount > 0 }
+        )
 
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_brapi_filter_choices_title)
-            .setItems(
-                arrayOf(
-                    getString(R.string.brapi_filter_type_program_count, "$programCount"),
-                    getString(R.string.brapi_filter_type_season_count, "$seasonCount"),
-                    getString(R.string.brapi_filter_type_trial_count, "$trialCount"),
-                    getString(R.string.brapi_filter_type_crop_count, "$cropCount")
-                )
-            ) { _, which ->
+            .setItems(choices.map { it.second }.toTypedArray()) { _, which ->
                 intentLauncher.launch(
-                    when (which) {
-                        FilterChoice.PROGRAM.ordinal -> BrapiProgramFilterActivity.getIntent(this)
-                        FilterChoice.SEASON.ordinal -> BrapiSeasonsFilterActivity.getIntent(this)
-                        FilterChoice.CROP.ordinal -> BrapiCropsFilterActivity.getIntent(this)
-                        else -> BrapiTrialsFilterActivity.getIntent(this)
+                    when (choices[which].first) {
+                        FilterChoice.PROGRAM -> BrapiProgramFilterActivity.getIntent(this)
+                        FilterChoice.SEASON -> BrapiSeasonsFilterActivity.getIntent(this)
+                        FilterChoice.CROP -> BrapiCropsFilterActivity.getIntent(this)
+                        FilterChoice.LIST -> BrapiStudyListsFilterActivity.getIntent(this)
+                        FilterChoice.TRIAL -> BrapiTrialsFilterActivity.getIntent(this)
                     }.also {
                         it.putExtra(EXTRA_FILTER_ROOT, defaultRootFilterKey)
                     }

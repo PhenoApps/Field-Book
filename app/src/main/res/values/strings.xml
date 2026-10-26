@@ -1756,6 +1756,12 @@
     <string name="brapi_filter_type_season">Season</string>
     <string name="brapi_filter_type_trial">Trial</string>
     <string name="brapi_filter_type_crop">Crop</string>
+    <string name="brapi_filter_type_list">List</string>
+    <plurals name="brapi_filter_list_study_count">
+        <item quantity="one">%d study</item>
+        <item quantity="other">%d studies</item>
+    </plurals>
+    <string name="act_brapi_study_lists_filter_failed">Couldn\'t load the studies in the selected lists. Please try again.</string>
     <string name="brapi_importer_search_hint">Search Text</string>
     <string name="act_brapi_filter_by_title">Filter By: %s</string>
     <string name="check_all">Select All</string>
@@ -1838,6 +1844,7 @@
     <string name="brapi_filter_type_season_count">Season (%s)</string>
     <string name="brapi_filter_type_trial_count">Trial (%s)</string>
     <string name="brapi_filter_type_crop_count">Crop (%s)</string>
+    <string name="brapi_filter_type_list_count">List (%s)</string>
     <string name="brapi_filter_type_study_count">Study (%s)</string>
     <string name="pref_alpha_enhanced_brapi_import_summary">When enabled, a new BrAPI import UI will be used for studies and traits.</string>
     <string name="pref_alpha_brapi_import_title">New BrAPI Import UI</string>

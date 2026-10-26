@@ -22,6 +22,7 @@ import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.brapi.service.core.CropService;
 import com.fieldbook.tracker.brapi.service.core.ProgramService;
 import com.fieldbook.tracker.brapi.service.core.SeasonService;
+import com.fieldbook.tracker.brapi.service.core.ListService;
 import com.fieldbook.tracker.brapi.service.core.ServerInfoService;
 import com.fieldbook.tracker.brapi.service.core.StudyService;
 import com.fieldbook.tracker.brapi.service.core.TrialService;
@@ -58,6 +59,7 @@ import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams;
 import org.brapi.client.v2.modules.core.CommonCropNamesApi;
 import org.brapi.client.v2.modules.core.ProgramsApi;
 import org.brapi.client.v2.modules.core.SeasonsApi;
+import org.brapi.client.v2.modules.core.ListsApi;
 import org.brapi.client.v2.modules.core.ServerInfoApi;
 import org.brapi.client.v2.modules.core.StudiesApi;
 import org.brapi.client.v2.modules.core.TrialsApi;
@@ -142,6 +144,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     private final SeasonsApi seasonsApi;
     private final CommonCropNamesApi cropsApi;
     private final ServerInfoApi serverInfoApi;
+    private final ListsApi listsApi;
 
     public final ProgramService programService;
     public final SeasonService seasonService;
@@ -153,6 +156,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     public final ObservationService observationService;
     public final GermplasmService germplasmService;
     public final ServerInfoService serverInfoService;
+    public final ListService listService;
 
     private final SharedPreferences preferences;
     private final BrapiAccountHelper accountHelper;
@@ -173,6 +177,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         this.seasonsApi = new SeasonsApi(apiClient);
         this.cropsApi = new CommonCropNamesApi(apiClient);
         this.serverInfoApi = new ServerInfoApi(apiClient);
+        this.listsApi = new ListsApi(apiClient);
 
         this.programService = new ProgramService.Default(this.programsApi);
         this.studyService = new StudyService.Default(this.studiesApi);
@@ -184,6 +189,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         this.observationService = new ObservationService.Default(this.observationsApi);
         this.germplasmService = new GermplasmService.Default(this.germplasmApi);
         this.serverInfoService = new ServerInfoService.Default(this.serverInfoApi);
+        this.listService = new ListService.Default(this.listsApi);
 
         this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
         this.accountHelper = new BrapiAccountHelper(context, preferences);

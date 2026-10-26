@@ -6,6 +6,7 @@ import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiCropsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiProgramFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiSeasonsFilterActivity
+import com.fieldbook.tracker.activities.brapi.io.filter.BrapiStudyListsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiTrialsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiStudyFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiTraitFilterActivity
@@ -38,7 +39,7 @@ class BrapiFilterCache {
         //gson leaves fields missing from older cache files null despite their types
         @Suppress("USELESS_ELVIS", "UNNECESSARY_SAFE_CALL")
         private fun BrapiCacheModel.shallowCopy() =
-            BrapiCacheModel(studies ?: emptyList(), variables?.toMutableMap() ?: mutableMapOf())
+            BrapiCacheModel(studies ?: emptyList(), variables?.toMutableMap() ?: mutableMapOf(), studyLists)
 
         enum class CacheClearInterval(val value: String) {
             EVERY("0"),
@@ -142,6 +143,13 @@ class BrapiFilterCache {
                 })
         }
 
+        fun saveStudyLists(context: Context, lists: List<StudyListModel>) {
+            saveToStorage(context,
+                getStoredModels(context).also { storedModel ->
+                    storedModel.studyLists = lists
+                })
+        }
+
         fun saveToStorage(context: Context, model: BrapiCacheModel) {
             val json = Gson().toJson(model, getTypeToken())
             context.externalCacheDir?.let {
@@ -166,6 +174,7 @@ class BrapiFilterCache {
                     BrapiSeasonsFilterActivity.FILTER_NAME,
                     BrapiProgramFilterActivity.FILTER_NAME,
                     BrapiCropsFilterActivity.FILTER_NAME,
+                    BrapiStudyListsFilterActivity.FILTER_NAME,
                     BrapiStudyFilterActivity.FILTER_NAME,
                     BrapiTraitFilterActivity.FILTER_NAME,
                 )) {

@@ -25,6 +25,8 @@ The fields list will take some time to retrieve when first accessed or when the 
 Select one or more fields from the list to import using the checkbox on the right of each listed field.
 You can search for specific fields using the search bar at the top of the screen.
 Fields can be filtered by `program`, `season`, `trial`, or `crop` by pressing <img class="icon" src="_static/icons/settings/brapi/filter-variant.png"> in the top toolbar.
+If your BrAPI server has lists of studies, they can also be filtered by `list` to show only the studies in the chosen lists.
+Studies in a list that Field Book has not cached, such as inactive studies, are shown by their ID.
 
 The number of selected fields is displayed on the <img class="icon" src="_static/icons/settings/brapi/tray-remove.png"> icon in the toolbar.
 Press this icon to clear your selections.

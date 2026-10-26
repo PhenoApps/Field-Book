@@ -159,6 +159,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                 BrapiTrialsFilterActivity.FILTER_NAME,
                 BrapiSeasonsFilterActivity.FILTER_NAME,
                 BrapiCropsFilterActivity.FILTER_NAME,
+                BrapiStudyListsFilterActivity.FILTER_NAME,
                 BrapiStudyFilterActivity.FILTER_NAME
             )) {
                 resetFilterChips(f)
@@ -476,7 +477,14 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         resetFilterCountDisplay()
 
         resetSelectionCountDisplay()
+
+        onStorageItemsLoaded()
     }
+
+    /**
+     * Called on the main thread each time the cached models are shown.
+     */
+    protected open fun onStorageItemsLoaded() = Unit
 
     private fun resetFilterCountDisplay() {
 
