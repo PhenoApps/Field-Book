@@ -159,6 +159,11 @@
     <string name="dialog_field_sort_delete_all_content_description">Deletes all sort entries.</string>
     <string name="dialog_field_sort_toggle_order_content_description">Reverses sort order.</string>
     <string name="dialog_field_sort_add_content_description">Opens a dialog to add a new attribute to sort by.</string>
+    <string name="field_sort_serpentine_content_description">Alternates the direction of this column in every other group of the column above it.</string>
+    <string name="field_sort_add_column">Add column</string>
+    <string name="field_sort_clear">Clear</string>
+    <string name="field_sort_preview">Preview</string>
+    <string name="field_sort_more_entries">and %1$d more</string>
 
     <!-- Modify -->
     <string name="fields_rename_study">Rename</string>

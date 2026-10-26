@@ -243,14 +243,27 @@ The top card includes metadata about the field (import source, entry count, attr
 **Sorting** displays a dialog to modify the entry order.
 <img class="icon" src="_static/icons/fields/barcode-scan.png"> **Search ID** displays a dialog to choose which unique attribute a barcode search will check against (default is the unique identifer selected on import).
 
-The sort dialog is populated by pressing the <img class="icon" src="_static/icons/fields/plus.png"> icon, and selecting from the list of available columns.
-Column priority for sorting can be modified by using using the <img class="icon" src="_static/icons/traits/reorder-horizontal.png"> icon to drag and reorder them.
-The <img class="icon" src="_static/icons/fields/sort.png"> icon will toggle the sort between ascending and descending.
-The <img class="icon" src="_static/icons/settings/sounds/delete.png"> icon will remove columns that have been added.
+The sort dialog is populated by pressing **Add column** and selecting from the dialog listing the available columns.
+Entries are sorted by the first column, then ties are sorted by the second column, and so on.
+Column priority for sorting can be modified by using the <img class="icon" src="_static/icons/traits/drag_handle.png"> icon to drag and reorder them.
+Each column has its own direction, and the <img class="icon" src="_static/icons/fields/sort.png"> icon toggles that column between ascending and descending.
+The <img class="icon" src="_static/icons/settings/sounds/delete.png"> icon will remove a column, and **Clear** removes them all.
+
+Every column after the first has a serpentine toggle (the U-turn arrow icon).
+A serpentine column reverses its direction for every other value of the column above it.
+For example, sorting by row and then a serpentine column visits row 1 from left to right, row 2 from right to left, and so on, following the path walked through the field.
+When there are more columns above it, the alternation restarts in each group, so sorting by block, row, and a serpentine column starts the first row of every block in the same direction.
+
+Values are sorted naturally, so numbers inside values are compared by their value (A2 comes before A10) and letter case is ignored.
+Blank values are always placed last.
+
+A preview table below the columns lists the first entries in their new order, with the unique ID and a column for each sort column.
+Alternating groups of the first sort column are shaded, which makes serpentine ordering easy to check.
+Changes only take effect after pressing Save.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/fields/field_detail_sort_joined.png" width="1100px"> 
-  <figcaption class="screenshot-caption"><i>Sorting entries by ascending row, then column</i></figcaption> 
+  <figcaption class="screenshot-caption"><i>Sorting entries by ascending row, then serpentine column</i></figcaption> 
 </figure>
 
 The Search ID dialog displays a list of attributes that are unique within the field.

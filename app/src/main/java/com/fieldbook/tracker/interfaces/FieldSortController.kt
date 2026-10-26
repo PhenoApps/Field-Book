@@ -1,8 +1,9 @@
 package com.fieldbook.tracker.interfaces
 
 import com.fieldbook.tracker.objects.FieldObject
+import com.fieldbook.tracker.utilities.sort.FieldSortSpec
 
 interface FieldSortController {
     fun showSortDialog(field: FieldObject?)
-    fun submitSortList(field: FieldObject?, attributes: Array<String?>?)
+    fun submitSort(studyId: Int, sortSpec: FieldSortSpec)
 }
