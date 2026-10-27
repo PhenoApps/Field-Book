@@ -464,14 +464,16 @@ public class FieldFileObject {
 
                 String value = getCellStringValue(row.getCell(idColPosition));
 
-                if (check.containsKey(value)) {
-                    return new HashMap<>();
-                } else {
-                    check.put(value, value);
-                }
+                if (!value.isEmpty()) {
+                    if (check.containsKey(value)) {
+                        return new HashMap<>();
+                    } else {
+                        check.put(value, value);
+                    }
 
-                if (value.contains("/") || value.contains("\\")) {
-                    specialCharactersFail = true;
+                    if (value.contains("/") || value.contains("\\")) {
+                        specialCharactersFail = true;
+                    }
                 }
 
             }
