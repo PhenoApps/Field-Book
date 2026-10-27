@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
@@ -152,6 +153,7 @@ class GoProTraitLayout :
         styledPlayerView?.visibility = View.GONE
         previewCardView?.visibility = View.GONE
         imageView?.visibility = View.INVISIBLE
+        imageView?.setImageDrawable(null)
 
         connectBtn?.setOnClickListener { connect() }
     }
@@ -179,8 +181,16 @@ class GoProTraitLayout :
         connectBtn?.visibility = View.GONE
         connectProgress?.visibility = View.GONE
         previewCardView?.visibility = View.VISIBLE
-        styledPlayerView?.visibility = View.VISIBLE
-        imageView?.visibility = View.INVISIBLE
+
+        //a transcoded preview is drawn frame by frame into the image view instead of the player
+        if (api.isPreviewTranscoded) {
+            styledPlayerView?.visibility = View.GONE
+            imageView?.visibility = View.VISIBLE
+        } else {
+            styledPlayerView?.visibility = View.VISIBLE
+            imageView?.visibility = View.INVISIBLE
+        }
+
         shutterButton?.visibility = View.VISIBLE
         settingsButton?.visibility = View.VISIBLE
 
@@ -346,8 +356,16 @@ class GoProTraitLayout :
 
     override fun onStreamRequested() {
         ui.launch {
+            //once transcoding, the player is never prepared again for this session
+            if (api.isPreviewTranscoded) return@launch
             styledPlayerView?.player = api.createPlayer()
             styledPlayerView?.requestFocus()
+        }
+    }
+
+    override fun onPreviewFrame(frame: Bitmap) {
+        ui.launch {
+            imageView?.setImageBitmap(frame)
         }
     }
 
