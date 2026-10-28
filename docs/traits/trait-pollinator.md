@@ -9,6 +9,7 @@ The pollinator trait format is used to count pollinator visits across categories
 - `Details` text is displayed under the trait name on the Collect screen.
 - `Categories` define the pollinator types counted during the observation.
 At least one category is required.
+Categories can be reordered by dragging the handle next to each category.
 - `Observation Duration (seconds)` sets the length of the timed observation period.
 - `Repeated Measures` toggles repeated measure for the trait.
 
