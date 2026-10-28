@@ -194,11 +194,24 @@ class BrapiSyncViewModel @Inject constructor(
 
         activeJob = viewModelScope.launch(Dispatchers.IO) {
 
-            _uiState.update { it.copy(viewMode = ViewMode.CHECKING) }
+            val lock = engine.lockFor(study.studyId)
+
+            // Held means an automatic sync of this field is running, say so rather than appear
+            // to be checking the server for however long that sync takes.
+            _uiState.update {
+                it.copy(viewMode = ViewMode.CHECKING, waitingForAutoSync = lock.isLocked)
+            }
 
             try {
 
-                val review = engine.lockFor(study.studyId).withLock {
+                val review = lock.withLock {
+
+                    _uiState.update { it.copy(waitingForAutoSync = false) }
+
+                    // The counts shown were read when the screen opened, an automatic sync that
+                    // finished since may have uploaded or downloaded some of them.
+                    refreshLocalStatus()
+
                     engine.checkForReview(brAPIService, study)
                 }
 
@@ -217,7 +230,7 @@ class BrapiSyncViewModel @Inject constructor(
                 // Upload repeats the conflict check, so a failure here only delays the listing.
                 Log.w(TAG, "Review check failed", e)
             } finally {
-                _uiState.update { it.copy(viewMode = ViewMode.IDLE) }
+                _uiState.update { it.copy(viewMode = ViewMode.IDLE, waitingForAutoSync = false) }
             }
         }
     }

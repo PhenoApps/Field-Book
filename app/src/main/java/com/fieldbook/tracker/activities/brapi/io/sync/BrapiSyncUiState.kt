@@ -109,6 +109,8 @@ data class BrapiExportUiState(
     // Bumped when an action (download, upload) finds items to review, so the screen opens the
     // matching dialog. Items found when the screen opens are only listed until the user asks.
     val reviewRequest: Int = 0,
+    // While CHECKING, an automatic sync of this study still holds it, the check waits for it.
+    val waitingForAutoSync: Boolean = false,
 )
 
 enum class ViewMode {

@@ -174,7 +174,11 @@ fun BrapiSyncScreen(
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = stringResource(R.string.brapi_review_checking, uiState.brapiServerDisplayName),
+                            text = if (uiState.waitingForAutoSync) {
+                                stringResource(R.string.brapi_review_waiting_auto_sync)
+                            } else {
+                                stringResource(R.string.brapi_review_checking, uiState.brapiServerDisplayName)
+                            },
                             style = AppTheme.typography.bodyStyle
                         )
                     }
