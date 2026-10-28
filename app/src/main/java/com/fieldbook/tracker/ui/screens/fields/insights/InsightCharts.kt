@@ -398,11 +398,27 @@ fun HorizontalBarList(items: List<BarItem>, total: Int, modifier: Modifier = Mod
     val largest = items.maxOfOrNull { it.value } ?: 0
     val shape = RoundedCornerShape(topEnd = barCorner, bottomEnd = barCorner)
 
+    val valueStyle = AppTheme.typography.bodyStyle
+    val values = items.map { item ->
+        if (total > 0) "${InsightFormat.count(item.value)} (${InsightFormat.percent(item.value * 100.0 / total)})"
+        else InsightFormat.count(item.value)
+    }
+
+    // The value column is as wide as its widest entry in every row. A share of the row cut long
+    // values short, which hid the percentages of the larger categories; and a width per row would
+    // give each bar a different length to fill, so bars could no longer be compared.
+    val measurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val valueWidth = remember(values, valueStyle) {
+        // A dp spare, so rounding to whole pixels never clips the last character.
+        with(density) { (values.maxOfOrNull { measurer.measure(it, valueStyle).size.width } ?: 0).toDp() } + 1.dp
+    }
+
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        items.forEach { item ->
+        items.forEachIndexed { index, item ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -412,7 +428,7 @@ fun HorizontalBarList(items: List<BarItem>, total: Int, modifier: Modifier = Mod
                 Text(
                     text = item.label,
                     modifier = Modifier
-                        .weight(0.35f)
+                        .weight(0.4f)
                         .padding(end = 8.dp),
                     style = AppTheme.typography.bodyStyle,
                     color = AppTheme.colors.text.primary,
@@ -422,7 +438,7 @@ fun HorizontalBarList(items: List<BarItem>, total: Int, modifier: Modifier = Mod
                 )
                 Box(
                     modifier = Modifier
-                        .weight(0.45f)
+                        .weight(0.6f)
                         .height(16.dp)
                 ) {
                     if (item.value > 0 && largest > 0) {
@@ -436,15 +452,14 @@ fun HorizontalBarList(items: List<BarItem>, total: Int, modifier: Modifier = Mod
                     }
                 }
                 Text(
-                    text = if (total > 0) {
-                        "${InsightFormat.count(item.value)} (${InsightFormat.percent(item.value * 100.0 / total)})"
-                    } else InsightFormat.count(item.value),
+                    text = values[index],
                     modifier = Modifier
-                        .weight(0.2f)
-                        .padding(start = 8.dp),
-                    style = AppTheme.typography.bodyStyle,
+                        .padding(start = 8.dp)
+                        .width(valueWidth),
+                    style = valueStyle,
                     color = AppTheme.colors.text.secondary,
-                    maxLines = 1
+                    maxLines = 1,
+                    softWrap = false
                 )
             }
         }
