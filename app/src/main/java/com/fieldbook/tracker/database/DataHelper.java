@@ -18,6 +18,7 @@ import androidx.preference.PreferenceManager;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
+import com.fieldbook.tracker.database.dao.FieldInsightsDao;
 import com.fieldbook.tracker.database.dao.GroupDao;
 import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao;
@@ -1413,6 +1414,35 @@ public class DataHelper {
         return ObservationUnitAttributeDao.Companion.getAllNames(studyId);
     }
 
+    /** Observations with a value, then traits that have one, as the insights screen counts them. */
+    public kotlin.Pair<Integer, Integer> getFieldInsightsCounts(int studyId) {
+
+        open();
+
+        return FieldInsightsDao.Companion.getCounts(studyId);
+    }
+
+    public List<FieldInsightsDao.ObservationRow> getFieldInsightsObservations(int studyId) {
+
+        open();
+
+        return FieldInsightsDao.Companion.getObservations(studyId);
+    }
+
+    public List<FieldInsightsDao.UnitRow> getFieldInsightsUnits(int studyId) {
+
+        open();
+
+        return FieldInsightsDao.Companion.getUnits(studyId);
+    }
+
+    public List<FieldInsightsDao.AttributeRow> getFieldInsightsAttributes(int studyId) {
+
+        open();
+
+        return FieldInsightsDao.Companion.getAttributes(studyId);
+    }
+
     public void beginTransaction() {
         openHelper.getWritableDatabase().beginTransaction();
     }
@@ -1528,6 +1558,13 @@ public class DataHelper {
         open();
 
         ObservationDao.Companion.deleteAllForStudy(studyId);
+    }
+
+    public void replaceAllObservationsForStudy(String studyId, List<ObservationDao.NewObservation> observations) {
+
+        open();
+
+        ObservationDao.Companion.replaceAllForStudy(studyId, observations);
     }
 
     /**

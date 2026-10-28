@@ -90,6 +90,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var cardViewCollect: CardView
     private lateinit var cardViewExport: CardView
     private lateinit var cardViewSync: CardView
+    private lateinit var cardViewInsights: CardView
+    private lateinit var insightsSummaryTextView: TextView
     private lateinit var sourceChip: Chip
     private lateinit var originalNameChip: Chip
     private lateinit var entryCountChip: Chip
@@ -181,6 +183,14 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     }
                 }
             } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot export data")
+        }
+
+        cardViewInsights = rootView.findViewById(R.id.cardViewInsights)
+        insightsSummaryTextView = rootView.findViewById(R.id.insightsSummaryTextView)
+        cardViewInsights.setOnClickListener {
+            fieldId?.let { id ->
+                startActivity(FieldInsightsActivity.getIntent(requireContext(), id))
+            } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot open insights")
         }
 
         val dataExpandCollapseIcon: ImageView = rootView.findViewById(R.id.data_expand_collapse_icon)
@@ -290,6 +300,14 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             // actions are usable while the observations are still being read.
             updateFieldData(field, studyGroupName)
             setupToolbar(field)
+
+            // Insights leaves out NA and blank values, so its card is counted with its own query
+            // rather than taking the data card's totals, which include them.
+            val (insightObservations, insightTraits) = withContext(Dispatchers.IO) {
+                database.getFieldInsightsCounts(id)
+            }
+            insightsSummaryTextView.text =
+                getString(R.string.field_data_summary, insightObservations, insightTraits)
 
             // Stage two: the observation values, and the per-trait processing they feed.
             val items = withContext(Dispatchers.IO) {

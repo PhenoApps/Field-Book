@@ -267,6 +267,21 @@ The <img class="icon" src="_static/icons/home/barley.png"> [Collect](collect.md)
 
 The <img class="icon" src="_static/icons/home/save.png"> [Export](export.md) card will export data that has been collected.
 
+The **Insights** card opens a screen for exploring the field's data in more depth.
+Its tabs show the data in different ways:
+
+- **Summary** lists headline counts and each trait's coverage, with the share of entries that have any data in the top right corner.
+- **Progress** charts coverage and observations per day over the collection period, and observations by collector.
+- **Distribution** shows the spread of one trait's values, and plots numeric values against the time they were recorded to reveal drift.
+- **Map** lays the trait out by the field's row and column attributes, with a box plot of the values in each row and column.
+Values are shaded light to dark, or colored red to green by how far they fall below or above the field mean.
+- **Compare** splits a trait by an attribute such as rep or entry, by collector, or by collection day, and reports how much of the variation the grouping explains.
+- **Correlations** shows the correlations between numeric traits as a matrix, with the traits numbered and named across the top, numbered down the side, and values in the upper half.
+Tapping a cell plots that pair of traits against each other below it.
+
+Tapping a chart shows the values behind the point, bar, cell, or group that was tapped, below the chart.
+On the map and scatter plots, pressing and holding opens a magnifier that follows your finger, and lifting it selects what is at its centre.
+
 The Data card summarizes data that has been collected for the field.
 For each trait with data, the number of observations and percent of entries with phenotypes is displayed in sub-cards.
 Expanding each sub-card will show a chart with a distribution of the phenotypes.
