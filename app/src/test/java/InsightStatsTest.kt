@@ -145,6 +145,20 @@ class InsightStatsTest {
     }
 
     @Test
+    fun filledCellsCountsEachEntryAndTraitOnce() {
+        val filled = InsightStats.filledCells(
+            listOf(
+                observation("A", trait = "t"),
+                observation("A", trait = "t"),
+                observation("B", trait = "t"),
+                observation("A", trait = "u")
+            )
+        )
+
+        assertEquals(3, filled)
+    }
+
+    @Test
     fun dailyProgressCountsEachCellOnItsFirstDay() {
         val progress = InsightStats.dailyProgress(
             listOf(

@@ -271,7 +271,7 @@ The **Insights** card opens a screen for exploring the field's data in more dept
 Below its title, the card shows how many observations and traits have values, leaving out entries recorded as NA.
 Its tabs show the data in different ways:
 
-- **Summary** lists headline counts and each trait's coverage, with the share of entries that have any data in the top right corner.
+- **Summary** lists headline counts and each trait's coverage, with the field's completeness in the top right corner: the share of every entry and trait pairing that has a value, as on the Progress tab.
 - **Progress** charts coverage and observations per day over the collection period, and observations by collector.
 - **Distribution** shows the spread of one trait's values, and plots numeric values against the time they were recorded to reveal drift.
 - **Map** lays the trait out by the field's row and column attributes, with a box plot of the values in each row and column.

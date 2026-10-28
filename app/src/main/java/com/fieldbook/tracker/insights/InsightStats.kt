@@ -286,6 +286,13 @@ object InsightStats {
     }
 
     /**
+     * Entry and trait pairings that hold at least one value. Out of entries × traits, this is
+     * how complete a field is; repeats of the same pairing count once.
+     */
+    fun filledCells(observations: List<InsightObservation>): Int =
+        observations.mapTo(HashSet()) { it.unitId + '\u0000' + it.traitId }.size
+
+    /**
      * Collection by day. A cell is one plot for one trait, and counts as filled from the first
      * day it received a value. Observations without a readable timestamp are left out.
      */

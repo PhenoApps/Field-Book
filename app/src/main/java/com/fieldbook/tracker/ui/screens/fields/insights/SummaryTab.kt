@@ -115,7 +115,10 @@ private fun TraitRow(row: TraitSummaryRow, onClick: () -> Unit) {
     }
 }
 
-/** The overview's tiles, and the share of entries with any data for its completeness pie. */
+/**
+ * The overview's tiles, and the field's completeness for its pie: the same share of entry and
+ * trait pairings with a value that Progress shows for all traits.
+ */
 private class Overview(val tiles: List<StatTile>, val coverage: Float)
 
 private fun overview(data: FieldInsightsData, resources: Resources): Overview {
@@ -136,7 +139,9 @@ private fun overview(data: FieldInsightsData, resources: Resources): Overview {
             StatTile(resources.getString(R.string.field_insights_collection_days), InsightFormat.count(days)),
             StatTile(resources.getString(R.string.field_insights_collectors), InsightFormat.count(collectors)),
         ),
-        coverage = if (units == 0) 0f else coveredUnits.toFloat() / units
+        coverage = (units * data.traits.size).let { total ->
+            if (total == 0) 0f else InsightStats.filledCells(data.observations).toFloat() / total
+        }
     )
 }
 
