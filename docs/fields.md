@@ -275,7 +275,7 @@ Its tabs show the data in different ways:
 - **Progress** charts coverage and observations per day over the collection period, and observations by collector.
 - **Statistics** summarizes one trait, shows the spread of its values, and plots numeric values against the time they were recorded to reveal drift.
 - **Map** lays the trait out by the field's row and column attributes, with a box plot of the values in each row and column.
-Values are shaded light to dark, or colored red to green by how far they fall below or above the field mean.
+Values are shaded light to dark, or, with **Mean scaled**, colored red to green by how far they fall below or above the field mean.
 - **Compare** splits a trait by an attribute such as rep or entry, by collector, or by collection day, and reports how much of the variation the grouping explains.
 - **Correlations** shows the correlations between numeric traits as a matrix, with the traits numbered and named across the top, numbered down the side, and values in the upper half.
 Tapping a cell plots that pair of traits against each other below it.

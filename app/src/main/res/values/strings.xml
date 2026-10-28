@@ -371,7 +371,7 @@
     <string name="field_insights_map_rows">Rows</string>
     <string name="field_insights_map_columns">Columns</string>
     <string name="field_insights_map_mode_value">Value</string>
-    <string name="field_insights_map_mode_deviation">Vs. field mean</string>
+    <string name="field_insights_map_mode_deviation">Mean scaled</string>
     <string name="field_insights_map_no_attributes">This field has no attributes to lay out a map.</string>
     <string name="field_insights_map_choose_layout">Choose the row and column attributes that lay out the field.</string>
     <string name="field_insights_map_too_large">%1$d rows by %2$d columns is too large to map. Try other row and column attributes.</string>

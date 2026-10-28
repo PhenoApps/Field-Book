@@ -120,16 +120,6 @@ fun FieldMapTab(
                     modifier = Modifier.weight(1f)
                 )
             }
-            if (trait.kind.isQuantitative) {
-                ChoiceChips(
-                    options = listOf(
-                        MapColorMode.VALUE to stringResource(R.string.field_insights_map_mode_value),
-                        MapColorMode.DEVIATION to stringResource(R.string.field_insights_map_mode_deviation)
-                    ),
-                    selected = mode,
-                    onSelect = { mode = it }
-                )
-            }
         }
 
         when {
@@ -138,7 +128,7 @@ fun FieldMapTab(
                 InsightMessage(stringResource(R.string.field_insights_map_choose_layout))
             grid.rows.toLong() * grid.columns > MAX_GRID_CELLS || max(grid.rows, grid.columns) > MAX_GRID_SIDE ->
                 InsightMessage(stringResource(R.string.field_insights_map_too_large, grid.rows, grid.columns))
-            else -> FieldMapContent(data, trait, grid, rowAttribute, columnAttribute, mode)
+            else -> FieldMapContent(data, trait, grid, rowAttribute, columnAttribute, mode) { mode = it }
         }
     }
 }
@@ -150,7 +140,8 @@ private fun FieldMapContent(
     grid: FieldGrid,
     rowAttribute: String,
     columnAttribute: String,
-    mode: MapColorMode
+    mode: MapColorMode,
+    onModeChange: (MapColorMode) -> Unit
 ) {
     val resources = LocalResources.current
     val paint = mapPaint(data, trait, mode)
@@ -194,6 +185,19 @@ private fun FieldMapContent(
                 if (grid.unplaced > 0) {
                     InsightNote(
                         stringResource(R.string.field_insights_map_unplaced, InsightFormat.count(grid.unplaced))
+                    )
+                }
+
+                // The coloring only changes this map, so its switch lives here rather than with
+                // the filters that scope the whole tab.
+                if (trait.kind.isQuantitative) {
+                    ChoiceChips(
+                        options = listOf(
+                            MapColorMode.VALUE to stringResource(R.string.field_insights_map_mode_value),
+                            MapColorMode.DEVIATION to stringResource(R.string.field_insights_map_mode_deviation)
+                        ),
+                        selected = mode,
+                        onSelect = onModeChange
                     )
                 }
             }
