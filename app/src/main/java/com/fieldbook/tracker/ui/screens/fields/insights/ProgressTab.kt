@@ -186,9 +186,9 @@ private fun progressStats(data: FieldInsightsData, trait: InsightTrait?): Progre
     return ProgressStats(
         observationCount = observations.size,
         totalCells = totalCells,
-        filled = InsightStats.filledCells(observations),
+        filled = InsightStats.filledCells(data.recorded(trait?.id)),
         undated = observations.count { it.collectedOn == null },
-        progress = InsightStats.dailyProgress(observations, totalCells),
+        progress = InsightStats.dailyProgress(observations, totalCells, na = data.naFor(trait?.id)),
         collectorCounts = observations.groupingBy { it.collector }.eachCount().toList().sortedByDescending { it.second }
     )
 }

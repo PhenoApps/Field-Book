@@ -40,13 +40,18 @@ class FieldInsightsRepository @Inject constructor(
         val unitIds = units.mapTo(HashSet()) { it.unitId }
 
         // Observations left behind by entries no longer in the field are dropped, so counts never
-        // run past the field's size.
-        val rows = database.getFieldInsightsObservations(studyId)
-            .filter { it.value.isNotBlank() && it.value != "NA" && it.unitId in unitIds }
+        // run past the field's size. NA rows are kept apart: they carry no value, but they still
+        // mark the entry as assessed.
+        val recordedRows = database.getFieldInsightsObservations(studyId)
+            .filter { it.value.isNotBlank() && it.unitId in unitIds }
+        val (naRows, rows) = recordedRows.partition { it.value == "NA" }
         val attributes = loadAttributes(database.getFieldInsightsAttributes(studyId))
 
         val rowsByTrait = rows.groupBy { it.traitId }
-        val traitObjects = database.allTraitObjects.filter { it.id in rowsByTrait.keys }
+
+        // A trait with only NA so far is still part of the field's progress, so it is listed too.
+        val recordedTraitIds = recordedRows.mapTo(HashSet()) { it.traitId }
+        val traitObjects = database.allTraitObjects.filter { it.id in recordedTraitIds }
 
         val traits = traitObjects.map { trait ->
             val values = rowsByTrait[trait.id].orEmpty().map { it.value }
@@ -69,6 +74,11 @@ class FieldInsightsRepository @Inject constructor(
         }
 
         val observationsByTrait = observations.groupBy { it.traitId }
+
+        val traitIds = traitObjects.mapTo(HashSet()) { it.id }
+        val naObservations = naRows
+            .filter { it.traitId in traitIds }
+            .map { row -> toNaObservation(row) }
 
         val plotNumeric = traits
             .filter { it.kind.isQuantitative }
@@ -97,6 +107,7 @@ class FieldInsightsRepository @Inject constructor(
             traits = traits,
             observations = observations,
             observationsByTrait = observationsByTrait,
+            naObservations = naObservations,
             plotNumeric = plotNumeric,
             plotCategories = plotCategories,
             defaultRowAttribute = defaultAttribute(
@@ -181,6 +192,23 @@ class FieldInsightsRepository @Inject constructor(
      * not numeric.
      */
     private fun finiteOrNull(value: String): Double? = value.toDoubleOrNull()?.takeIf { it.isFinite() }
+
+    /** An observation recorded as NA: it has a time and a collector, but no value. */
+    private fun toNaObservation(row: FieldInsightsDao.ObservationRow): InsightObservation {
+
+        val (day, time) = parseTimestamp(row.timestamp)
+
+        return InsightObservation(
+            unitId = row.unitId,
+            traitId = row.traitId,
+            numeric = null,
+            categories = emptyList(),
+            collectedOn = day,
+            collectedAt = time,
+            collector = row.collector?.trim().orEmpty(),
+            rep = row.rep?.toIntOrNull() ?: 1
+        )
+    }
 
     /** Labels or values, following the trait's display setting, as the collect screen shows them. */
     private fun categoriesOf(value: String, trait: TraitObject): List<String> = try {

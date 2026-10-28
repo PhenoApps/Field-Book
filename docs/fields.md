@@ -271,7 +271,7 @@ The **Insights** card opens a screen for exploring the field's data in more dept
 Below its title, the card shows how many observations and traits have values, leaving out entries recorded as NA.
 Its tabs show the data in different ways:
 
-- **Summary** lists headline counts and each trait's coverage, with the field's completeness in the top right corner: the share of every entry and trait pairing that has a value, as on the Progress tab.
+- **Summary** lists headline counts and each trait's coverage, with the field's completeness in the top right corner: the share of every entry and trait pairing that has been recorded, as on the Progress tab.
 - **Progress** charts coverage and observations per day over the collection period, and observations by collector.
 - **Distribution** shows the spread of one trait's values, and plots numeric values against the time they were recorded to reveal drift.
 - **Map** lays the trait out by the field's row and column attributes, with a box plot of the values in each row and column.
@@ -280,5 +280,6 @@ Values are shaded light to dark, or colored red to green by how far they fall be
 - **Correlations** shows the correlations between numeric traits as a matrix, with the traits numbered and named across the top, numbered down the side, and values in the upper half.
 Tapping a cell plots that pair of traits against each other below it.
 
+Values recorded as NA count toward completeness, since the entry was assessed, but are left out of the charts and statistics.
 Tapping a chart shows the values behind the point, bar, cell, or group that was tapped, below the chart.
 On the map and scatter plots, pressing and holding opens a magnifier that follows your finger, and lifting it selects what is at its centre.

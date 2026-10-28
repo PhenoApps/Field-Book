@@ -318,7 +318,7 @@ private fun mapPaint(data: FieldInsightsData, trait: InsightTrait, mode: MapColo
         InsightTraitKind.OTHER -> {
 
             val covered = remember(data, trait) {
-                data.observationsByTrait[trait.id].orEmpty().mapTo(HashSet()) { it.unitId }
+                data.recorded(trait.id).mapTo(HashSet()) { it.unitId }
             }
             val recorded = stringResource(R.string.field_insights_recorded)
 

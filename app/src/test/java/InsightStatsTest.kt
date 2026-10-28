@@ -177,6 +177,20 @@ class InsightStatsTest {
     }
 
     @Test
+    fun dailyProgressFillsCellsWithNaButDoesNotCountThem() {
+        val progress = InsightStats.dailyProgress(
+            listOf(observation("A", day = DAY_ONE)),
+            totalCells = 4,
+            na = listOf(observation("B", day = DAY_TWO), observation("A", day = DAY_TWO))
+        )
+
+        // Day two had only NA: no observations, but entry B is now assessed. A was already filled.
+        assertEquals(listOf(DAY_ONE, DAY_TWO), progress.map { it.day })
+        assertEquals(listOf(1, 0), progress.map { it.observations })
+        assertEquals(listOf(1, 2), progress.map { it.filled })
+    }
+
+    @Test
     fun compareGroupsMeasuresVarianceExplained() {
         val comparison = InsightStats.compareGroups(
             listOf("a" to 1.0, "a" to 2.0, "a" to 3.0, "b" to 7.0, "b" to 8.0, "b" to 9.0)

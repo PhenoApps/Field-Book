@@ -124,7 +124,8 @@ private class Overview(val tiles: List<StatTile>, val coverage: Float)
 private fun overview(data: FieldInsightsData, resources: Resources): Overview {
 
     val units = data.unitIds.size
-    val coveredUnits = data.observations.mapTo(HashSet()) { it.unitId }.size
+    val recorded = data.recorded(null)
+    val coveredUnits = recorded.mapTo(HashSet()) { it.unitId }.size
     val days = data.observations.mapNotNullTo(HashSet()) { it.collectedOn }.size
     val collectors = data.observations.mapNotNullTo(HashSet()) { it.collector.ifBlank { null } }.size
 
@@ -140,7 +141,7 @@ private fun overview(data: FieldInsightsData, resources: Resources): Overview {
             StatTile(resources.getString(R.string.field_insights_collectors), InsightFormat.count(collectors)),
         ),
         coverage = (units * data.traits.size).let { total ->
-            if (total == 0) 0f else InsightStats.filledCells(data.observations).toFloat() / total
+            if (total == 0) 0f else InsightStats.filledCells(recorded).toFloat() / total
         }
     )
 }
@@ -149,8 +150,9 @@ private fun traitRows(data: FieldInsightsData, resources: Resources): List<Trait
     data.traits.map { trait ->
 
         val observations = data.observationsByTrait[trait.id].orEmpty()
+        // NA counts as assessed here, though it adds nothing to n or the statistics.
         val coverage = if (data.unitIds.isEmpty()) 0f
-        else observations.mapTo(HashSet()) { it.unitId }.size.toFloat() / data.unitIds.size
+        else data.recorded(trait.id).mapTo(HashSet()) { it.unitId }.size.toFloat() / data.unitIds.size
         val n = resources.getString(R.string.field_insights_n) to InsightFormat.count(observations.size)
 
         val center = when (trait.kind) {

@@ -43,7 +43,7 @@ fun DistributionTab(
             InsightTraitKind.CATEGORICAL -> CategoricalDistribution(trait, observations)
             InsightTraitKind.OTHER -> LazyColumn(contentPadding = PaddingValues(8.dp)) {
                 item {
-                    val covered = observations.mapTo(HashSet()) { it.unitId }.size
+                    val covered = data.recorded(trait.id).mapTo(HashSet()) { it.unitId }.size
                     InsightSection(
                         title = stringResource(R.string.field_insights_overview),
                         trailing = {

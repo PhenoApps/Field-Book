@@ -98,7 +98,7 @@ fun FieldInsightsScreen(
                     }
 
                     is FieldInsightsUiState.Success -> {
-                        if (state.data.observations.isEmpty()) {
+                        if (state.data.observations.isEmpty() && state.data.naObservations.isEmpty()) {
                             InsightMessage(stringResource(R.string.field_insights_no_data))
                         } else {
                             FieldInsightsContent(state.data)

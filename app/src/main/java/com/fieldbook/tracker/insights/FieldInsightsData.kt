@@ -52,6 +52,9 @@ data class InsightObservation(
  * Plot level values are precomputed because the map, the comparisons and the correlations all
  * work from them: repeated measures are averaged for numbers, and the latest repeat wins for
  * categories. Only entries in the field are included.
+ *
+ * Observations recorded as NA are kept apart in [naObservations]. They have no value to chart,
+ * but the entry was assessed, so they count toward completeness through [recorded].
  */
 data class FieldInsightsData(
     val fieldName: String,
@@ -59,8 +62,11 @@ data class FieldInsightsData(
     /** Attribute name to (unit id to value), for every attribute that has values. */
     val attributes: Map<String, Map<String, String>>,
     val traits: List<InsightTrait>,
+    /** Observations with a value. */
     val observations: List<InsightObservation>,
     val observationsByTrait: Map<String, List<InsightObservation>>,
+    /** Observations recorded as NA. */
+    val naObservations: List<InsightObservation>,
     /** Trait id to (unit id to mean value across repeats). */
     val plotNumeric: Map<String, Map<String, Double>>,
     /** Trait id to (unit id to the latest repeat's categories; more than one for multicat). */
@@ -71,4 +77,16 @@ data class FieldInsightsData(
     val attributeNames: List<String> get() = attributes.keys.toList()
 
     fun trait(id: String?): InsightTrait? = traits.firstOrNull { it.id == id }
+
+    /**
+     * Everything recorded for one trait, or for all of them when [traitId] is null, NA included.
+     * For completeness: an entry assessed as NA is done, even though it has no value.
+     */
+    fun recorded(traitId: String?): List<InsightObservation> =
+        if (traitId == null) observations + naObservations
+        else observationsByTrait[traitId].orEmpty() + naObservations.filter { it.traitId == traitId }
+
+    /** Observations recorded as NA for one trait, or for all of them when [traitId] is null. */
+    fun naFor(traitId: String?): List<InsightObservation> =
+        if (traitId == null) naObservations else naObservations.filter { it.traitId == traitId }
 }

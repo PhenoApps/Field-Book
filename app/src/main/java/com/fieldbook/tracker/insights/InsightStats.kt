@@ -294,9 +294,15 @@ object InsightStats {
 
     /**
      * Collection by day. A cell is one plot for one trait, and counts as filled from the first
-     * day it received a value. Observations without a readable timestamp are left out.
+     * day it was recorded. [na] observations fill cells but are not counted as observations: an
+     * entry assessed as NA is done, but has no value. Observations without a readable timestamp
+     * are left out.
      */
-    fun dailyProgress(observations: List<InsightObservation>, totalCells: Int): List<DayProgress> {
+    fun dailyProgress(
+        observations: List<InsightObservation>,
+        totalCells: Int,
+        na: List<InsightObservation> = emptyList()
+    ): List<DayProgress> {
 
         val firstDayByCell = HashMap<String, LocalDate>()
         val countByDay = TreeMap<LocalDate, Int>()
@@ -304,6 +310,13 @@ object InsightStats {
         observations.forEach { o ->
             val day = o.collectedOn ?: return@forEach
             countByDay[day] = (countByDay[day] ?: 0) + 1
+        }
+
+        (observations + na).forEach { o ->
+            val day = o.collectedOn ?: return@forEach
+            // A day with nothing but NA still moves completeness on, so it appears with no
+            // observations.
+            if (day !in countByDay) countByDay[day] = 0
             val cell = o.unitId + '\u0000' + o.traitId
             val previous = firstDayByCell[cell]
             if (previous == null || day < previous) firstDayByCell[cell] = day
