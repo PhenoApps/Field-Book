@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.ui.screens.fields.insights
 
+import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -135,6 +136,12 @@ private fun FieldInsightsContent(data: FieldInsightsData) {
     fun open(tab: InsightTab, trait: String?) {
         trait?.let { traitId = it }
         tabIndex = tab.ordinal
+    }
+
+    // Back returns to Summary before it leaves the screen. Only registered off Summary, so from
+    // there back falls through to the activity as usual.
+    BackHandler(enabled = tabIndex != InsightTab.SUMMARY.ordinal) {
+        tabIndex = InsightTab.SUMMARY.ordinal
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
