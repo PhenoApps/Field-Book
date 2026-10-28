@@ -62,7 +62,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -730,35 +729,9 @@ public class DataHelper {
 
     public FieldObject getFieldObject(Integer studyId) {
 
-        return getFieldObject(studyId, true);
-    }
-
-    /**
-     * Loads a study. Its trait details carry every observation value recorded against the study,
-     * so callers that never read them should pass false rather than paying to build and discard
-     * them.
-     */
-    public FieldObject getFieldObject(Integer studyId, boolean loadTraitDetails) {
-
         open();
 
-        List<FieldObject.TraitDetail> traitDetails = loadTraitDetails
-                ? getTraitDetailsForStudy(studyId)
-                : Collections.emptyList();
-
-        return StudyDao.Companion.getFieldObject(
-                studyId,
-                traitDetails
-        );
-    }
-
-    public List<FieldObject.TraitDetail> getTraitDetailsForStudy(Integer studyId) {
-
-        open();
-
-        String sortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
-
-        return StudyDao.Companion.getTraitDetailsForStudy(studyId, sortOrder);
+        return StudyDao.Companion.getFieldObject(studyId);
     }
 
     /**

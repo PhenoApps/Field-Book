@@ -20,7 +20,6 @@ import com.fieldbook.tracker.database.toFirst
 import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
-import com.fieldbook.tracker.utilities.CategoryJsonUtil
 
 
 class StudyDao {
@@ -269,7 +268,7 @@ class StudyDao {
         } ?: ArrayList()
 
 
-        fun getFieldObject(studyId: Int, traitDetails: List<FieldObject.TraitDetail>): FieldObject? = withDatabase { db ->
+        fun getFieldObject(studyId: Int): FieldObject? = withDatabase { db ->
             val query = """
                 SELECT 
                     ${Study.PK},
@@ -315,76 +314,12 @@ class StudyDao {
                         val columnIndex = cursor.getColumnIndex(columnName)
                         if (columnIndex != -1) cursor.getString(columnIndex) else null
                     }
-                    map.toFieldObject().apply {
-                        // Set the trait details
-                        this.traitDetails = traitDetails
-                    }
+                    map.toFieldObject()
                 } else {
                     null
                 }
             }
             fieldData
-        }
-
-
-        /**
-         * This function returns trait details for a given study in the form
-         * data class TraitDetail(
-         *         val traitName: String,
-         *         val format: String,
-         *         val categories: String,
-         *         val count: Int,
-         *         val observations: List<String>
-         *         val completeness: Float
-         * )
-         */
-
-        fun getTraitDetailsForStudy(studyId: Int, sortOrder: String = "position"): List<FieldObject.TraitDetail> {
-            return withDatabase { db ->
-                val traitDetails = mutableListOf<FieldObject.TraitDetail>()
-
-                val cursor = db.rawQuery("""
-                    SELECT ov.observation_variable_name, ov.observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(o.value, '|') as observations,
-                    COUNT(DISTINCT observation_unit_id) AS distinct_obs_units,
-                    (SELECT COUNT(*) FROM observation_units WHERE study_id = ?) AS total_obs_units,
-                    (SELECT v.observation_variable_attribute_value 
-                     FROM observation_variable_values v
-                     JOIN observation_variable_attributes a ON v.observation_variable_attribute_db_id = a.internal_id_observation_variable_attribute
-                     WHERE v.observation_variable_db_id = o.observation_variable_db_id AND a.observation_variable_attribute_name = 'category') AS categories
-                    FROM observations o
-                    JOIN observation_variables ov ON o.observation_variable_db_id = ov.internal_id_observation_variable
-                    WHERE o.study_id = ? AND o.observation_variable_db_id > 0
-                    GROUP BY ov.observation_variable_name, ov.observation_variable_field_book_format
-                    ORDER BY ov.${if (sortOrder == "visible") "position" else sortOrder} COLLATE NOCASE ASC
-                """, arrayOf(studyId.toString(), studyId.toString()))
-
-                if (cursor.moveToFirst()) {
-                    do {
-                        val traitName = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_name"))
-                        val format = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_field_book_format"))
-                        val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
-                        val observationsString = cursor.getString(cursor.getColumnIndexOrThrow("observations"))
-                        val rawObservations = observationsString?.split("|") ?: emptyList()
-                        val observations = rawObservations.map { obs ->
-                            CategoryJsonUtil.processValue(
-                                buildMap {
-                                    put("observation_variable_field_book_format", format)
-                                    put("value", obs)
-                                }
-                            )
-                        }
-                        val distinctObsUnits = cursor.getInt(cursor.getColumnIndexOrThrow("distinct_obs_units"))
-                        val totalObsUnits = cursor.getInt(cursor.getColumnIndexOrThrow("total_obs_units"))
-                        val completeness = distinctObsUnits.toFloat() / totalObsUnits.toFloat()
-                        val categories = cursor.getString(cursor.getColumnIndexOrThrow("categories"))
-
-                        traitDetails.add(FieldObject.TraitDetail(traitName, format, categories, count, observations, completeness))
-                    } while (cursor.moveToNext())
-                }
-
-                cursor.close()
-                traitDetails
-            } ?: emptyList()
         }
 
 

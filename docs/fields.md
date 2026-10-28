@@ -268,6 +268,7 @@ The <img class="icon" src="_static/icons/home/barley.png"> [Collect](collect.md)
 The <img class="icon" src="_static/icons/home/save.png"> [Export](export.md) card will export data that has been collected.
 
 The **Insights** card opens a screen for exploring the field's data in more depth.
+Below its title, the card shows how many observations and traits have values, leaving out entries recorded as NA.
 Its tabs show the data in different ways:
 
 - **Summary** lists headline counts and each trait's coverage, with the share of entries that have any data in the top right corner.
@@ -281,7 +282,3 @@ Tapping a cell plots that pair of traits against each other below it.
 
 Tapping a chart shows the values behind the point, bar, cell, or group that was tapped, below the chart.
 On the map and scatter plots, pressing and holding opens a magnifier that follows your finger, and lifting it selects what is at its centre.
-
-The Data card summarizes data that has been collected for the field.
-For each trait with data, the number of observations and percent of entries with phenotypes is displayed in sub-cards.
-Expanding each sub-card will show a chart with a distribution of the phenotypes.

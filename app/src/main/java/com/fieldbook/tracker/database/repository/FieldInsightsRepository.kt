@@ -34,7 +34,7 @@ class FieldInsightsRepository @Inject constructor(
     /** Loads the whole field. Returns null when the field no longer exists. */
     suspend fun load(studyId: Int): FieldInsightsData? = withContext(ioDispatcher) {
 
-        val field = database.getFieldObject(studyId, false) ?: return@withContext null
+        val field = database.getFieldObject(studyId) ?: return@withContext null
 
         val units = database.getFieldInsightsUnits(studyId)
         val unitIds = units.mapTo(HashSet()) { it.unitId }
