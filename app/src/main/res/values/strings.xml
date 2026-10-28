@@ -354,6 +354,7 @@
     <string name="field_insights_sd">Std. deviation</string>
     <string name="field_insights_sd_short">SD</string>
     <string name="field_insights_n">n</string>
+    <string name="field_insights_na">NA</string>
     <string name="field_insights_cv">CV</string>
     <string name="field_insights_range">Range</string>
     <string name="field_insights_earliest">Earliest</string>

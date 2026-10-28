@@ -31,6 +31,7 @@ fun StatisticsTab(
     onTraitChange: (InsightTrait) -> Unit
 ) {
     val observations = data.observationsByTrait[trait.id].orEmpty()
+    val naCount = data.naFor(trait.id).size
 
     Column(modifier = Modifier.fillMaxSize()) {
 
@@ -39,8 +40,8 @@ fun StatisticsTab(
         }
 
         when (trait.kind) {
-            InsightTraitKind.NUMERIC, InsightTraitKind.DATE -> QuantitativeDistribution(trait, observations)
-            InsightTraitKind.CATEGORICAL -> CategoricalDistribution(trait, observations)
+            InsightTraitKind.NUMERIC, InsightTraitKind.DATE -> QuantitativeDistribution(trait, observations, naCount)
+            InsightTraitKind.CATEGORICAL -> CategoricalDistribution(trait, observations, naCount)
             InsightTraitKind.OTHER -> LazyColumn(contentPadding = PaddingValues(8.dp)) {
                 item {
                     val covered = data.recorded(trait.id).mapTo(HashSet()) { it.unitId }.size
@@ -63,6 +64,7 @@ fun StatisticsTab(
                                     stringResource(R.string.field_insights_observations),
                                     InsightFormat.count(observations.size)
                                 ),
+                                StatTile(stringResource(R.string.field_insights_na), InsightFormat.count(naCount)),
                             )
                         )
                         InsightNote(stringResource(R.string.field_insights_not_chartable))
@@ -76,7 +78,8 @@ fun StatisticsTab(
 @Composable
 private fun QuantitativeDistribution(
     trait: InsightTrait,
-    observations: List<InsightObservation>
+    observations: List<InsightObservation>,
+    naCount: Int
 ) {
     val resources = LocalResources.current
     val palette = LocalInsightColors.current
@@ -108,11 +111,13 @@ private fun QuantitativeDistribution(
                 StatTileGrid(
                     if (trait.kind == InsightTraitKind.DATE) listOf(
                         StatTile(stringResource(R.string.field_insights_observations), InsightFormat.count(stats.n)),
+                        StatTile(stringResource(R.string.field_insights_na), InsightFormat.count(naCount)),
                         StatTile(stringResource(R.string.field_insights_median), format(stats.median)),
                         StatTile(stringResource(R.string.field_insights_earliest), format(stats.min)),
                         StatTile(stringResource(R.string.field_insights_latest), format(stats.max)),
                     ) else listOf(
                         StatTile(stringResource(R.string.field_insights_observations), InsightFormat.count(stats.n)),
+                        StatTile(stringResource(R.string.field_insights_na), InsightFormat.count(naCount)),
                         StatTile(stringResource(R.string.field_insights_mean), format(stats.mean)),
                         StatTile(stringResource(R.string.field_insights_median), format(stats.median)),
                         StatTile(stringResource(R.string.field_insights_sd), InsightFormat.number(stats.sd)),
@@ -236,7 +241,8 @@ private fun QuantitativeDistribution(
 @Composable
 private fun CategoricalDistribution(
     trait: InsightTrait,
-    observations: List<InsightObservation>
+    observations: List<InsightObservation>,
+    naCount: Int
 ) {
     val counts = remember(observations) { observations.flatMap { it.categories }.groupingBy { it }.eachCount() }
     val total = counts.values.sum()
@@ -259,6 +265,7 @@ private fun CategoricalDistribution(
                             stringResource(R.string.field_insights_observations),
                             InsightFormat.count(observations.size)
                         ),
+                        StatTile(stringResource(R.string.field_insights_na), InsightFormat.count(naCount)),
                         StatTile(
                             stringResource(R.string.field_insights_categories_used),
                             if (trait.categoryOrder.isEmpty()) InsightFormat.count(counts.size)

@@ -32,7 +32,10 @@ import com.fieldbook.tracker.ui.theme.AppTheme
 private data class TraitSummaryRow(
     val trait: InsightTrait,
     val coverage: Float,
-    /** Short label to value: n first, then what suits the trait (mean and SD, median, or mode). */
+    /**
+     * Short label to value: n and the NA count first, then what suits the trait (mean and SD,
+     * median, or mode).
+     */
     val stats: List<Pair<String, String>>
 )
 
@@ -154,6 +157,7 @@ private fun traitRows(data: FieldInsightsData, resources: Resources): List<Trait
         val coverage = if (data.unitIds.isEmpty()) 0f
         else data.recorded(trait.id).mapTo(HashSet()) { it.unitId }.size.toFloat() / data.unitIds.size
         val n = resources.getString(R.string.field_insights_n) to InsightFormat.count(observations.size)
+        val na = resources.getString(R.string.field_insights_na) to InsightFormat.count(data.naFor(trait.id).size)
 
         val center = when (trait.kind) {
             InsightTraitKind.NUMERIC -> InsightStats.summarize(observations.mapNotNull { it.numeric })?.let {
@@ -177,5 +181,5 @@ private fun traitRows(data: FieldInsightsData, resources: Resources): List<Trait
             InsightTraitKind.OTHER -> null
         }.orEmpty()
 
-        TraitSummaryRow(trait, coverage, listOf(n) + center)
+        TraitSummaryRow(trait, coverage, listOf(n, na) + center)
     }
