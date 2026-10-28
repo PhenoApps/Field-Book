@@ -269,7 +269,7 @@ The <img class="icon" src="_static/icons/home/save.png"> [Export](export.md) car
 
 The **Insights** card opens a screen for exploring the field's data in more depth.
 Below its title, the card shows how many observations and traits have values, leaving out entries recorded as NA.
-Its tabs show the data in different ways:
+Its tabs show the data in different ways, and can be switched by tapping a tab or swiping sideways:
 
 - **Summary** lists headline counts and each trait's coverage, with the field's completeness in the top right corner: the share of every entry and trait pairing that has been recorded, as on the Progress tab.
 - **Progress** charts coverage and observations per day over the collection period, and observations by collector.

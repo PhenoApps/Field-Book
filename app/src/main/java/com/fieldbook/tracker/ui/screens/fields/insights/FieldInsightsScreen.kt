@@ -3,6 +3,8 @@ package com.fieldbook.tracker.ui.screens.fields.insights
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -19,8 +21,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,6 +40,7 @@ import com.fieldbook.tracker.insights.InsightTrait
 import com.fieldbook.tracker.insights.InsightTraitKind
 import com.fieldbook.tracker.ui.components.appBar.AppBar
 import com.fieldbook.tracker.ui.theme.AppTheme
+import kotlinx.coroutines.launch
 
 enum class InsightTab(@StringRes val title: Int) {
     SUMMARY(R.string.field_insights_tab_summary),
@@ -119,7 +122,13 @@ fun FieldInsightsScreen(
 @Composable
 private fun FieldInsightsContent(data: FieldInsightsData) {
 
-    var tabIndex by rememberSaveable { mutableIntStateOf(0) }
+    // The pager holds which tab is showing, so swiping and the tab row stay in step; its state
+    // is saved, so the tab survives rotation.
+    val tabs = InsightTab.entries
+    val pagerState = rememberPagerState(pageCount = { tabs.size })
+    val scope = rememberCoroutineScope()
+    val tabIndex = pagerState.currentPage
+
     var traitId by rememberSaveable {
         mutableStateOf(data.traits.firstOrNull { it.kind != InsightTraitKind.OTHER }?.id ?: data.traits.first().id)
     }
@@ -131,19 +140,18 @@ private fun FieldInsightsContent(data: FieldInsightsData) {
     var rowAttribute by rememberSaveable { mutableStateOf(data.defaultRowAttribute) }
     var columnAttribute by rememberSaveable { mutableStateOf(data.defaultColumnAttribute) }
 
-    val tabs = InsightTab.entries
     val trait = data.trait(traitId) ?: data.traits.first()
     val relationshipPair = pairFirstId?.let { first -> pairSecondId?.let { second -> first to second } }
 
-    fun open(tab: InsightTab, trait: String?) {
+    fun open(tab: InsightTab, trait: String? = null) {
         trait?.let { traitId = it }
-        tabIndex = tab.ordinal
+        scope.launch { pagerState.animateScrollToPage(tab.ordinal) }
     }
 
     // Back returns to Summary before it leaves the screen. Only registered off Summary, so from
     // there back falls through to the activity as usual.
     BackHandler(enabled = tabIndex != InsightTab.SUMMARY.ordinal) {
-        tabIndex = InsightTab.SUMMARY.ordinal
+        open(InsightTab.SUMMARY)
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -164,9 +172,7 @@ private fun FieldInsightsContent(data: FieldInsightsData) {
             tabs.forEachIndexed { index, tab ->
                 Tab(
                     selected = index == tabIndex,
-                    onClick = {
-                        tabIndex = index
-                    },
+                    onClick = { open(tab) },
                     text = { Text(stringResource(tab.title)) },
                     selectedContentColor = AppTheme.colors.text.primary,
                     unselectedContentColor = AppTheme.colors.text.secondary
@@ -174,61 +180,70 @@ private fun FieldInsightsContent(data: FieldInsightsData) {
             }
         }
 
-        when (tabs[tabIndex]) {
-            InsightTab.SUMMARY -> SummaryTab(
-                data = data,
-                onOpenTrait = { open(InsightTab.STATISTICS, it) }
-            )
+        // Pages fill the space under the tabs. The map and the correlation matrix scroll sideways
+        // themselves; a swipe on them scrolls them first and turns the page once they reach
+        // their edge.
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize(),
+            key = { tabs[it] }
+        ) { page ->
+            when (tabs[page]) {
+                InsightTab.SUMMARY -> SummaryTab(
+                    data = data,
+                    onOpenTrait = { open(InsightTab.STATISTICS, it) }
+                )
 
-            InsightTab.PROGRESS -> ProgressTab(
-                data = data,
-                trait = if (progressAllTraits) null else trait,
-                onTraitChange = { selected ->
-                    progressAllTraits = selected == null
-                    selected?.let { traitId = it.id }
-                }
-            )
+                InsightTab.PROGRESS -> ProgressTab(
+                    data = data,
+                    trait = if (progressAllTraits) null else trait,
+                    onTraitChange = { selected ->
+                        progressAllTraits = selected == null
+                        selected?.let { traitId = it.id }
+                    }
+                )
 
-            InsightTab.STATISTICS -> StatisticsTab(
-                data = data,
-                trait = trait,
-                onTraitChange = {
-                    traitId = it.id
-                }
-            )
+                InsightTab.STATISTICS -> StatisticsTab(
+                    data = data,
+                    trait = trait,
+                    onTraitChange = {
+                        traitId = it.id
+                    }
+                )
 
-            InsightTab.MAP -> FieldMapTab(
-                data = data,
-                trait = trait,
-                rowAttribute = rowAttribute,
-                columnAttribute = columnAttribute,
-                onTraitChange = {
-                    traitId = it.id
-                },
-                onRowAttributeChange = {
-                    rowAttribute = it
-                },
-                onColumnAttributeChange = {
-                    columnAttribute = it
-                }
-            )
+                InsightTab.MAP -> FieldMapTab(
+                    data = data,
+                    trait = trait,
+                    rowAttribute = rowAttribute,
+                    columnAttribute = columnAttribute,
+                    onTraitChange = {
+                        traitId = it.id
+                    },
+                    onRowAttributeChange = {
+                        rowAttribute = it
+                    },
+                    onColumnAttributeChange = {
+                        columnAttribute = it
+                    }
+                )
 
-            InsightTab.COMPARE -> CompareTab(
-                data = data,
-                trait = trait,
-                onTraitChange = {
-                    traitId = it.id
-                }
-            )
+                InsightTab.COMPARE -> CompareTab(
+                    data = data,
+                    trait = trait,
+                    onTraitChange = {
+                        traitId = it.id
+                    }
+                )
 
-            InsightTab.CORRELATIONS -> CorrelationsTab(
-                data = data,
-                selectedPair = relationshipPair,
-                onPairChange = {
-                    pairFirstId = it.first
-                    pairSecondId = it.second
-                }
-            )
+                InsightTab.CORRELATIONS -> CorrelationsTab(
+                    data = data,
+                    selectedPair = relationshipPair,
+                    onPairChange = {
+                        pairFirstId = it.first
+                        pairSecondId = it.second
+                    }
+                )
+            }
         }
     }
 }
