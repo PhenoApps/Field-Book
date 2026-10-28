@@ -123,7 +123,9 @@ private fun FieldInsightsContent(data: FieldInsightsData) {
     var traitId by rememberSaveable {
         mutableStateOf(data.traits.firstOrNull { it.kind != InsightTraitKind.OTHER }?.id ?: data.traits.first().id)
     }
-    var progressTraitId by rememberSaveable { mutableStateOf<String?>(null) }
+    // Progress shares the selected trait with the other tabs, and can also show all traits at
+    // once; that choice is Progress's own, so it leaves the other tabs' trait alone.
+    var progressAllTraits by rememberSaveable { mutableStateOf(true) }
     var pairFirstId by rememberSaveable { mutableStateOf<String?>(null) }
     var pairSecondId by rememberSaveable { mutableStateOf<String?>(null) }
     var rowAttribute by rememberSaveable { mutableStateOf(data.defaultRowAttribute) }
@@ -180,9 +182,10 @@ private fun FieldInsightsContent(data: FieldInsightsData) {
 
             InsightTab.PROGRESS -> ProgressTab(
                 data = data,
-                trait = data.trait(progressTraitId),
-                onTraitChange = {
-                    progressTraitId = it?.id
+                trait = if (progressAllTraits) null else trait,
+                onTraitChange = { selected ->
+                    progressAllTraits = selected == null
+                    selected?.let { traitId = it.id }
                 }
             )
 
