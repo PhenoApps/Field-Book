@@ -62,8 +62,11 @@ On inactive servers, a **Switch Server** action switches Field Book to use that 
 #### Check Compatibility
 
 The top card displays the information for a server including its server name, organization, and description.
-The second card shows how many of the BrAPI calls used by Field Book are supported by the server.
-The remaining cards show module-wise comparison of all calls in the BrAPI specification that have been implemented by the server and/or Field Book.
+The next two cards show how many of the BrAPI calls used by Field Book are supported by the server.
+**Import to Field Book** covers the calls used to import fields and traits and to download observations.
+**Upload from Field Book** covers the calls used to send observations and images to the server.
+Each method of a call is its own row, so a server that lets Field Book read observations but not create or update them shows `GET observations` as supported and `POST observations` and `PUT observations` as not supported.
+The remaining cards, under **All Server Calls**, compare every call the server lists, grouped by BrAPI module, with the calls Field Book uses.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/brapi/settings/brapi_compatibility.png" width="350px"> 

@@ -11,8 +11,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.ui.components.widgets.CollapsibleSection
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.BrapiModuleCalls
-import com.fieldbook.tracker.utilities.CallImplementedBy
-import com.fieldbook.tracker.utilities.ServiceComparison
+import com.fieldbook.tracker.utilities.CallComparison
 
 @Composable
 fun ModuleCard(moduleInfo: BrapiModuleCalls) {
@@ -22,8 +21,14 @@ fun ModuleCard(moduleInfo: BrapiModuleCalls) {
         headerContent = {
             Text(
                 text = stringResource(
-                    R.string.brapi_server_calls_implemented,
-                    moduleInfo.appImplementedCount,
+                    // Field Book's own cards count what the server supports, module cards count
+                    // what Field Book makes of the server's calls
+                    if (moduleInfo.isAppCompatibility) {
+                        R.string.brapi_server_calls_supported
+                    } else {
+                        R.string.brapi_server_calls_implemented
+                    },
+                    moduleInfo.supportedCount,
                     moduleInfo.totalCalls,
                     moduleInfo.implementationPercentage
                 ),
@@ -44,23 +49,12 @@ private fun ModuleCardWithTablePreview() {
             moduleInfo = BrapiModuleCalls(
                 moduleName = "Module",
                 calls = listOf(
-                    ServiceComparison(
-                        service = "studies",
-                        methods = listOf("GET", "POST"),
-                        isAppImplemented = true,
-                        implementedMethods = listOf("GET"),
-                        source = CallImplementedBy.SERVER_AND_APP
-                    ),
-                    ServiceComparison(
-                        service = "observations",
-                        methods = listOf("GET", "POST", "PUT"),
-                        isAppImplemented = true,
-                        implementedMethods = listOf("GET", "POST", "PUT"),
-                        source = CallImplementedBy.SERVER_AND_APP
-                    ),
+                    CallComparison("observations", "GET", supportedByServer = true, supportedByApp = true),
+                    CallComparison("observations", "POST", supportedByServer = true, supportedByApp = true),
+                    CallComparison("studies", "POST", supportedByServer = true, supportedByApp = false),
                 ),
-                appImplementedCount = 1,
-                totalCalls = 2
+                supportedCount = 2,
+                totalCalls = 3
             )
         )
     }
