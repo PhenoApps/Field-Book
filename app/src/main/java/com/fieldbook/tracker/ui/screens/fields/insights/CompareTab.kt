@@ -14,10 +14,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -55,7 +55,8 @@ private const val LABEL_WEIGHT = 0.3f
 private const val PLOT_WEIGHT = 0.5f
 private const val VALUE_WEIGHT = 0.2f
 
-private val rowPadding = 24.dp
+/** Inside the card's own padding; just enough for the highlight behind a selected row. */
+private val rowPadding = 4.dp
 private val boxHeight = 12.dp
 
 private val PREFERRED_GROUPING_REGEX =
@@ -196,7 +197,9 @@ private fun NumericComparison(
     val domain = remember(comparison) { InsightStats.niceDomain(comparison.overall.min, comparison.overall.max, 4) }
     var selected by remember(comparison) { mutableStateOf<String?>(null) }
 
-    LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
+    // The axis and every group sit in one card with the title. Groups are capped at MAX_GROUPS, so
+    // the rows are laid out together rather than lazily.
+    LazyColumn(contentPadding = PaddingValues(8.dp)) {
 
         item {
             InsightSection(
@@ -208,29 +211,32 @@ private fun NumericComparison(
                         InsightFormat.percent(it * 100),
                         trait.name
                     )
-                },
-                modifier = Modifier.padding(horizontal = 8.dp)
-            ) {}
-        }
+                }
+            ) {
+                AxisHeader(domain, format)
 
-        item { AxisHeader(domain, format) }
-
-        items(groups, key = { it.group }) { summary ->
-            GroupRangeRow(
-                summary = summary,
-                domain = domain,
-                overallMean = comparison.overall.mean,
-                format = format,
-                detail = if (summary.group != selected) null else resources.getString(
-                    R.string.field_insights_group_readout,
-                    InsightFormat.count(summary.stats.n),
-                    format(summary.stats.mean),
-                    format(summary.stats.median),
-                    format(summary.stats.min),
-                    format(summary.stats.max)
-                ),
-                onClick = { selected = if (selected == summary.group) null else summary.group }
-            )
+                Column {
+                    groups.forEach { summary ->
+                        key(summary.group) {
+                            GroupRangeRow(
+                                summary = summary,
+                                domain = domain,
+                                overallMean = comparison.overall.mean,
+                                format = format,
+                                detail = if (summary.group != selected) null else resources.getString(
+                                    R.string.field_insights_group_readout,
+                                    InsightFormat.count(summary.stats.n),
+                                    format(summary.stats.mean),
+                                    format(summary.stats.median),
+                                    format(summary.stats.min),
+                                    format(summary.stats.max)
+                                ),
+                                onClick = { selected = if (selected == summary.group) null else summary.group }
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -362,32 +368,35 @@ private fun CategoricalComparison(
     }
     var selected by remember(groups) { mutableStateOf<String?>(null) }
 
-    LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
+    LazyColumn(contentPadding = PaddingValues(8.dp)) {
 
         item {
             InsightSection(
-                title = stringResource(R.string.field_insights_compare_title, trait.name, grouping.label),
-                modifier = Modifier.padding(horizontal = 8.dp)
+                title = stringResource(R.string.field_insights_compare_title, trait.name, grouping.label)
             ) {
                 SwatchLegend(
                     colors.order.filterNot(colors::isOther).map { LegendItem(it, colors.colorOf(it)) } +
                             (if (colors.hasOther) listOf(LegendItem(other, palette.other)) else emptyList())
                 )
-            }
-        }
 
-        items(sorted, key = { it.group }) { group ->
-            GroupShareRow(
-                group = group,
-                colors = colors,
-                detail = if (group.group != selected) null else colors.order
-                    .filter { (group.counts[it] ?: 0) > 0 }
-                    .joinToString(", ") {
-                        val count = group.counts[it] ?: 0
-                        "$it ${InsightFormat.count(count)} (${InsightFormat.percent(count * 100.0 / group.total)})"
-                    },
-                onClick = { selected = if (selected == group.group) null else group.group }
-            )
+                Column {
+                    sorted.forEach { group ->
+                        key(group.group) {
+                            GroupShareRow(
+                                group = group,
+                                colors = colors,
+                                detail = if (group.group != selected) null else colors.order
+                                    .filter { (group.counts[it] ?: 0) > 0 }
+                                    .joinToString(", ") {
+                                        val count = group.counts[it] ?: 0
+                                        "$it ${InsightFormat.count(count)} (${InsightFormat.percent(count * 100.0 / group.total)})"
+                                    },
+                                onClick = { selected = if (selected == group.group) null else group.group }
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
