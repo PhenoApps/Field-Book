@@ -1,9 +1,11 @@
 package com.fieldbook.tracker.adapters
 
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -15,21 +17,41 @@ import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories
  * Reference:
  * https://developer.android.com/guide/topics/ui/layout/recyclerview
  */
-class CategoryAdapter(private val context: CategoryListItemOnClick):
+/**
+ * @param isSortable shows a drag handle on each item that calls onCategoryDrag when touched
+ */
+class CategoryAdapter(private val context: CategoryListItemOnClick, private val isSortable: Boolean = false):
         ListAdapter<BrAPIScaleValidValuesCategories, CategoryAdapter.ViewHolder>(DiffCallback()) {
 
     interface CategoryListItemOnClick {
         fun onCategoryClick(label: String)
+        fun onCategoryDrag(viewHolder: RecyclerView.ViewHolder) {}
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val valueTextView: TextView = view.findViewById(R.id.list_item_category_value_tv)
         private val deleteButton: ImageButton = view.findViewById(R.id.list_item_category_delete_btn)
+        private val dragButton: ImageView = view.findViewById(R.id.list_item_category_drag_iv)
 
         init {
             deleteButton.setOnClickListener {
                 val value = valueTextView.text.toString()
                 context.onCategoryClick(value)
+            }
+
+            if (isSortable) {
+
+                dragButton.visibility = View.VISIBLE
+
+                dragButton.setOnTouchListener { v, event ->
+
+                    if (event.action == MotionEvent.ACTION_DOWN) {
+
+                        context.onCategoryDrag(this)
+                    }
+
+                    v.performClick()
+                }
             }
         }
     }
