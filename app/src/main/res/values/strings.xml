@@ -323,7 +323,7 @@
     <string name="field_insights_no_data">No observations have been collected in this field yet.</string>
     <string name="field_insights_tab_summary">Summary</string>
     <string name="field_insights_tab_progress">Progress</string>
-    <string name="field_insights_tab_distribution">Distribution</string>
+    <string name="field_insights_tab_statistics">Statistics</string>
     <string name="field_insights_tab_map">Map</string>
     <string name="field_insights_tab_compare">Compare</string>
     <string name="field_insights_tab_correlations">Correlations</string>

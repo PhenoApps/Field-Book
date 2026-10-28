@@ -23,9 +23,9 @@ import kotlin.math.floor
 /** Timed scatters color by collector only while the colors stay distinguishable on every pair. */
 private const val MAX_COLLECTOR_COLORS = 3
 
-/** One trait's values: their spread, and whether they shifted while they were being collected. */
+/** One trait's statistics: its summary, the spread of its values, and whether they shifted while they were being collected. */
 @Composable
-fun DistributionTab(
+fun StatisticsTab(
     data: FieldInsightsData,
     trait: InsightTrait,
     onTraitChange: (InsightTrait) -> Unit

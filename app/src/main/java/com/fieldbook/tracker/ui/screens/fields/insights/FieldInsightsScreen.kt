@@ -42,7 +42,7 @@ import com.fieldbook.tracker.ui.theme.AppTheme
 enum class InsightTab(@StringRes val title: Int) {
     SUMMARY(R.string.field_insights_tab_summary),
     PROGRESS(R.string.field_insights_tab_progress),
-    DISTRIBUTION(R.string.field_insights_tab_distribution),
+    STATISTICS(R.string.field_insights_tab_statistics),
     MAP(R.string.field_insights_tab_map),
     COMPARE(R.string.field_insights_tab_compare),
     CORRELATIONS(R.string.field_insights_tab_correlations),
@@ -175,7 +175,7 @@ private fun FieldInsightsContent(data: FieldInsightsData) {
         when (tabs[tabIndex]) {
             InsightTab.SUMMARY -> SummaryTab(
                 data = data,
-                onOpenTrait = { open(InsightTab.DISTRIBUTION, it) }
+                onOpenTrait = { open(InsightTab.STATISTICS, it) }
             )
 
             InsightTab.PROGRESS -> ProgressTab(
@@ -186,7 +186,7 @@ private fun FieldInsightsContent(data: FieldInsightsData) {
                 }
             )
 
-            InsightTab.DISTRIBUTION -> DistributionTab(
+            InsightTab.STATISTICS -> StatisticsTab(
                 data = data,
                 trait = trait,
                 onTraitChange = {

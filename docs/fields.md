@@ -273,7 +273,7 @@ Its tabs show the data in different ways:
 
 - **Summary** lists headline counts and each trait's coverage, with the field's completeness in the top right corner: the share of every entry and trait pairing that has been recorded, as on the Progress tab.
 - **Progress** charts coverage and observations per day over the collection period, and observations by collector.
-- **Distribution** shows the spread of one trait's values, and plots numeric values against the time they were recorded to reveal drift.
+- **Statistics** summarizes one trait, shows the spread of its values, and plots numeric values against the time they were recorded to reveal drift.
 - **Map** lays the trait out by the field's row and column attributes, with a box plot of the values in each row and column.
 Values are shaded light to dark, or colored red to green by how far they fall below or above the field mean.
 - **Compare** splits a trait by an attribute such as rep or entry, by collector, or by collection day, and reports how much of the variation the grouping explains.
