@@ -310,14 +310,90 @@
 
     <!--    <string name="field_default_sort_order">import order</string>-->
 
-    <string name="field_data_title">Data</string>
     <string name="field_data_summary">%1$d observations across %2$d traits</string>
-    <string name="field_trait_observation_total">"%d" observations</string>
 
     <!-- Field Detail Charts -->
     <string name="chart_no_data">No data to chart</string>
     <string name="chart_incompatible_format">This trait format cannot be charted</string>
     <string name="chart_excess_data">Too many distinct values to chart</string>
+
+    <!-- Field Insights -->
+    <string name="field_insights_title">Insights</string>
+    <string name="field_insights_error_loading">Could not load this field\'s data.</string>
+    <string name="field_insights_no_data">No observations have been collected in this field yet.</string>
+    <string name="field_insights_tab_summary">Summary</string>
+    <string name="field_insights_tab_progress">Progress</string>
+    <string name="field_insights_tab_statistics">Statistics</string>
+    <string name="field_insights_tab_map">Map</string>
+    <string name="field_insights_tab_compare">Compare</string>
+    <string name="field_insights_tab_correlations">Correlations</string>
+    <string name="field_insights_trait">Trait</string>
+    <string name="field_insights_all_traits">All traits</string>
+    <string name="field_insights_none">None</string>
+    <string name="field_insights_other">Other</string>
+    <string name="field_insights_multiple">Multiple</string>
+    <string name="field_insights_no_value">No value</string>
+    <string name="field_insights_no_values">No values to chart.</string>
+    <string name="field_insights_not_chartable">Values of this trait\'s format can\'t be charted.</string>
+    <string name="field_insights_overview">Overview</string>
+    <string name="field_insights_observations">Observations</string>
+    <string name="field_insights_traits">Traits</string>
+    <string name="field_insights_plots_with_data">Entries with data</string>
+    <string name="field_insights_plots_filled">Entries with a value</string>
+    <string name="field_insights_collection_days">Collection days</string>
+    <string name="field_insights_collectors">Collectors</string>
+    <string name="field_insights_collector_unknown">Not recorded</string>
+    <string name="field_insights_coverage_over_time">Coverage over time</string>
+    <string name="field_insights_progress_readout">%1$s: %2$s filled (%3$s of %4$s)</string>
+    <string name="field_insights_observations_per_day">Observations per day</string>
+    <string name="field_insights_day_readout">%1$s: %2$s observations</string>
+    <string name="field_insights_by_collector">By collector</string>
+    <string name="field_insights_undated_note">%1$s observations have no readable timestamp and are left out of the charts over time.</string>
+    <string name="field_insights_mean">Mean</string>
+    <string name="field_insights_median">Median</string>
+    <string name="field_insights_sd">Std. deviation</string>
+    <string name="field_insights_sd_short">SD</string>
+    <string name="field_insights_n">n</string>
+    <string name="field_insights_na">NA</string>
+    <string name="field_insights_cv">CV</string>
+    <string name="field_insights_range">Range</string>
+    <string name="field_insights_earliest">Earliest</string>
+    <string name="field_insights_latest">Latest</string>
+    <string name="field_insights_distribution">Distribution</string>
+    <string name="field_insights_value_readout">%1$s: %2$s observations (%3$s)</string>
+    <string name="field_insights_bin_readout">%1$s to %2$s: %3$s observations (%4$s)</string>
+    <string name="field_insights_over_time">Values over collection time</string>
+    <string name="field_insights_over_time_trend">Trend %1$s per day, r = %2$s</string>
+    <string name="field_insights_timed_readout">Entry %1$s: %2$s, %3$s, %4$s</string>
+    <string name="field_insights_counts">Counts</string>
+    <string name="field_insights_categories_used">Categories used</string>
+    <string name="field_insights_most_common">Mode</string>
+    <string name="field_insights_map_rows">Rows</string>
+    <string name="field_insights_map_columns">Columns</string>
+    <string name="field_insights_map_mode_value">Value</string>
+    <string name="field_insights_map_mode_deviation">Mean scaled</string>
+    <string name="field_insights_map_no_attributes">This field has no attributes to lay out a map.</string>
+    <string name="field_insights_map_choose_layout">Choose the row and column attributes that lay out the field.</string>
+    <string name="field_insights_map_too_large">%1$d rows by %2$d columns is too large to map. Try other row and column attributes.</string>
+    <string name="field_insights_map_unplaced">%1$s entries have no row or column value and are not shown.</string>
+    <string name="field_insights_cell_readout">Entry %1$s: %2$s (%3$s %4$s, %5$s %6$s)</string>
+    <string name="field_insights_recorded">Recorded</string>
+    <string name="field_insights_values_by">Values by %1$s</string>
+    <string name="field_insights_profile_readout">%1$s %2$s: n = %3$s, mean %4$s, median %5$s, range %6$s to %7$s</string>
+    <string name="field_insights_group_by">Group by</string>
+    <string name="field_insights_group_collector">Collector</string>
+    <string name="field_insights_group_day">Collection day</string>
+    <string name="field_insights_sort_value">Value</string>
+    <string name="field_insights_sort_name">Name</string>
+    <string name="field_insights_compare_title">%1$s by %2$s</string>
+    <string name="field_insights_compare_explained">%1$s explains %2$s of the variation in %3$s</string>
+    <string name="field_insights_compare_no_groups">No values could be grouped by %1$s.</string>
+    <string name="field_insights_group_readout">n = %1$s, mean %2$s, median %3$s, range %4$s to %5$s</string>
+    <string name="field_insights_correlations_need_two">Correlations need at least two numeric or date traits measured on the same entries.</string>
+    <string name="field_insights_correlation_matrix">Correlation matrix</string>
+    <string name="field_insights_scatter_title">%1$s vs. %2$s</string>
+    <string name="field_insights_scatter_subtitle">r = %1$s, n = %2$s, slope %3$s</string>
+    <string name="field_insights_scatter_readout">Entry %1$s: %2$s %3$s, %4$s %5$s</string>
 
     <!-- Semantic dates -->
     <string name="today">Today</string>
@@ -1824,6 +1900,7 @@
     <string name="pref_experimental_generate_sample_data_confirm_message">This will create or populate a field named \"field_sample\" with artificial observations. Sample traits will be loaded automatically if none are present.</string>
     <string name="pref_experimental_generate_sample_data_success">Sample field created successfully.</string>
     <string name="pref_experimental_generate_sample_data_failure">Failed to generate sample field. Check that storage is configured correctly.</string>
+    <string name="pref_experimental_generate_sample_data_running">Generating the sample field…</string>
     <string name="traits_format_experimental">Experimental</string>
     <string name="traits_format_canopy_cover">Canopy Cover</string>
     <string name="trait_canopy_sensitivity_label">Sensitivity</string>

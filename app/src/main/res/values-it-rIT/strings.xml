@@ -264,9 +264,7 @@
     <string name="search_attribute_updated_all">Criterio di ricerca aggiornato per campo/i %1$d</string>
     <string name="search_multiple_matches_found">Trovati %1$d appezzamenti corrispondenti. Visualizzazione del primo.</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
-    <string name="field_data_title">Dato</string>
     <string name="field_data_summary">%1$d osservazioni su %2$d caratteri</string>
-    <string name="field_trait_observation_total">\"%d\" osservazioni</string>
     <!-- Field Detail Charts -->
     <string name="chart_no_data">Nessun dato da rappresentare graficamente</string>
     <string name="chart_incompatible_format">Questo formato di carattere non può essere grafitato</string>

@@ -18,6 +18,7 @@ import androidx.preference.PreferenceManager;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
+import com.fieldbook.tracker.database.dao.FieldInsightsDao;
 import com.fieldbook.tracker.database.dao.GroupDao;
 import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao;
@@ -61,7 +62,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -729,35 +729,9 @@ public class DataHelper {
 
     public FieldObject getFieldObject(Integer studyId) {
 
-        return getFieldObject(studyId, true);
-    }
-
-    /**
-     * Loads a study. Its trait details carry every observation value recorded against the study,
-     * so callers that never read them should pass false rather than paying to build and discard
-     * them.
-     */
-    public FieldObject getFieldObject(Integer studyId, boolean loadTraitDetails) {
-
         open();
 
-        List<FieldObject.TraitDetail> traitDetails = loadTraitDetails
-                ? getTraitDetailsForStudy(studyId)
-                : Collections.emptyList();
-
-        return StudyDao.Companion.getFieldObject(
-                studyId,
-                traitDetails
-        );
-    }
-
-    public List<FieldObject.TraitDetail> getTraitDetailsForStudy(Integer studyId) {
-
-        open();
-
-        String sortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
-
-        return StudyDao.Companion.getTraitDetailsForStudy(studyId, sortOrder);
+        return StudyDao.Companion.getFieldObject(studyId);
     }
 
     /**
@@ -1413,6 +1387,35 @@ public class DataHelper {
         return ObservationUnitAttributeDao.Companion.getAllNames(studyId);
     }
 
+    /** Observations with a value, then traits that have one, as the insights screen counts them. */
+    public kotlin.Pair<Integer, Integer> getFieldInsightsCounts(int studyId) {
+
+        open();
+
+        return FieldInsightsDao.Companion.getCounts(studyId);
+    }
+
+    public List<FieldInsightsDao.ObservationRow> getFieldInsightsObservations(int studyId) {
+
+        open();
+
+        return FieldInsightsDao.Companion.getObservations(studyId);
+    }
+
+    public List<FieldInsightsDao.UnitRow> getFieldInsightsUnits(int studyId) {
+
+        open();
+
+        return FieldInsightsDao.Companion.getUnits(studyId);
+    }
+
+    public List<FieldInsightsDao.AttributeRow> getFieldInsightsAttributes(int studyId) {
+
+        open();
+
+        return FieldInsightsDao.Companion.getAttributes(studyId);
+    }
+
     public void beginTransaction() {
         openHelper.getWritableDatabase().beginTransaction();
     }
@@ -1528,6 +1531,13 @@ public class DataHelper {
         open();
 
         ObservationDao.Companion.deleteAllForStudy(studyId);
+    }
+
+    public void replaceAllObservationsForStudy(String studyId, List<ObservationDao.NewObservation> observations) {
+
+        open();
+
+        ObservationDao.Companion.replaceAllForStudy(studyId, observations);
     }
 
     /**
