@@ -263,7 +263,7 @@
 
     <string name="brapi_resync_choice_required">Re-sync found existing server observations without local BrAPI IDs. Choose how to handle them before uploading.</string>
     <string name="brapi_resync_dialog_title">Re-sync Match Found</string>
-    <string name="brapi_resync_dialog_message">%1$d observation(s) match data already stored on the server but have no local BrAPI ID. Choose one action for these matches.</string>
+    <string name="brapi_resync_dialog_message">%1$d new observation(s) match values already stored on the server. They were probably uploaded before without this device recording it, for example if the app closed during an upload. Update Existing links them to the server copies, Upload as New sends them again as separate observations.</string>
     <string name="brapi_resync_dialog_values">Local: %1$s | Server: %2$s</string>
     <string name="brapi_resync_update_existing">Update Existing</string>
     <string name="brapi_resync_upload_new">Upload as New</string>
@@ -1781,6 +1781,66 @@
     <string name="preferences_brapi_cache_invalidate_dialog_title">Invalidate Cache Interval Choices</string>
     <string name="preferences_brapi_cache_invalidate_summary">%s</string>
     <string name="preferences_brapi_cache_invalidate_title">Cache Invalidation</string>
+    <string name="preferences_brapi_sync_title">Sync Settings</string>
+    <string name="preferences_brapi_sync_summary">Automatic sync and reminders</string>
+    <string name="preferences_brapi_sync_on_field_open_title">Sync When Opening a Field</string>
+    <string name="preferences_brapi_sync_on_field_open_summary">Download and upload observations when a BrAPI field is opened</string>
+    <string name="preferences_brapi_sync_interval_title">Background Sync</string>
+    <string name="preferences_brapi_sync_interval_summary">%s</string>
+    <string name="preferences_brapi_sync_upload_mode_title">Automatic Upload</string>
+    <string name="preferences_brapi_sync_upload_mode_summary">%s</string>
+    <string name="preferences_brapi_sync_reconnect_notification_title">Notify on Reconnect</string>
+    <string name="preferences_brapi_sync_reconnect_notification_summary">Show a notification when the network returns and observations have not been synced</string>
+    <string name="brapi_sync_notification_channel">BrAPI sync</string>
+    <string name="brapi_sync_notification_channel_description">Reminders to sync observations with the BrAPI server</string>
+    <plurals name="brapi_sync_notification_title">
+        <item quantity="one">%d observation is not synced</item>
+        <item quantity="other">%d observations are not synced</item>
+    </plurals>
+    <string name="brapi_sync_notification_text_field">Tap to sync %s</string>
+    <string name="brapi_sync_notification_action_sync">Sync</string>
+    <string name="brapi_sync_notification_action_dismiss">Dismiss</string>
+    <plurals name="brapi_sync_notification_text_fields">
+        <item quantity="one">In %d field, tap to review</item>
+        <item quantity="other">In %d fields, tap to review</item>
+    </plurals>
+    <plurals name="brapi_sync_unsynced_count">
+        <item quantity="one">%d observation not synced</item>
+        <item quantity="other">%d observations not synced</item>
+    </plurals>
+    <string name="brapi_sync_all_synced">All observations synced</string>
+    <string name="brapi_sync_all_synced_today">All observations synced today</string>
+    <string name="brapi_sync_all_synced_yesterday">All observations synced yesterday</string>
+    <string name="brapi_sync_all_synced_on">All observations synced on %s</string>
+    <plurals name="brapi_sync_all_synced_years_ago">
+        <item quantity="one">All observations synced %d year ago</item>
+        <item quantity="other">All observations synced %d years ago</item>
+    </plurals>
+    <string name="brapi_sync_in_progress">Syncing…</string>
+    <plurals name="brapi_sync_needs_review">
+        <item quantity="one">%d observation needs review</item>
+        <item quantity="other">%d observations need review</item>
+    </plurals>
+    <string name="brapi_sync_auto_failed">Automatic sync failed</string>
+    <!-- Joins the unsynced count with a clause about the last automatic sync, e.g. "3 observations not synced, 2 need review" -->
+    <string name="brapi_sync_status_with_clause">%1$s, %2$s</string>
+    <plurals name="brapi_sync_clause_needs_review">
+        <item quantity="one">%d needs review</item>
+        <item quantity="other">%d need review</item>
+    </plurals>
+    <string name="brapi_sync_clause_auto_failed">last automatic sync failed</string>
+    <string name="brapi_review_title">Needs Review</string>
+    <string name="brapi_review_checking">Checking %s for changes…</string>
+    <plurals name="brapi_review_conflicts_message">
+        <item quantity="one">%d observation was changed on the server since the last sync and also edited on this device. Choose which value to keep before uploading.</item>
+        <item quantity="other">%d observations were changed on the server since the last sync and also edited on this device. Choose which values to keep before uploading.</item>
+    </plurals>
+    <plurals name="brapi_review_resync_message">
+        <item quantity="one">%d new observation matches a value already on the server. It may have been uploaded before without this device recording it, for example if the app closed during an upload. Link it to the server copy or upload it again.</item>
+        <item quantity="other">%d new observations match values already on the server. They may have been uploaded before without this device recording it, for example if the app closed during an upload. Link them to the server copies or upload them again.</item>
+    </plurals>
+    <string name="brapi_review_resync_button">Review Matches</string>
+    <string name="brapi_review_upload_blocked">Resolve the observations that need review before uploading</string>
     <string name="brapi_v1_is_not_compatible">BrAPI V1 is not compatible.</string>
     <string name="no_programdbid_provided">No programDbId provided</string>
     <string name="no_studydbids_provided">No studyDbIds provided</string>
@@ -2057,7 +2117,7 @@
     <string name="brapi_sync">BrAPI Sync</string>
     <string name="download_from">Download from %1$s</string>
     <string name="last_checked">Last checked: %1$s</string>
-    <string name="brapi_conflicts_found">Found %1$d conflicting observations. Choose a merge strategy:</string>
+    <string name="brapi_conflicts_found">%1$d observation(s) were changed on this device and on the server since the last sync. Choose which values to keep:</string>
     <string name="manual">Manual</string>
     <string name="select_all_local">Select all (local)</string>
     <string name="select_all_server">Select all (server)</string>

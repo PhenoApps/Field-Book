@@ -106,10 +106,14 @@ data class BrapiExportUiState(
     // Pre-upload re-sync matches for observations with no local BrAPI id.
     val pendingResyncChoicesCount: Int = 0,
     val pendingResyncChoices: List<PendingResyncChoiceUi> = emptyList(),
+    // Bumped when an action (download, upload) finds items to review, so the screen opens the
+    // matching dialog. Items found when the screen opens are only listed until the user asks.
+    val reviewRequest: Int = 0,
 )
 
 enum class ViewMode {
     IDLE,
+    CHECKING, // looking for observations that need review when the screen opens
     EXPORTING,
     DOWNLOADING,
     SAVING

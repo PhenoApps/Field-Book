@@ -79,6 +79,8 @@ Once you are satisified with the traits, press the Import button at the bottom o
 ## Sync
 
 Fields imported using BrAPI include a <img class="icon" src="./_static/icons/fields/sync.png"> **Sync** option in the field detail page to transfer data between Field Book and BrAPI-compatible databases.
+The Sync card shows when the field was last synced and how many observations on the device have not been synced yet.
+Fields can also be synced automatically, see [Sync Settings](./settings/settings-brapi.md#sync-settings).
 The top card shows a summary of transfers to the BrAPI database including uploaded observations and images.
 
 <figure class="image">
@@ -96,12 +98,30 @@ The top card shows a summary of transfers to the BrAPI database including upload
 Remote observations can be imported into Field Book in the second card.
 If observations have been collected on different devices, this is a good way to synchronize data across users.
 
-If there are conflicts between local and remote observations, there are several different merge options:
+Observations edited only on the device are uploaded, and observations changed only on the server are downloaded.
+An observation is a conflict when it was edited on the device and also changed on the server since the last sync.
+Field Book compares the server's observation time with the time the observation was last synced to tell whether the server copy changed.
+
+### Needs Review
+
+When the sync screen opens, Field Book checks the server for observations that need a decision and lists them in a **Needs Review** card.
+Nothing is uploaded until they are resolved.
+There are two kinds:
+
+- Conflicts, observations changed on both the device and the server since the last sync.
+Press **Resolve Conflicts** to choose which values to keep.
+- New observations that match values already on the server.
+They were probably uploaded before without the device recording it, for example if the app closed during an upload.
+Press **Review Matches** to link them to the server copies, or to upload them again as separate observations.
+
+Conflicts can be resolved with several different merge options:
 
 - Server: replace local observations with the remote values
 - Local: keep local observation values
 - Recent: keep the most recent observation value
 - Manual: decide for each conflict
+
+Uploading also checks the server for conflicts first, so an upload never overwrites a change made on the server.
 
 <figure class="image">
   <img class="screenshot" src="./_static/images/brapi/joined_brapi_sync_conflict.png" alt="BrAPI sync main screen" width="1100px">

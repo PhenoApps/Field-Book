@@ -101,4 +101,44 @@
     <string name="prefs_brapi_cache_invalidate_choice_weekly">Weekly</string>
     <string name="prefs_brapi_cache_invalidate_choice_none">Never</string>
 
+    <!-- Minutes between interval syncs, 15 is WorkManager's shortest periodic interval -->
+    <string-array name="pref_brapi_sync_interval_values" translatable="false">
+        <item>0</item>
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>360</item>
+        <item>1440</item>
+    </string-array>
+
+    <string-array name="pref_brapi_sync_interval_entries">
+        <item>@string/prefs_brapi_sync_interval_choice_off</item>
+        <item>@string/prefs_brapi_sync_interval_choice_15_minutes</item>
+        <item>@string/prefs_brapi_sync_interval_choice_30_minutes</item>
+        <item>@string/prefs_brapi_sync_interval_choice_hourly</item>
+        <item>@string/prefs_brapi_sync_interval_choice_6_hours</item>
+        <item>@string/prefs_brapi_sync_interval_choice_daily</item>
+    </string-array>
+
+    <string name="prefs_brapi_sync_interval_choice_off">Off</string>
+    <string name="prefs_brapi_sync_interval_choice_15_minutes">Every 15 minutes</string>
+    <string name="prefs_brapi_sync_interval_choice_30_minutes">Every 30 minutes</string>
+    <string name="prefs_brapi_sync_interval_choice_hourly">Every hour</string>
+    <string name="prefs_brapi_sync_interval_choice_6_hours">Every 6 hours</string>
+    <string name="prefs_brapi_sync_interval_choice_daily">Daily</string>
+
+    <!-- What automatic syncs upload, values match BrapiSyncEngine.UPLOAD_MODE_* -->
+    <string-array name="pref_brapi_sync_upload_mode_values" translatable="false">
+        <item>all</item>
+        <item>new</item>
+    </string-array>
+
+    <string-array name="pref_brapi_sync_upload_mode_entries">
+        <item>@string/prefs_brapi_sync_upload_mode_choice_all</item>
+        <item>@string/prefs_brapi_sync_upload_mode_choice_new</item>
+    </string-array>
+
+    <string name="prefs_brapi_sync_upload_mode_choice_all">New and edited observations</string>
+    <string name="prefs_brapi_sync_upload_mode_choice_new">New observations only</string>
+
 </resources>

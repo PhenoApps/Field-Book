@@ -29,6 +29,14 @@
         android:title="@string/brapi_advanced_settings"
         app:iconSpaceReserved="true" />
 
+    <!-- Sync Settings (navigates to sub-screen) -->
+    <Preference
+        android:fragment="com.fieldbook.tracker.preferences.BrapiSyncPreferencesFragment"
+        android:icon="@drawable/ic_field_sync"
+        android:key="brapi_sync_settings"
+        android:title="@string/preferences_brapi_sync_title"
+        app:iconSpaceReserved="true" />
+
     <!-- Active Server section — populated dynamically in BrapiPreferencesFragment -->
     <PreferenceCategory
         android:key="brapi_active_server_category"

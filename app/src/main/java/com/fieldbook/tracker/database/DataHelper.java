@@ -391,6 +391,17 @@ public class DataHelper {
 
     }
 
+    /**
+     * The rep shown when repeated measures is off: the highest rep, so a value downloaded on top of
+     * a local one is the one displayed and edited. "1" when nothing has been recorded yet.
+     */
+    public String getLatestRep(String studyId, String unit, String traitDbId) {
+
+        open();
+
+        return ObservationDao.Companion.getLatestRepeatedValue(studyId, unit, traitDbId);
+    }
+
     public int getMaxPositionFromTraits() {
 
         open();
@@ -460,6 +471,9 @@ public class DataHelper {
      * @return Map containing categorized observations
      */
     public Map<String, List<Observation>> getBrAPIExportData(int fieldId, String hostUrl) {
+
+        open();
+
         return ObservationDao.Companion.getBrAPIExportData(Integer.toString(fieldId), hostUrl);
     }
 
@@ -1102,6 +1116,9 @@ public class DataHelper {
     }
 
     public void updateSyncDate(int studyId) {
+
+        open();
+
         StudyDao.Companion.updateSyncDate(studyId);
     }
 

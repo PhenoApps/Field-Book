@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.activities
 
 import android.Manifest
+import android.animation.ObjectAnimator
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -13,6 +15,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.LinearInterpolator
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -23,7 +26,9 @@ import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
@@ -42,19 +47,28 @@ import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.export.ExportUtil
 import com.fieldbook.tracker.utilities.DateJsonUtil
 import com.fieldbook.tracker.utilities.FileUtil
+import com.fieldbook.tracker.utilities.DateResult
 import com.fieldbook.tracker.utilities.SemanticDateUtil
 import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pub.devrel.easypermissions.EasyPermissions
 import javax.inject.Inject
 import androidx.core.view.isGone
 import androidx.core.content.edit
+import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity
+import com.fieldbook.tracker.activities.brapi.io.sync.BrapiAutoSyncManager
+import com.fieldbook.tracker.activities.brapi.io.sync.BrapiAutoSyncManager.AutoSyncStatus
 import com.fieldbook.tracker.activities.brapi.io.sync.BrapiSyncActivity
+import com.fieldbook.tracker.activities.brapi.io.sync.BrapiSyncEngine
 import com.fieldbook.tracker.utilities.InsetHandler
 import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 
@@ -63,6 +77,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
     companion object {
         const val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
+        private const val AUTO_SYNC_REQUESTED = "auto_sync_requested"
     }
 
     @Inject
@@ -77,6 +92,12 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     @Inject
     lateinit var valueProcessor: ValueProcessorFormatAdapter
 
+    @Inject
+    lateinit var syncEngine: BrapiSyncEngine
+
+    @Inject
+    lateinit var autoSyncManager: BrapiAutoSyncManager
+
     private var toolbar: Toolbar? = null
     private var fieldId: Int? = null
     private var fieldObject: FieldObject? = null
@@ -87,6 +108,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var lastEditTextView: TextView
     private lateinit var lastExportTextView: TextView
     private lateinit var lastSyncTextView: TextView
+    private lateinit var syncIconImageView: ImageView
+    private var syncIconAnimator: ObjectAnimator? = null
     private lateinit var cardViewCollect: CardView
     private lateinit var cardViewExport: CardView
     private lateinit var cardViewSync: CardView
@@ -103,10 +126,34 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private var adapter: FieldDetailAdapter? = null
     private var fieldDetailsJob: Job? = null
 
+    // Observations a sync would upload, null until counted or when the field cannot sync here.
+    private var unsyncedCount: Int? = null
+
+    // Sync on open fires once per visit, not on every resume or rotation.
+    private var autoSyncRequested = false
+
     private val brapiSyncIntentLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
+        // The sync screen resolves what an automatic sync left for review, so drop its note.
+        fieldId?.let { autoSyncManager.clearStatus(it) }
+    }
 
+    // Started from the sync card when the last automatic sync was rejected for authorization.
+    private val brapiAuthLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+
+        val id = fieldId ?: return@registerForActivityResult
+        autoSyncManager.clearStatus(id)
+
+        // The user tapped the card to sync, so carry on with that sync now they are logged in.
+        if (autoSyncManager.canSync()) {
+            autoSyncManager.requestSync(id)
+        } else {
+            renderSyncStatus()
+        }
     }
 
     override fun onCreateView(
@@ -120,6 +167,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         lastExportTextView = rootView.findViewById(R.id.lastExportTextView)
         cardViewSync = rootView.findViewById(R.id.cardViewSync)
         lastSyncTextView = rootView.findViewById(R.id.lastSyncTextView)
+        syncIconImageView = rootView.findViewById(R.id.syncIconImageView)
         sourceChip = rootView.findViewById(R.id.sourceChip)
         originalNameChip = rootView.findViewById(R.id.originalNameChip)
         entryCountChip = rootView.findViewById(R.id.entryCountChip)
@@ -226,17 +274,52 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         return rootView
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        autoSyncRequested = savedInstanceState?.getBoolean(AUTO_SYNC_REQUESTED, false) ?: false
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(AUTO_SYNC_REQUESTED, autoSyncRequested)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         rootView.setOnTouchListener { v, event ->
             // Consume touch event to prevent propagation to FieldEditor/FieldArchived RecyclerView
             true
         }
+
+        // Follows automatic syncs of this field, whether started here or by the interval sync.
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                var previous: AutoSyncStatus? = null
+                autoSyncManager.status
+                    .map { statuses -> fieldId?.let { statuses[it] } }
+                    .distinctUntilChanged()
+                    .collect { status ->
+                        // A sync that finished while this screen was stopped is picked up by the
+                        // reload in onResume, only one seen finishing here needs its own reload.
+                        if (status is AutoSyncStatus.Done && previous is AutoSyncStatus.Running) {
+                            loadFieldDetails()
+                        } else {
+                            renderSyncStatus()
+                        }
+                        previous = status
+                    }
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
         loadFieldDetails()
+    }
+
+    override fun onDestroyView() {
+        setSyncIconSpinning(false)
+        super.onDestroyView()
     }
 
     override fun onSyncComplete() {
@@ -290,6 +373,24 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             // actions are usable while the observations are still being read.
             updateFieldData(field, studyGroupName)
             setupToolbar(field)
+            requestAutoSync(field, context)
+
+            // Counted alongside stage two, it reads the same observations the sync screen does.
+            // A failed count only leaves the card without it, it must not cancel the whole load.
+            val unsyncedDeferred = if (canShowSyncStatus(field, context)) {
+                async(Dispatchers.IO) {
+                    try {
+                        syncEngine.countUnsynced(id)
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.e("FieldDetailFragment", "Failed to count unsynced observations", e)
+                        null
+                    }
+                }
+            } else {
+                null
+            }
 
             // Stage two: the observation values, and the per-trait processing they feed.
             val items = withContext(Dispatchers.IO) {
@@ -303,6 +404,146 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             } else { // reload after data change
                 adapter?.updateItems(items)
             }
+
+            unsyncedCount = unsyncedDeferred?.await()
+            renderSyncStatus()
+        }
+    }
+
+    /**
+     * The unsynced count only means something for a BrAPI field from the configured server. For
+     * any other, every observation is categorized as from the wrong source and the count would be
+     * a misleading zero.
+     */
+    private fun canShowSyncStatus(field: FieldObject, context: Context): Boolean =
+        field.dataSourceFormat == ImportFormat.BRAPI
+                && preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)
+                && BrAPIService.checkMatchBrapiUrl(context, field.dataSource)
+
+    private fun requestAutoSync(field: FieldObject, context: Context) {
+
+        if (autoSyncRequested) return
+        if (!preferences.getBoolean(PreferenceKeys.BRAPI_SYNC_ON_FIELD_OPEN, false)) return
+        if (!canShowSyncStatus(field, context) || !autoSyncManager.canSync()) return
+
+        autoSyncRequested = true
+        autoSyncManager.requestSync(field.studyId)
+    }
+
+    /**
+     * The sync card's details line and icon, as a single sentence. Something that needs the user,
+     * a failed sync or observations left for review, takes priority over the unsynced count and
+     * swaps the sync icon for an alert. While an automatic sync runs the icon spins instead.
+     */
+    private fun renderSyncStatus() {
+
+        val context = context ?: return
+        val field = fieldObject ?: return
+
+        val lastSync = field.dateSync
+        val date = if (!lastSync.isNullOrEmpty()) {
+            SemanticDateUtil.getSemanticDate(context, lastSync)
+        } else {
+            getString(R.string.no_activity)
+        }
+
+        if (!canShowSyncStatus(field, context)) {
+            setSyncIconSpinning(false)
+            syncIconImageView.setImageResource(R.drawable.ic_field_sync)
+            lastSyncTextView.text = date
+            return
+        }
+
+        val status = autoSyncManager.status.value[field.studyId]
+        val result = (status as? AutoSyncStatus.Done)?.result
+        val count = unsyncedCount
+
+        val needsAttention = result != null && (result.error != null || result.needsReview > 0)
+
+        setSyncIconSpinning(status is AutoSyncStatus.Running)
+        syncIconImageView.setImageResource(
+            if (needsAttention) R.drawable.ic_alert_rhombus else R.drawable.ic_field_sync
+        )
+
+        // What the last automatic sync left behind. It is a snapshot from that sync, so it is added
+        // to the live count rather than replacing it, otherwise new data would never show up.
+        val clause = when {
+            result?.error != null -> getString(R.string.brapi_sync_clause_auto_failed)
+            result != null && result.needsReview > 0 -> resources.getQuantityString(
+                R.plurals.brapi_sync_clause_needs_review,
+                result.needsReview,
+                result.needsReview
+            )
+            else -> null
+        }
+
+        lastSyncTextView.text = when {
+            status is AutoSyncStatus.Running -> getString(R.string.brapi_sync_in_progress)
+            // Tapping the card logs in while this shows, so it is never mixed with anything else.
+            result?.error == BrapiSyncEngine.AutoSyncError.UNAUTHORIZED -> getString(R.string.brapi_error_unauthorized)
+            count != null && count > 0 -> {
+                val unsynced = resources.getQuantityString(R.plurals.brapi_sync_unsynced_count, count, count)
+                if (clause == null) unsynced else getString(R.string.brapi_sync_status_with_clause, unsynced, clause)
+            }
+            result?.error != null -> getString(R.string.brapi_sync_auto_failed)
+            result != null && result.needsReview > 0 -> resources.getQuantityString(
+                R.plurals.brapi_sync_needs_review,
+                result.needsReview,
+                result.needsReview
+            )
+            // Nothing left to upload only reads as synced once a sync has actually happened.
+            count == 0 && !lastSync.isNullOrEmpty() -> allSyncedText(context, lastSync)
+            else -> date
+        }
+    }
+
+    /**
+     * Whether the card is showing that the server rejected the last automatic sync's credentials.
+     */
+    private fun isAuthorizationRequired(field: FieldObject): Boolean {
+        val status = autoSyncManager.status.value[field.studyId] as? AutoSyncStatus.Done
+        return status?.result?.error == BrapiSyncEngine.AutoSyncError.UNAUTHORIZED
+    }
+
+    private fun allSyncedText(context: Context, lastSync: String): String {
+
+        val semanticDate = SemanticDateUtil.calculateSemanticValue(lastSync)
+
+        return when (semanticDate.result) {
+            DateResult.TODAY -> getString(R.string.brapi_sync_all_synced_today)
+            DateResult.YESTERDAY -> getString(R.string.brapi_sync_all_synced_yesterday)
+            DateResult.THIS_YEAR -> getString(
+                R.string.brapi_sync_all_synced_on,
+                SemanticDateUtil.getSemanticDate(context, lastSync)
+            )
+            DateResult.YEARS_AGO -> resources.getQuantityString(
+                R.plurals.brapi_sync_all_synced_years_ago,
+                semanticDate.yearsAgo,
+                semanticDate.yearsAgo
+            )
+            DateResult.INVALID_DATE -> getString(R.string.brapi_sync_all_synced)
+        }
+    }
+
+    private fun setSyncIconSpinning(spinning: Boolean) {
+
+        if (spinning) {
+
+            if (syncIconAnimator?.isRunning == true) return
+
+            // Counterclockwise, the direction the icon's arrows point.
+            syncIconAnimator = ObjectAnimator.ofFloat(syncIconImageView, View.ROTATION, 0f, -360f).apply {
+                duration = 1000L
+                repeatCount = ObjectAnimator.INFINITE
+                interpolator = LinearInterpolator()
+                start()
+            }
+
+        } else {
+
+            syncIconAnimator?.cancel()
+            syncIconAnimator = null
+            syncIconImageView.rotation = 0f
         }
     }
 
@@ -328,7 +569,11 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             cardViewSync.setOnClickListener {
                 if (preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
                     if (BrAPIService.checkMatchBrapiUrl(requireContext(), field.dataSource)) {
-                        startSync(field)
+                        if (isAuthorizationRequired(field)) {
+                            brapiAuthLauncher.launch(Intent(context, BrapiAuthActivity::class.java))
+                        } else {
+                            startSync(field)
+                        }
                     } else {
                         showWrongSourceDialog(field)
                     }
@@ -371,12 +616,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             getString(R.string.no_activity)
         }
 
-        val lastSync = field.dateSync
-        lastSyncTextView.text = if (!lastSync.isNullOrEmpty()) {
-            SemanticDateUtil.getSemanticDate(requireContext(), lastSync)
-        } else {
-            getString(R.string.no_activity)
-        }
+        renderSyncStatus()
 
         // Counts arrive as strings straight off the query, so they are parsed defensively rather
         // than with toInt(), which threw on a null or empty column.

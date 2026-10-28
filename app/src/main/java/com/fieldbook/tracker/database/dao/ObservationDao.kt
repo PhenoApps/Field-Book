@@ -198,6 +198,14 @@ class ObservationDao {
             getAllRepeatedValues(studyId, obsUnit, traitDbId).minByOrNull { it.rep.toInt() }?.rep
                 ?: "1"
 
+        /**
+         * Finds the maximum repeated value. Traits without repeated measures display the latest
+         * rep, so this is the rep their edits and deletes must target.
+         */
+        fun getLatestRepeatedValue(studyId: String, obsUnit: String, traitDbId: String) =
+            getAllRepeatedValues(studyId, obsUnit, traitDbId).maxByOrNull { it.rep.toInt() }?.rep
+                ?: "1"
+
         fun getNextRepeatedValue(studyId: String, obsUnit: String, traitDbId: String) =
             (getAllRepeatedValues(
                 studyId,
