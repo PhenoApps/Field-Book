@@ -446,10 +446,13 @@ fun BrapiSyncScreen(
                 val totalImages = uiState.newImageCount + uiState.editedImageCount
                 val hasObservationsToUpload = (totalObservations + totalImages) > 0
 
-                // Uploads the server does not list in serverinfo are greyed out and explained
+                // Uploads the server does not list in serverinfo are greyed out and explained.
+                // Review items are held back, so they alone leave nothing to upload.
                 val support = uiState.uploadSupport
-                val canUpload = (support.newObservations && uiState.newObservationCount > 0)
-                        || (support.editedObservations && uiState.editedObservationCount > 0)
+                val canUpload = (support.newObservations
+                        && uiState.newObservationCount > uiState.pendingResyncChoicesCount)
+                        || (support.editedObservations
+                        && uiState.editedObservationCount > uiState.pendingConflictsCount)
                         || (support.images && uiState.uploadImages
                         && totalImages + uiState.incompleteImageCount > 0)
 
@@ -582,10 +585,11 @@ fun BrapiSyncScreen(
                 // Show upload button only when there are observations/images to upload
                 if (hasObservationsToUpload) {
 
-                    // Nothing is uploaded until the review items above are decided
+                    // The review items above wait for a decision, everything else uploads
                     if (needsReview && uiState.viewMode == ViewMode.IDLE) {
+                        val heldBack = uiState.pendingConflictsCount + uiState.pendingResyncChoicesCount
                         ResultRow(
-                            stringResource(R.string.brapi_review_upload_blocked),
+                            pluralStringResource(R.plurals.brapi_review_held_back, heldBack, heldBack),
                             painterResource(R.drawable.ic_alert_rhombus),
                             MaterialTheme.colorScheme.error
                         )
@@ -594,7 +598,7 @@ fun BrapiSyncScreen(
                     Button(
                         onClick = onExportClick,
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = uiState.isInitialized && uiState.viewMode == ViewMode.IDLE && !needsReview && canUpload
+                        enabled = uiState.isInitialized && uiState.viewMode == ViewMode.IDLE && canUpload
                     ) {
                         Text(stringResource(R.string.brapi_upload_button))
                     }

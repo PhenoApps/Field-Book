@@ -66,7 +66,8 @@ class BrapiSyncEngine @Inject constructor(
     private val dataHelper: DataHelper,
     private val preferences: SharedPreferences,
     private val traitRepo: TraitRepository,
-    private val valueProcessorFormatAdapter: ValueProcessorFormatAdapter
+    private val valueProcessorFormatAdapter: ValueProcessorFormatAdapter,
+    private val reviewDecisions: BrapiReviewDecisions
 ) {
 
     companion object {
@@ -864,7 +865,7 @@ class BrapiSyncEngine @Inject constructor(
         onServerCheck: () -> Unit = {}
     ): ReviewCheck {
 
-        cachedReview(study.studyId)?.let { return it }
+        cachedReview(study.studyId)?.let { return withoutDecided(study.studyId, it) }
 
         onServerCheck()
 
@@ -884,7 +885,21 @@ class BrapiSyncEngine @Inject constructor(
             mutableSetOf()
         )
 
-        return ReviewCheck(conflicts, resync.pendingChoices)
+        return withoutDecided(study.studyId, ReviewCheck(conflicts, resync.pendingChoices))
+    }
+
+    /**
+     * Drops the review items the user has already decided on, see [BrapiReviewDecisions]. Also
+     * applied to a reused result, which may predate the choice.
+     */
+    private fun withoutDecided(studyId: Int, review: ReviewCheck): ReviewCheck {
+
+        val uploadAsNew = reviewDecisions.get(studyId).uploadAsNew
+
+        return ReviewCheck(
+            conflicts = reviewDecisions.unsettled(studyId, review.conflicts),
+            resyncChoices = review.resyncChoices.filter { it.key !in uploadAsNew }
+        )
     }
 
     private fun matchesResyncCheck(
@@ -1294,7 +1309,8 @@ class BrapiSyncEngine @Inject constructor(
 
     /**
      * Downloads then uploads a study without asking the user anything. Anything that would need a
-     * decision is left untouched for the sync screen:
+     * decision is left untouched for the sync screen, unless the user already made it there, see
+     * [BrapiReviewDecisions]:
      *
      * - An observation changed both here and on the server since the last sync is a conflict, see
      *   [resolveObservationStatus], including one edited in Collect while this sync runs. Neither
@@ -1336,11 +1352,19 @@ class BrapiSyncEngine @Inject constructor(
 
             val local = loadLocalStatus(studyId)
 
+            reviewDecisions.prune(studyId, local)
+
             // An update skipped because Collect edited the observation after the read above is a
             // conflict too, both sides changed. Otherwise the edit would be uploaded over the
-            // server's change.
-            val conflicts = resolution.conflicts + conflictsFor(skippedUpdates, local)
+            // server's change. Conflicts the user settled by keeping the local value upload.
+            val conflicts = reviewDecisions.unsettled(
+                studyId,
+                resolution.conflicts + conflictsFor(skippedUpdates, local)
+            )
             val heldBack = conflicts.mapNotNull { it.localObservation.fieldBookDbId }.toSet()
+
+            // Matches the user chose to upload again, the rest wait for a choice.
+            val uploadAsNew = reviewDecisions.get(studyId).uploadAsNew
 
             // Only what the server accepts, otherwise every sync would fail on the same calls.
             val support = uploadSupport(brAPIService)
@@ -1369,7 +1393,7 @@ class BrapiSyncEngine @Inject constructor(
                     localValues,
                     downloaded,
                     mutableSetOf(),
-                    mutableSetOf()
+                    uploadAsNew.toMutableSet()
                 )
                 if (resync.observationsToUpload.isEmpty()) return@forEach
 
@@ -1432,7 +1456,7 @@ class BrapiSyncEngine @Inject constructor(
                 mutableSetOf()
             ).pendingChoices
 
-            val review = ReviewCheck(conflicts, resyncChoices)
+            val review = withoutDecided(studyId, ReviewCheck(conflicts, resyncChoices))
 
             reviewByStudy[studyId] = CachedReview(
                 review = review,

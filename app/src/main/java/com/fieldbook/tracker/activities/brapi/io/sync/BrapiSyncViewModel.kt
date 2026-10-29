@@ -49,7 +49,8 @@ class BrapiSyncViewModel @Inject constructor(
     private val preferences: SharedPreferences,
     private val traitRepo: TraitRepository,
     private val engine: BrapiSyncEngine,
-    private val autoSyncManager: BrapiAutoSyncManager
+    private val autoSyncManager: BrapiAutoSyncManager,
+    private val reviewDecisions: BrapiReviewDecisions
 ) : ViewModel() {
 
     private var brAPIService = engine.newService()
@@ -64,16 +65,10 @@ class BrapiSyncViewModel @Inject constructor(
 
     // Pending pre-upload re-sync choices where local observations have no BrAPI id.
     private var pendingResyncChoices: List<PendingResyncChoice> = emptyList()
-    private val resyncUploadAsNewKeys = mutableSetOf<String>()
     private val resyncAdoptServerKeys = mutableSetOf<String>()
 
-    // Re-sync choices raised mid-upload resume that upload once answered, ones found when the
-    // screen opened leave the upload to the user.
-    private var resyncFromUpload = false
-
-    // Conflicts the user resolved by keeping the local value. The server copy is still newer than
-    // the last sync until the edit is uploaded, so without this they would be raised again.
-    private val keepLocalDbIds = mutableSetOf<String>()
+    // Keeping the local value and uploading a match again are stored in [reviewDecisions] rather
+    // than here, so they hold after the screen closes and automatic syncs follow them too.
 
     private var activeJob: Job? = null
 
@@ -134,6 +129,8 @@ class BrapiSyncViewModel @Inject constructor(
 
         localStatus = engine.loadLocalStatus(studyId)
 
+        reviewDecisions.prune(studyId, localStatus)
+
         _uiState.update {
             it.copy(
                 newObservationCount = localStatus.newObservations.size,
@@ -177,9 +174,7 @@ class BrapiSyncViewModel @Inject constructor(
             // load persisted last-checked timestamps into state
             loadLastCheckedFromPrefs()
             clearPendingResyncChoices()
-            resyncUploadAsNewKeys.clear()
             resyncAdoptServerKeys.clear()
-            keepLocalDbIds.clear()
 
             loadUploadSupport()
             checkForReview()
@@ -237,7 +232,6 @@ class BrapiSyncViewModel @Inject constructor(
 
                 setPendingConflicts(review.conflicts)
 
-                resyncFromUpload = false
                 if (review.resyncChoices.isNotEmpty()) {
                     setPendingResyncChoices(review.resyncChoices)
                 } else {
@@ -285,11 +279,6 @@ class BrapiSyncViewModel @Inject constructor(
                     uploadError = context.getString(R.string.nothing_to_upload)
                 )
             }
-            return
-        }
-
-        if (uiState.value.pendingConflictsCount > 0 || uiState.value.pendingResyncChoicesCount > 0) {
-            requestReview()
             return
         }
 
@@ -373,7 +362,8 @@ class BrapiSyncViewModel @Inject constructor(
                     }
 
                     // Edits are only sent once the server copy is known not to have changed too,
-                    // otherwise an upload would silently overwrite an edit made elsewhere.
+                    // otherwise an upload would silently overwrite an edit made elsewhere. Any
+                    // conflict found joins the Needs Review card and is held back below.
                     if (uploadingEdited) {
 
                         val traitsById = traitRepo.getTraits().associateBy { it.id }
@@ -385,16 +375,12 @@ class BrapiSyncViewModel @Inject constructor(
                                 traitsById
                             ).conflicts
                         )
-
-                        if (uiState.value.pendingConflictsCount > 0) {
-                            _uiState.update { it.copy(viewMode = ViewMode.IDLE) }
-                            requestReview()
-                            return@launch
-                        }
                     }
 
-                    val newObservations = localStatus.newObservations
-                    val editedObservations = localStatus.editedObservations
+                    // Review items wait for the user, everything else is uploaded.
+                    val heldBack = heldBackIds()
+                    val newObservations = localStatus.newObservations.filter { it.fieldBookDbId !in heldBack }
+                    val editedObservations = localStatus.editedObservations.filter { it.fieldBookDbId !in heldBack }
                     val newImageObservations = localStatus.newImageObservations
                     val editedImageObservations = localStatus.editedImageObservations
                     val incompleteImageObservations = localStatus.incompleteImageObservations
@@ -415,7 +401,6 @@ class BrapiSyncViewModel @Inject constructor(
                         processObservations(newObservations, serverObservations) { observations, localValues ->
                             engine.processNewObservations(brAPIService, observations, localValues, syncedAt)
                         }
-                        if (uiState.value.pendingResyncChoicesCount > 0) return@launch
                     }
 
                     if (support.editedObservations && editedObservations.isNotEmpty()) {
@@ -434,7 +419,6 @@ class BrapiSyncViewModel @Inject constructor(
                         processObservations(editedObservations, serverObservations) { observations, localValues ->
                             engine.processEditedObservations(brAPIService, observations, localValues, syncedAt)
                         }
-                        if (uiState.value.pendingResyncChoicesCount > 0) return@launch
                     }
 
                     if (newImageObservations.isNotEmpty() && uploadImages) {
@@ -514,8 +498,11 @@ class BrapiSyncViewModel @Inject constructor(
      */
     private fun hasUploadable(support: BrapiSyncEngine.UploadSupport): Boolean {
 
-        val hasNew = support.newObservations && localStatus.newObservations.isNotEmpty()
-        val hasEdited = support.editedObservations && localStatus.editedObservations.isNotEmpty()
+        val heldBack = heldBackIds()
+        val hasNew = support.newObservations
+                && localStatus.newObservations.any { it.fieldBookDbId !in heldBack }
+        val hasEdited = support.editedObservations
+                && localStatus.editedObservations.any { it.fieldBookDbId !in heldBack }
         val hasImages = _uiState.value.uploadImages && support.images
                 && (localStatus.newImageObservations.isNotEmpty()
                 || localStatus.editedImageObservations.isNotEmpty()
@@ -523,6 +510,14 @@ class BrapiSyncViewModel @Inject constructor(
 
         return hasNew || hasEdited || hasImages
     }
+
+    /**
+     * Field Book ids of the observations on the Needs Review card, held back from uploads until
+     * the user decides on them.
+     */
+    private fun heldBackIds(): Set<String> =
+        (pendingConflicts.mapNotNull { (_, local) -> local?.fieldBookDbId } +
+                pendingResyncChoices.mapNotNull { it.localObservation.fieldBookDbId }).toSet()
 
     fun startDownload() {
 
@@ -745,7 +740,9 @@ class BrapiSyncViewModel @Inject constructor(
     // Store pending conflicts for UI to resolve
     private suspend fun setPendingConflicts(found: List<BrapiSyncEngine.Conflict>) {
 
-        val conflicts = found.filter { it.localObservation.dbId !in keepLocalDbIds }
+        val conflicts = uiState.value.study?.studyId
+            ?.let { reviewDecisions.unsettled(it, found) }
+            ?: found
 
         pendingConflicts = conflicts.map { Pair(it.serverObservation, it.localObservation) }
 
@@ -787,11 +784,15 @@ class BrapiSyncViewModel @Inject constructor(
         if (pendingConflicts.isEmpty()) return
 
         val toUpdateFromServer = mutableListOf<Observation>()
-        val toKeepLocal = mutableListOf<Observation>()
+        val toKeepLocal = mutableListOf<BrapiSyncEngine.Conflict>()
+
+        fun keepLocal(server: Observation, local: Observation?) {
+            local?.let { toKeepLocal.add(BrapiSyncEngine.Conflict(server, it)) }
+        }
 
         when (strategy) {
             is MergeStrategy.Local -> {
-                pendingConflicts.forEach { (_, local) -> local?.let { toKeepLocal.add(it) } }
+                pendingConflicts.forEach { (server, local) -> keepLocal(server, local) }
             }
 
             is MergeStrategy.Server -> {
@@ -800,7 +801,7 @@ class BrapiSyncViewModel @Inject constructor(
 
             is MergeStrategy.MostRecent -> {
                 pendingConflicts.forEach { (server, local) ->
-                    if (local != null && local.timestamp > server.timestamp) toKeepLocal.add(local) else toUpdateFromServer.add(
+                    if (local != null && local.timestamp > server.timestamp) keepLocal(server, local) else toUpdateFromServer.add(
                         server
                     )
                 }
@@ -819,13 +820,13 @@ class BrapiSyncViewModel @Inject constructor(
                     if (manualChoices[id] == true) {
                         toUpdateFromServer.add(server)
                     } else {
-                        local?.let { toKeepLocal.add(it) }
+                        keepLocal(server, local)
                     }
                 }
             }
         }
 
-        keepLocalDbIds.addAll(toKeepLocal.mapNotNull { it.dbId })
+        uiState.value.study?.studyId?.let { reviewDecisions.keepLocal(it, toKeepLocal) }
 
         // clear and update ui state
         pendingConflicts = emptyList()
@@ -893,7 +894,6 @@ class BrapiSyncViewModel @Inject constructor(
             val key = choice.key
             if (applyAsUpdate) {
                 resyncAdoptServerKeys.add(key)
-                resyncUploadAsNewKeys.remove(key)
 
                 val localObservation = choice.localObservation
                 localObservation.value = choice.preservedLocalValue
@@ -906,8 +906,14 @@ class BrapiSyncViewModel @Inject constructor(
                 }
                 updatesToPersist.add(localObservation)
             } else {
-                resyncUploadAsNewKeys.add(key)
                 resyncAdoptServerKeys.remove(key)
+            }
+        }
+
+        // Upload again is kept until the next upload sends it, by this screen or an automatic sync.
+        if (!applyAsUpdate) {
+            uiState.value.study?.studyId?.let { studyId ->
+                reviewDecisions.uploadAsNew(studyId, pendingResyncChoices.map { it.key })
             }
         }
 
@@ -925,10 +931,6 @@ class BrapiSyncViewModel @Inject constructor(
                 uploadError = ""
             )
         }
-
-        if (!applyAsUpdate && resyncFromUpload) {
-            startUpload()
-        }
     }
 
     /**
@@ -944,6 +946,10 @@ class BrapiSyncViewModel @Inject constructor(
 
         val localValuesByFieldBookId = engine.prepareForUpload(observations)
 
+        val uploadAsNewKeys = uiState.value.study?.studyId
+            ?.let { reviewDecisions.get(it).uploadAsNew.toMutableSet() }
+            ?: mutableSetOf()
+
         val preUploadResyncResult = try {
             serverObservations?.let {
                 engine.matchResyncCandidates(
@@ -951,27 +957,17 @@ class BrapiSyncViewModel @Inject constructor(
                     localValuesByFieldBookId,
                     it,
                     adoptServerKeys = resyncAdoptServerKeys,
-                    uploadAsNewKeys = resyncUploadAsNewKeys
+                    uploadAsNewKeys = uploadAsNewKeys
                 )
             }
         } catch (e: Exception) {
             Log.w(TAG, "Pre-upload re-sync check failed; continuing with normal upload", e)
             null
         } ?: BrapiSyncEngine.PreUploadResyncResult(observations, emptyList())
+        // Matches needing a choice join the Needs Review card and are left out, the rest uploads.
         if (preUploadResyncResult.pendingChoices.isNotEmpty()) {
             setPendingResyncChoices(preUploadResyncResult.pendingChoices)
-            resyncFromUpload = true
-            _uiState.update {
-                it.copy(
-                    viewMode = ViewMode.IDLE,
-                    isUploadFinished = false
-                )
-            }
-            requestReview()
-            return
         }
-
-        clearPendingResyncChoices()
 
         val observationsToUpload = preUploadResyncResult.observationsToUpload
         if (observationsToUpload.isEmpty()) {

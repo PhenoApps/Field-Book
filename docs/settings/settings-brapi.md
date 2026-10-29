@@ -111,6 +111,7 @@ If an observation was edited both on the device and on the server, both values a
 This includes an observation edited in Collect while a sync is running.
 See [Importing and merging observations](../brapi.md#importing-and-merging-observations) for how Field Book tells that the server copy changed, and when it cannot.
 If a new observation appears to already be on the server, it is not uploaded.
+Choices already made on the sync screen are followed, so a kept local value or a match chosen to upload again is uploaded.
 The field's Sync card shows how many observations need review, and they can be resolved in the [Needs Review](../brapi.md#needs-review) card on the sync screen.
 Observations edited only on the device are uploaded, and observations changed only on the server are downloaded.
 

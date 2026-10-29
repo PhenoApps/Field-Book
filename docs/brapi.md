@@ -111,7 +111,7 @@ A device clock that is set wrong has the same effect.
 ### Needs Review
 
 When the sync screen opens, Field Book checks the server for observations that need a decision and lists them in a **Needs Review** card.
-Nothing is uploaded until they are resolved.
+They are not uploaded until they are resolved, everything else is still uploaded.
 There are two kinds:
 
 - Conflicts, observations changed on both the device and the server since the last sync.
@@ -119,6 +119,10 @@ Press **Resolve Conflicts** to choose which values to keep.
 - New observations that match values already on the server.
 They were probably uploaded before without the device recording it, for example if the app closed during an upload.
 Press **Review Matches** to link them to the server copies, or to upload them again as separate observations.
+
+Choosing to keep a local value, or to upload a match again, is remembered until the observation is uploaded, so it is not asked again.
+A kept local value is asked about again if the server copy changes once more.
+Automatic syncs follow these choices too.
 
 Conflicts can be resolved with several different merge options:
 

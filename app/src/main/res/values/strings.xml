@@ -1849,7 +1849,10 @@
         <item quantity="other">%d new observations match values already on the server. They may have been uploaded before without this device recording it, for example if the app closed during an upload. Link them to the server copies or upload them again.</item>
     </plurals>
     <string name="brapi_review_resync_button">Review Matches</string>
-    <string name="brapi_review_upload_blocked">Resolve the observations that need review before uploading</string>
+    <plurals name="brapi_review_held_back">
+        <item quantity="one">%d observation that needs review is not uploaded until it is resolved</item>
+        <item quantity="other">%d observations that need review are not uploaded until they are resolved</item>
+    </plurals>
     <!-- %1$s is a count such as "12 observations", shown in bold, %2$s is the server name -->
     <string name="brapi_upload_unsupported_new">%1$s cannot be sent to %2$s because it does not accept new observations (POST).</string>
     <string name="brapi_upload_unsupported_edited">%1$s cannot be sent to %2$s because it does not accept edited observations (PUT).</string>
