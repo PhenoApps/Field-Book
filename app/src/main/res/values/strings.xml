@@ -2103,6 +2103,7 @@
     <string name="study_info_missing">Study info missing</string>
     <string name="nothing_to_upload">Nothing to upload</string>
     <string name="download_cancelled">Download cancelled</string>
+    <string name="upload_cancelled">Upload cancelled</string>
     <string name="download_failed">Download Failed</string>
     <string name="no_new_or_updated_observations_found">No new or updated observations found</string>
     <string name="user_cancelled_operation">User cancelled operation.</string>

@@ -135,8 +135,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private val brapiSyncIntentLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
-        // The sync screen resolves what an automatic sync left for review, so drop its note.
-        fieldId?.let { autoSyncManager.clearStatus(it) }
+        // onResume reloads the card, the sync screen has already cleared the automatic sync's note
     }
 
     // Started from the sync card when the last automatic sync was rejected for authorization.

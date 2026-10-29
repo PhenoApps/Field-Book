@@ -848,12 +848,10 @@ class BrapiSyncEngine @Inject constructor(
     /**
      * What a sync of the study would need the user to decide, found without changing anything.
      *
-     * @return conflicts: observations changed on this device and on the server since the last sync
-     *         resyncChoices: new observations whose values already appear on the server
-     */
-    /**
      * @param onServerCheck called only when the server has to be asked, the last automatic
      * sync's result is reused otherwise
+     * @return conflicts: observations changed on this device and on the server since the last sync
+     *         resyncChoices: new observations whose values already appear on the server
      */
     suspend fun checkForReview(
         brAPIService: BrAPIService,

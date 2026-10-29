@@ -48,7 +48,8 @@ class BrapiSyncViewModel @Inject constructor(
     private val dataHelper: DataHelper,
     private val preferences: SharedPreferences,
     private val traitRepo: TraitRepository,
-    private val engine: BrapiSyncEngine
+    private val engine: BrapiSyncEngine,
+    private val autoSyncManager: BrapiAutoSyncManager
 ) : ViewModel() {
 
     private var brAPIService = engine.newService()
@@ -157,6 +158,10 @@ class BrapiSyncViewModel @Inject constructor(
             Log.d(TAG, "Initializing BrapiExportViewModel")
 
             val fieldObject = dataHelper.getFieldObject(studyId)
+
+            // This screen lists what an automatic sync left for review itself, so the field
+            // card's note about it is no longer needed, whichever way the screen was opened.
+            autoSyncManager.clearStatus(studyId)
 
             _uiState.update {
                 it.copy(
@@ -271,17 +276,9 @@ class BrapiSyncViewModel @Inject constructor(
             return
         }
 
-        // Only what the server accepts counts, the rest is skipped and explained on the screen.
-        val support = _uiState.value.uploadSupport
-        val uploadImages = _uiState.value.uploadImages && support.images
-
-        val hasNew = support.newObservations && localStatus.newObservations.isNotEmpty()
-        val hasEdited = support.editedObservations && localStatus.editedObservations.isNotEmpty()
-        val hasImages = uploadImages && (localStatus.newImageObservations.isNotEmpty()
-                || localStatus.editedImageObservations.isNotEmpty()
-                || localStatus.incompleteImageObservations.isNotEmpty())
-
-        if (!hasNew && !hasEdited && !hasImages) {
+        // A quick check with what the screen knows, the upload checks again once the server has
+        // said what it accepts.
+        if (!hasUploadable(_uiState.value.uploadSupport)) {
             _uiState.update {
                 it.copy(
                     isUploadFinished = false,
@@ -305,6 +302,26 @@ class BrapiSyncViewModel @Inject constructor(
                 engine.lockFor(study.studyId).withLock {
 
                     refreshLocalStatus()
+
+                    // Asked here rather than read from the screen, which allows everything until
+                    // the server has answered. Cached after the first time, so this rarely waits.
+                    val support = engine.uploadSupport(brAPIService)
+                    _uiState.update { it.copy(uploadSupport = support) }
+
+                    // Only what the server accepts counts, the rest is skipped and explained on
+                    // the screen.
+                    if (!hasUploadable(support)) {
+                        _uiState.update {
+                            it.copy(
+                                viewMode = ViewMode.IDLE,
+                                isUploadFinished = false,
+                                uploadError = context.getString(R.string.nothing_to_upload)
+                            )
+                        }
+                        return@launch
+                    }
+
+                    val uploadImages = _uiState.value.uploadImages && support.images
 
                     // when these observations were read, recorded as their sync time on upload
                     val syncedAt = localStatus.loadedAt
@@ -476,12 +493,12 @@ class BrapiSyncViewModel @Inject constructor(
 
             } catch (e: CancellationException) {
 
-                Log.w(TAG, "Download job was cancelled externally.", e)
+                Log.w(TAG, "Upload job was cancelled externally.", e)
                 _uiState.update {
                     it.copy(
                         viewMode = ViewMode.IDLE,
-                        isDownloadFinished = true,
-                        downloadError = context.getString(R.string.download_cancelled)
+                        isUploadFinished = false,
+                        uploadError = context.getString(R.string.upload_cancelled)
                     )
                 }
 
@@ -490,6 +507,21 @@ class BrapiSyncViewModel @Inject constructor(
                 refreshLocalStatus()
             }
         }
+    }
+
+    /**
+     * Whether anything read by [refreshLocalStatus] can be uploaded to a server with this support.
+     */
+    private fun hasUploadable(support: BrapiSyncEngine.UploadSupport): Boolean {
+
+        val hasNew = support.newObservations && localStatus.newObservations.isNotEmpty()
+        val hasEdited = support.editedObservations && localStatus.editedObservations.isNotEmpty()
+        val hasImages = _uiState.value.uploadImages && support.images
+                && (localStatus.newImageObservations.isNotEmpty()
+                || localStatus.editedImageObservations.isNotEmpty()
+                || localStatus.incompleteImageObservations.isNotEmpty())
+
+        return hasNew || hasEdited || hasImages
     }
 
     fun startDownload() {

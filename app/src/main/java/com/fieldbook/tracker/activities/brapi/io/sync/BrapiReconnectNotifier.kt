@@ -130,6 +130,20 @@ class BrapiReconnectNotifier @Inject constructor(
             networkCallback = null
 
             WorkManager.getInstance(context).cancelUniqueWork(RECONNECT_WORK_NAME)
+
+            cancelAll()
+        }
+    }
+
+    // Reminders already posted would otherwise stay until each one is dismissed.
+    private fun cancelAll() {
+        try {
+            context.getSystemService(NotificationManager::class.java)
+                ?.activeNotifications
+                ?.filter { it.tag == NOTIFICATION_TAG }
+                ?.forEach { cancel(context, it.id) }
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to clear sync reminders", e)
         }
     }
 
