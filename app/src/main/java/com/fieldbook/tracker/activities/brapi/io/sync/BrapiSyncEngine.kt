@@ -92,7 +92,7 @@ class BrapiSyncEngine @Inject constructor(
     /**
      * Which kinds of upload the server accepts, from the calls it lists in serverinfo.
      * Everything defaults to supported: a server whose serverinfo fails or lists nothing is not
-     * blocked, many servers leave it incomplete.
+     * blocked, and neither is a call it leaves out, many servers leave it incomplete.
      */
     data class UploadSupport(
         val newObservations: Boolean = true, // POST observations
@@ -167,15 +167,20 @@ class BrapiSyncEngine @Inject constructor(
         }
 
         val keys = BrapiImplementationHelper.serverCallKeys(serverCalls)
-        fun supports(service: String, method: String) =
-            BrapiImplementationHelper.supports(keys, service, method)
+        val listedServices = keys.map { (service, _) -> service }.toSet()
+
+        // Only a call listed without the method rules an upload out. A call missing entirely is
+        // more likely left out of serverinfo than unsupported, so it is tried anyway.
+        fun accepts(service: String, method: String) =
+            BrapiImplementationHelper.normalizeService(service) !in listedServices
+                    || BrapiImplementationHelper.supports(keys, service, method)
 
         val support = UploadSupport(
-            newObservations = supports("observations", "POST"),
-            editedObservations = supports("observations", "PUT"),
-            images = supports("images", "POST")
-                    && supports("images/{imageDbId}", "PUT")
-                    && supports("images/{imageDbId}/imagecontent", "PUT")
+            newObservations = accepts("observations", "POST"),
+            editedObservations = accepts("observations", "PUT"),
+            images = accepts("images", "POST")
+                    && accepts("images/{imageDbId}", "PUT")
+                    && accepts("images/{imageDbId}/imagecontent", "PUT")
         )
 
         Log.d(TAG, "Upload support for $host from serverinfo: $support")
@@ -1141,6 +1146,10 @@ class BrapiSyncEngine @Inject constructor(
             )
 
             val imageWithDbId = brAPIService.awaitPostImageMetaData(image)
+
+            // Recorded before the content is sent. If that fails the image is left incomplete, and
+            // the next sync finishes this server image rather than posting the details again.
+            dataHelper.markImageCreated(image.fieldBookDbId, imageWithDbId.dbId)
 
             onEvent(
                 ImageUploadEvent.Message(

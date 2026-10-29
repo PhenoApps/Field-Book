@@ -593,6 +593,13 @@ public class DataHelper {
         return ObservationUnitDao.Companion.getBySearchAttribute(studyId, searchValue);
     }
 
+    public void markImageCreated(String fieldBookDbId, String dbId) {
+
+        open();
+
+        ObservationDao.Companion.markImageCreated(fieldBookDbId, dbId);
+    }
+
     public void updateImage(FieldBookImage image) {
 
         open();

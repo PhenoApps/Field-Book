@@ -104,6 +104,9 @@ class BrapiReconnectNotifier @Inject constructor(
 
             val callback = object : ConnectivityManager.NetworkCallback() {
                 override fun onLost(network: Network) {
+                    // Moving from Wi-Fi to cellular loses one network while another takes over,
+                    // the device never went offline so there is nothing to remind about.
+                    if (hasOtherNetwork(network)) return
                     enqueueReconnectCheck()
                 }
             }
@@ -145,6 +148,14 @@ class BrapiReconnectNotifier @Inject constructor(
         } catch (e: Exception) {
             Log.w(TAG, "Failed to clear sync reminders", e)
         }
+    }
+
+    // Validation is not required, a network that just took over may not be validated yet.
+    private fun hasOtherNetwork(lost: Network): Boolean {
+        val active = connectivityManager.activeNetwork ?: return false
+        if (active == lost) return false
+        return connectivityManager.getNetworkCapabilities(active)
+            ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
     }
 
     private fun enqueueReconnectCheck() {

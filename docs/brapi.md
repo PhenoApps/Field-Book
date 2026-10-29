@@ -149,4 +149,6 @@ Field Book checks which calls the server lists in its BrAPI server information b
 If the server does not accept new observations, edited observations, or images, that part of the upload is skipped and the upload card explains why, and the upload button is disabled when nothing else can be sent.
 Automatic syncs skip the same uploads.
 A server that does not provide this information is not restricted.
+Only a call the server lists without the method Field Book needs counts as not accepted.
+A call left out of the list entirely is tried anyway, since many servers leave calls out of it.
 See [Check Compatibility](./settings/settings-brapi.md#check-compatibility) for the full list of calls.

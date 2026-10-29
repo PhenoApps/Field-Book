@@ -994,6 +994,24 @@ class ObservationDao {
             )
         }.also { ObservationChangeTracker.markChanged() }
 
+        /**
+         * Records the BrAPI id an image was given when its details were posted, before its content
+         * is uploaded. Without a sync time it counts as an incomplete image, which a sync finishes
+         * with the image calls for an existing image.
+         */
+        fun markImageCreated(fieldBookDbId: String?, dbId: String?) = withDatabase {
+
+            if (fieldBookDbId == null || dbId == null) return@withDatabase 0
+
+            it.update(Observation.tableName,
+
+                    ContentValues().apply {
+                        put("observation_db_id", dbId)
+                        putNull("last_synced_time")
+                    },
+                    Observation.PK + " = ?", arrayOf(fieldBookDbId))
+        }.also { ObservationChangeTracker.markChanged() }
+
         fun updateImage(image: FieldBookImage) = withDatabase {
 
             it.update(Observation.tableName,
