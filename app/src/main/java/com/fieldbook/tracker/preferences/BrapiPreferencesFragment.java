@@ -687,10 +687,12 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         Preference addAccount = findPreference("brapi_add_account");
         Preference sharedServers = findPreference("brapi_shared_servers");
         Preference advancedSettings = findPreference("brapi_advanced_settings");
+        Preference syncSettings = findPreference("brapi_sync_settings");
 
         if (addAccount != null) addAccount.setVisible(brapiEnabled);
         if (sharedServers != null) sharedServers.setVisible(brapiEnabled);
         if (advancedSettings != null) advancedSettings.setVisible(brapiEnabled);
+        if (syncSettings != null) syncSettings.setVisible(brapiEnabled);
 
         if (brapiEnabled) {
             refreshServerCards();

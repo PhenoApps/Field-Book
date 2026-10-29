@@ -198,6 +198,14 @@ class ObservationDao {
             getAllRepeatedValues(studyId, obsUnit, traitDbId).minByOrNull { it.rep.toInt() }?.rep
                 ?: "1"
 
+        /**
+         * Finds the maximum repeated value. Traits without repeated measures display the latest
+         * rep, so this is the rep their edits and deletes must target.
+         */
+        fun getLatestRepeatedValue(studyId: String, obsUnit: String, traitDbId: String) =
+            getAllRepeatedValues(studyId, obsUnit, traitDbId).maxByOrNull { it.rep.toInt() }?.rep
+                ?: "1"
+
         fun getNextRepeatedValue(studyId: String, obsUnit: String, traitDbId: String) =
             (getAllRepeatedValues(
                 studyId,
@@ -864,6 +872,91 @@ class ObservationDao {
             }
         }.also { ObservationChangeTracker.markChanged() }
 
+        /**
+         * Records an upload's result, the BrAPI id and when it was synced. Unlike
+         * [updateObservationsByFieldBookId] the value and collector are left alone: the row
+         * already holds the local value, and Collect may have changed it while the upload was in
+         * flight.
+         */
+        fun markObservationsSynced(observations: List<BrapiObservation>) = withDatabase { db ->
+
+            observations.forEach {
+
+                db.update(
+                    Observation.tableName,
+                    ContentValues().apply {
+                        put("observation_db_id", it.dbId)
+                        put("last_synced_time", it.lastSyncedTime.format(internalTimeFormatter))
+                    },
+                    "${Observation.PK} = ?", arrayOf(it.fieldBookDbId))
+
+            }
+        }.also { ObservationChangeTracker.markChanged() }
+
+        /**
+         * Writes server values over local observations that are still unedited, as
+         * [updateObservationsByBrapiId] does unconditionally. Each row is checked again inside one
+         * transaction, so an edit made in Collect after a sync read the observations is never
+         * overwritten.
+         *
+         * @return the BrAPI ids of the observations skipped because they were edited, or no longer
+         * exist. Every id when the database is unavailable, nothing was written.
+         */
+        fun updateUneditedObservationsByBrapiId(observations: List<BrapiObservation>): Set<String> = withDatabase { db ->
+
+            val skipped = mutableSetOf<String>()
+
+            db.beginTransaction()
+
+            try {
+
+                observations.forEach { obs ->
+
+                    val editedSinceSync = db.rawQuery(
+                        "SELECT observation_time_stamp, last_synced_time FROM ${Observation.tableName} WHERE observation_db_id = ?",
+                        arrayOf(obs.dbId)
+                    ).use { cursor ->
+
+                        if (!cursor.moveToFirst()) return@use true
+
+                        val local = BrapiObservation().apply {
+                            setTimestamp(cursor.getString(0))
+                            setLastSyncedTime(cursor.getString(1))
+                        }
+
+                        val syncedTime = local.lastSyncedTime
+                        val editTime = local.timestamp
+                        syncedTime == null || (editTime != null && editTime > syncedTime)
+                    }
+
+                    if (editedSinceSync) {
+                        obs.dbId?.let { skipped.add(it) }
+                        return@forEach
+                    }
+
+                    db.update(
+                        Observation.tableName,
+                        ContentValues().apply {
+                            put("collector", obs.collector)
+                            put("value", obs.value)
+                            put("observation_db_id", obs.dbId)
+                            put("last_synced_time", obs.lastSyncedTime.format(internalTimeFormatter))
+                        },
+                        "observation_db_id = ?", arrayOf(obs.dbId))
+                }
+
+                db.setTransactionSuccessful()
+
+            } finally {
+
+                db.endTransaction()
+
+            }
+
+            skipped
+
+        }.also { ObservationChangeTracker.markChanged() } ?: observations.mapNotNull { it.dbId }.toSet()
+
         fun updateObservationMediaUris(observation: ObservationModel) = withDatabase {
             db.update(Observation.tableName, contentValuesOf().apply {
                 put("value", observation.value)
@@ -899,6 +992,24 @@ class ObservationDao {
                 "${Observation.PK} = ?",
                 arrayOf(id.toString())
             )
+        }.also { ObservationChangeTracker.markChanged() }
+
+        /**
+         * Records the BrAPI id an image was given when its details were posted, before its content
+         * is uploaded. Without a sync time it counts as an incomplete image, which a sync finishes
+         * with the image calls for an existing image.
+         */
+        fun markImageCreated(fieldBookDbId: String?, dbId: String?) = withDatabase {
+
+            if (fieldBookDbId == null || dbId == null) return@withDatabase 0
+
+            it.update(Observation.tableName,
+
+                    ContentValues().apply {
+                        put("observation_db_id", dbId)
+                        putNull("last_synced_time")
+                    },
+                    Observation.PK + " = ?", arrayOf(fieldBookDbId))
         }.also { ObservationChangeTracker.markChanged() }
 
         fun updateImage(image: FieldBookImage) = withDatabase {

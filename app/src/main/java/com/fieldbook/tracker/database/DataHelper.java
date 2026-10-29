@@ -66,6 +66,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -391,6 +392,17 @@ public class DataHelper {
 
     }
 
+    /**
+     * The rep shown when repeated measures is off: the highest rep, so a value downloaded on top of
+     * a local one is the one displayed and edited. "1" when nothing has been recorded yet.
+     */
+    public String getLatestRep(String studyId, String unit, String traitDbId) {
+
+        open();
+
+        return ObservationDao.Companion.getLatestRepeatedValue(studyId, unit, traitDbId);
+    }
+
     public int getMaxPositionFromTraits() {
 
         open();
@@ -460,6 +472,9 @@ public class DataHelper {
      * @return Map containing categorized observations
      */
     public Map<String, List<Observation>> getBrAPIExportData(int fieldId, String hostUrl) {
+
+        open();
+
         return ObservationDao.Companion.getBrAPIExportData(Integer.toString(fieldId), hostUrl);
     }
 
@@ -537,6 +552,20 @@ public class DataHelper {
         ObservationDao.Companion.updateObservationsByBrapiId(observations);
     }
 
+    public void markObservationsSynced(List<Observation> observations) {
+
+        open();
+
+        ObservationDao.Companion.markObservationsSynced(observations);
+    }
+
+    public Set<String> updateUneditedObservationsByBrapiId(List<Observation> observations) {
+
+        open();
+
+        return ObservationDao.Companion.updateUneditedObservationsByBrapiId(observations);
+    }
+
     public void updateObservationsByFieldBookId(List<Observation> observations) {
 
         open();
@@ -562,6 +591,13 @@ public class DataHelper {
     public ObservationUnitModel[] getObservationUnitsBySearchAttribute(int studyId, String searchValue) {
         open();
         return ObservationUnitDao.Companion.getBySearchAttribute(studyId, searchValue);
+    }
+
+    public void markImageCreated(String fieldBookDbId, String dbId) {
+
+        open();
+
+        ObservationDao.Companion.markImageCreated(fieldBookDbId, dbId);
     }
 
     public void updateImage(FieldBookImage image) {
@@ -1102,6 +1138,9 @@ public class DataHelper {
     }
 
     public void updateSyncDate(int studyId) {
+
+        open();
+
         StudyDao.Companion.updateSyncDate(studyId);
     }
 

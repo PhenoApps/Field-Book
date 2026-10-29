@@ -79,6 +79,9 @@ Once you are satisified with the traits, press the Import button at the bottom o
 ## Sync
 
 Fields imported using BrAPI include a <img class="icon" src="./_static/icons/fields/sync.png"> **Sync** option in the field detail page to transfer data between Field Book and BrAPI-compatible databases.
+The Sync card shows when the field was last synced and how many observations on the device have not been synced yet.
+Observations the server does not accept, for example new observations on a server that only allows downloads, are counted separately because no sync can send them.
+Fields can also be synced automatically, see [Sync Settings](./settings/settings-brapi.md#sync-settings).
 The top card shows a summary of transfers to the BrAPI database including uploaded observations and images.
 
 <figure class="image">
@@ -96,12 +99,39 @@ The top card shows a summary of transfers to the BrAPI database including upload
 Remote observations can be imported into Field Book in the second card.
 If observations have been collected on different devices, this is a good way to synchronize data across users.
 
-If there are conflicts between local and remote observations, there are several different merge options:
+Observations edited only on the device are uploaded, and observations changed only on the server are downloaded.
+An observation is a conflict when it was edited on the device and also changed on the server since the last sync.
+Field Book compares the server's observation time with the time the observation was last synced to tell whether the server copy changed.
+
+The observation time is when the value was recorded or edited, on whichever device did it, not when it reached the server.
+An edit made on another device while it was offline, and uploaded after this device last synced, can carry an earlier time.
+That edit is then not seen as a server change, and an edit made on this device replaces it without a conflict.
+A device clock that is set wrong has the same effect.
+
+### Needs Review
+
+When the sync screen opens, Field Book checks the server for observations that need a decision and lists them in a **Needs Review** card.
+They are not uploaded until they are resolved, everything else is still uploaded.
+There are two kinds:
+
+- Conflicts, observations changed on both the device and the server since the last sync.
+Press **Resolve Conflicts** to choose which values to keep.
+- New observations that match values already on the server.
+They were probably uploaded before without the device recording it, for example if the app closed during an upload.
+Press **Review Matches** to link them to the server copies, or to upload them again as separate observations.
+
+Choosing to keep a local value, or to upload a match again, is remembered until the observation is uploaded, so it is not asked again.
+A kept local value is asked about again if the server copy changes once more.
+Automatic syncs follow these choices too.
+
+Conflicts can be resolved with several different merge options:
 
 - Server: replace local observations with the remote values
 - Local: keep local observation values
 - Recent: keep the most recent observation value
 - Manual: decide for each conflict
+
+Uploading also checks the server for conflicts first, so an edit is not uploaded over a server change that Field Book can detect.
 
 <figure class="image">
   <img class="screenshot" src="./_static/images/brapi/joined_brapi_sync_conflict.png" alt="BrAPI sync main screen" width="1100px">
@@ -118,3 +148,11 @@ If there are conflicts between local and remote observations, there are several 
 A summary of new observations is displayed in the last card.
 These observations can be uploaded to the connected BrAPI database.
 Images can be optionally skipped during upload to decrease upload time.
+
+Field Book checks which calls the server lists in its BrAPI server information before uploading.
+If the server does not accept new observations, edited observations, or images, that part of the upload is skipped and the upload card explains why, and the upload button is disabled when nothing else can be sent.
+Automatic syncs skip the same uploads.
+A server that does not provide this information is not restricted.
+Only a call the server lists without the method Field Book needs counts as not accepted.
+A call left out of the list entirely is tried anyway, since many servers leave calls out of it.
+See [Check Compatibility](./settings/settings-brapi.md#check-compatibility) for the full list of calls.
