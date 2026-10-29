@@ -121,6 +121,9 @@ Defaults to `Off`.
 **New and edited observations** uploads everything.
 **New observations only** uploads observations and images collected on this device, and leaves changes to data already on the server to the sync screen, where they are checked first.
 Defaults to `New and edited observations`.
+- **Include Images** lets automatic syncs upload images as well as observations.
+Turn it off to save data on slow or metered connections, images are then only uploaded from the sync screen.
+Defaults to on.
 - **Notify on Reconnect** shows a notification when the device gets a network connection back and BrAPI fields have observations that are not synced.
 Tapping the notification opens the sync screen, or the field list when more than one field needs syncing.
 Going back from the sync screen returns to that field's details.

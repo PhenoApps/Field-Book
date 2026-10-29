@@ -29,6 +29,13 @@
         android:title="@string/preferences_brapi_sync_upload_mode_title" />
 
     <CheckBoxPreference
+        android:defaultValue="true"
+        android:icon="@drawable/ic_trait_camera"
+        android:key="BRAPI_SYNC_UPLOAD_IMAGES"
+        android:summary="@string/preferences_brapi_sync_upload_images_summary"
+        android:title="@string/preferences_brapi_sync_upload_images_title" />
+
+    <CheckBoxPreference
         android:defaultValue="false"
         android:icon="@drawable/wifi"
         android:key="BRAPI_SYNC_RECONNECT_NOTIFICATION"

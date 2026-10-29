@@ -1792,6 +1792,8 @@
     <string name="preferences_brapi_sync_interval_summary">%s</string>
     <string name="preferences_brapi_sync_upload_mode_title">Automatic Upload</string>
     <string name="preferences_brapi_sync_upload_mode_summary">%s</string>
+    <string name="preferences_brapi_sync_upload_images_title">Include Images</string>
+    <string name="preferences_brapi_sync_upload_images_summary">Automatic syncs also upload images. When off, images are only uploaded from the sync screen</string>
     <string name="preferences_brapi_sync_reconnect_notification_title">Notify on Reconnect</string>
     <string name="preferences_brapi_sync_reconnect_notification_summary">Show a notification when the network returns and observations have not been synced</string>
     <string name="brapi_sync_notification_channel">BrAPI sync</string>

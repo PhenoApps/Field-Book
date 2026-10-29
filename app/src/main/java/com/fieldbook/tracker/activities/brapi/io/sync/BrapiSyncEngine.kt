@@ -1362,7 +1362,10 @@ class BrapiSyncEngine @Inject constructor(
             // Images upload concurrently, so their events can arrive from several threads at once.
             val uploadedImages = AtomicInteger(0)
 
-            if (failedCode != UNAUTHORIZED && support.images) {
+            // Images can be large, so automatic syncs can leave them to the sync screen.
+            val uploadImages = preferences.getBoolean(PreferenceKeys.BRAPI_SYNC_UPLOAD_IMAGES, true)
+
+            if (failedCode != UNAUTHORIZED && support.images && uploadImages) {
 
                 processImages(
                     brAPIService,
