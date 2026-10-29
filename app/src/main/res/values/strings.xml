@@ -1845,6 +1845,22 @@
     </plurals>
     <string name="brapi_review_resync_button">Review Matches</string>
     <string name="brapi_review_upload_blocked">Resolve the observations that need review before uploading</string>
+    <!-- %1$s is a count such as "12 observations", shown in bold, %2$s is the server name -->
+    <string name="brapi_upload_unsupported_new">%1$s cannot be sent to %2$s because it does not accept new observations (POST).</string>
+    <string name="brapi_upload_unsupported_edited">%1$s cannot be sent to %2$s because it does not accept edited observations (PUT).</string>
+    <string name="brapi_upload_unsupported_images">%1$s cannot be sent to %2$s because it does not accept images.</string>
+    <plurals name="brapi_upload_count_observations">
+        <item quantity="one">%d observation</item>
+        <item quantity="other">%d observations</item>
+    </plurals>
+    <plurals name="brapi_upload_count_edited_observations">
+        <item quantity="one">%d edited observation</item>
+        <item quantity="other">%d edited observations</item>
+    </plurals>
+    <plurals name="brapi_upload_count_images">
+        <item quantity="one">%d image</item>
+        <item quantity="other">%d images</item>
+    </plurals>
     <string name="brapi_v1_is_not_compatible">BrAPI V1 is not compatible.</string>
     <string name="no_programdbid_provided">No programDbId provided</string>
     <string name="no_studydbids_provided">No studyDbIds provided</string>

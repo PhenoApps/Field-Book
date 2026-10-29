@@ -111,6 +111,10 @@ data class BrapiExportUiState(
     val reviewRequest: Int = 0,
     // While CHECKING, an automatic sync of this study still holds it, the check waits for it.
     val waitingForAutoSync: Boolean = false,
+    // While CHECKING, the server is being asked, rather than the last automatic sync's result reused.
+    val checkingServer: Boolean = false,
+    // Which uploads the server lists in serverinfo, all allowed until it is known.
+    val uploadSupport: BrapiSyncEngine.UploadSupport = BrapiSyncEngine.UploadSupport(),
 )
 
 enum class ViewMode {

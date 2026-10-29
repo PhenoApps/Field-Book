@@ -551,6 +551,20 @@ public class DataHelper {
         ObservationDao.Companion.updateObservationsByBrapiId(observations);
     }
 
+    public void markObservationsSynced(List<Observation> observations) {
+
+        open();
+
+        ObservationDao.Companion.markObservationsSynced(observations);
+    }
+
+    public int updateUneditedObservationsByBrapiId(List<Observation> observations) {
+
+        open();
+
+        return ObservationDao.Companion.updateUneditedObservationsByBrapiId(observations);
+    }
+
     public void updateObservationsByFieldBookId(List<Observation> observations) {
 
         open();

@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities.brapi.io.sync
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,7 +48,10 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
@@ -166,7 +170,7 @@ fun BrapiSyncScreen(
                 )
                 CountRow(stringResource(R.string.synced_images), uiState.syncedImageCount)
 
-                if (uiState.viewMode == ViewMode.CHECKING) {
+                if (uiState.viewMode == ViewMode.CHECKING && (uiState.waitingForAutoSync || uiState.checkingServer)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
@@ -442,6 +446,13 @@ fun BrapiSyncScreen(
                 val totalImages = uiState.newImageCount + uiState.editedImageCount
                 val hasObservationsToUpload = (totalObservations + totalImages) > 0
 
+                // Uploads the server does not list in serverinfo are greyed out and explained
+                val support = uiState.uploadSupport
+                val canUpload = (support.newObservations && uiState.newObservationCount > 0)
+                        || (support.editedObservations && uiState.editedObservationCount > 0)
+                        || (support.images && uiState.uploadImages
+                        && totalImages + uiState.incompleteImageCount > 0)
+
                 if (uiState.viewMode == ViewMode.EXPORTING) {
                     ExportProgressIndicator(uiState.progress, Modifier.fillMaxWidth())
                     Button(onClick = onCancelExportClick, modifier = Modifier.fillMaxWidth()) {
@@ -476,20 +487,55 @@ fun BrapiSyncScreen(
                             )
                         }
 
+                        // Each kind of data waiting to upload is a count, or when the server does
+                        // not accept it, a sentence saying so and how much is left unsynced.
                         if (uiState.newObservationCount + uiState.editedObservationCount + uiState.newImageCount + uiState.editedImageCount > 0) {
-                            CountRow(
-                                stringResource(R.string.new_observations),
-                                uiState.newObservationCount
-                            )
-                            CountRow(
-                                stringResource(R.string.edited_observations),
-                                uiState.editedObservationCount
-                            )
-                            CountRow(stringResource(R.string.new_images), uiState.newImageCount)
-                            CountRow(
-                                stringResource(R.string.edited_images),
-                                uiState.editedImageCount
-                            )
+
+                            val server = uiState.brapiServerDisplayName
+
+                            if (support.newObservations) {
+                                CountRow(stringResource(R.string.new_observations), uiState.newObservationCount)
+                            } else if (uiState.newObservationCount > 0) {
+                                UnsupportedUploadRow(
+                                    template = R.string.brapi_upload_unsupported_new,
+                                    count = pluralStringResource(
+                                        R.plurals.brapi_upload_count_observations,
+                                        uiState.newObservationCount,
+                                        uiState.newObservationCount
+                                    ),
+                                    server = server
+                                )
+                            }
+
+                            if (support.editedObservations) {
+                                CountRow(stringResource(R.string.edited_observations), uiState.editedObservationCount)
+                            } else if (uiState.editedObservationCount > 0) {
+                                UnsupportedUploadRow(
+                                    template = R.string.brapi_upload_unsupported_edited,
+                                    count = pluralStringResource(
+                                        R.plurals.brapi_upload_count_edited_observations,
+                                        uiState.editedObservationCount,
+                                        uiState.editedObservationCount
+                                    ),
+                                    server = server
+                                )
+                            }
+
+                            if (support.images) {
+                                CountRow(stringResource(R.string.new_images), uiState.newImageCount)
+                                CountRow(stringResource(R.string.edited_images), uiState.editedImageCount)
+                            } else if (totalImages > 0) {
+                                // one sentence for new and edited images, the reason is the same
+                                UnsupportedUploadRow(
+                                    template = R.string.brapi_upload_unsupported_images,
+                                    count = pluralStringResource(
+                                        R.plurals.brapi_upload_count_images,
+                                        totalImages,
+                                        totalImages
+                                    ),
+                                    server = server
+                                )
+                            }
                         }
 
                     }
@@ -522,8 +568,9 @@ fun BrapiSyncScreen(
                     if (totalImages > 0 && uiState.viewMode == ViewMode.IDLE) {
                         Row {
                             Switch(
-                                checked = uiState.uploadImages,
-                                onCheckedChange = onImageUploadToggle
+                                checked = uiState.uploadImages && support.images,
+                                onCheckedChange = onImageUploadToggle,
+                                enabled = support.images
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(stringResource(R.string.include_images),
@@ -547,7 +594,7 @@ fun BrapiSyncScreen(
                     Button(
                         onClick = onExportClick,
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = uiState.isInitialized && uiState.viewMode == ViewMode.IDLE && !needsReview
+                        enabled = uiState.isInitialized && uiState.viewMode == ViewMode.IDLE && !needsReview && canUpload
                     ) {
                         Text(stringResource(R.string.brapi_upload_button))
                     }
@@ -697,6 +744,32 @@ private fun ResultRow(text: String, icon: Painter, tint: Color) {
         Spacer(modifier = Modifier.width(12.dp))
         Text(text = text, style = AppTheme.typography.bodyStyle)
     }
+}
+
+/**
+ * Data that cannot be uploaded because the server does not accept it, as one sentence such as
+ * "**12 observations** cannot be sent to [server] because it does not accept new observations".
+ *
+ * @param template a string with the count as %1$s and the server as %2$s
+ */
+@Composable
+private fun UnsupportedUploadRow(@StringRes template: Int, count: String, server: String) {
+
+    // The template is split around the count, wherever a translation places it, so only the
+    // count is bold.
+    val marker = "\u0000"
+    val sentence = stringResource(template, marker, server)
+    val (before, after) = sentence.split(marker, limit = 2).let { it[0] to it.getOrElse(1) { "" } }
+
+    Text(
+        text = buildAnnotatedString {
+            append(before)
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(count) }
+            append(after)
+        },
+        style = AppTheme.typography.bodyStyle,
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
 }
 
 @Composable

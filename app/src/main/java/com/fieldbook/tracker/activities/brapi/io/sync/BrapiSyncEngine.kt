@@ -8,9 +8,11 @@ import com.fieldbook.tracker.brapi.model.FieldBookImage
 import com.fieldbook.tracker.brapi.model.Observation
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
+import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.brapi.service.BrapiDeviceIdProvider
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.ObservationChangeTracker
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.TraitObject
@@ -18,6 +20,7 @@ import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.CategoricalTraitLayout
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.coders.DateJsonCoder
+import com.fieldbook.tracker.utilities.BrapiImplementationHelper
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.DateJsonUtil
 import com.fieldbook.tracker.utilities.JsonUtil
@@ -32,16 +35,21 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
+import org.brapi.v2.model.core.BrAPIService as BrAPIServerCallInfo
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.coroutines.resume
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -65,6 +73,9 @@ class BrapiSyncEngine @Inject constructor(
         private const val TAG = "BrapiSyncEngine"
         private const val UNAUTHORIZED = 401
 
+        // how long an automatic sync's review items stand in for the sync screen's own check
+        private val REVIEW_REUSE_MS = TimeUnit.MINUTES.toMillis(5)
+
         // values of PreferenceKeys.BRAPI_SYNC_UPLOAD_MODE
         const val UPLOAD_MODE_ALL = "all"
         const val UPLOAD_MODE_NEW = "new"
@@ -77,6 +88,116 @@ class BrapiSyncEngine @Inject constructor(
     fun lockFor(studyId: Int): Mutex = studyLocks.getOrPut(studyId) { Mutex() }
 
     fun newService(): BrAPIService = BrAPIServiceFactory.getBrAPIService(context)
+
+    /**
+     * Which kinds of upload the server accepts, from the calls it lists in serverinfo.
+     * Everything defaults to supported: a server whose serverinfo fails or lists nothing is not
+     * blocked, many servers leave it incomplete.
+     */
+    data class UploadSupport(
+        val newObservations: Boolean = true, // POST observations
+        val editedObservations: Boolean = true, // PUT observations
+        val images: Boolean = true // POST images, PUT images/{imageDbId} and its imagecontent
+    )
+
+    // serverinfo rarely changes, so it is asked once per server for the life of the process
+    private val uploadSupportByHost = ConcurrentHashMap<String, UploadSupport>()
+
+    /**
+     * Review items an automatic sync found, kept so the sync screen does not download the same
+     * server observations again just to list them.
+     *
+     * @param revision [ObservationChangeTracker] after the sync, any observation write since
+     * makes the result stale
+     */
+    private data class CachedReview(
+        val review: ReviewCheck,
+        val host: String,
+        val revision: Long,
+        val createdAt: Long
+    )
+
+    private val reviewByStudy = ConcurrentHashMap<Int, CachedReview>()
+
+    /**
+     * The last automatic sync's review items for the study, if nothing could have changed them
+     * since: same server, no observation written, and recent enough that the server is unlikely
+     * to have moved on. Uploads check the server for conflicts again regardless.
+     */
+    private fun cachedReview(studyId: Int): ReviewCheck? {
+
+        val cached = reviewByStudy[studyId]
+
+        val staleReason = when {
+            cached == null -> "no automatic sync result"
+            cached.host != BrAPIService.getHostUrl(context) -> "server changed"
+            cached.revision != ObservationChangeTracker.current -> "observations written since"
+            System.currentTimeMillis() - cached.createdAt >= REVIEW_REUSE_MS -> "older than the reuse window"
+            else -> null
+        }
+
+        if (staleReason != null) {
+            Log.d(TAG, "Checking the server for study $studyId review items: $staleReason")
+            reviewByStudy.remove(studyId)
+            return null
+        }
+
+        Log.d(TAG, "Using the review items from the last automatic sync of study $studyId")
+
+        return cached?.review
+    }
+
+    suspend fun uploadSupport(brAPIService: BrAPIService): UploadSupport {
+
+        val host = BrAPIService.getHostUrl(context) ?: return UploadSupport()
+
+        uploadSupportByHost[host]?.let { return it }
+
+        // BrAPI V1 has no serverinfo calls list to check
+        val v2 = brAPIService as? BrAPIServiceV2 ?: return UploadSupport()
+
+        val serverCalls = fetchServerCalls(v2)
+        if (serverCalls.isNullOrEmpty()) {
+            Log.d(TAG, "serverinfo for $host listed no calls, uploads are not restricted")
+            return UploadSupport()
+        }
+
+        val keys = BrapiImplementationHelper.serverCallKeys(serverCalls)
+        fun supports(service: String, method: String) =
+            BrapiImplementationHelper.supports(keys, service, method)
+
+        val support = UploadSupport(
+            newObservations = supports("observations", "POST"),
+            editedObservations = supports("observations", "PUT"),
+            images = supports("images", "POST")
+                    && supports("images/{imageDbId}", "PUT")
+                    && supports("images/{imageDbId}/imagecontent", "PUT")
+        )
+
+        Log.d(TAG, "Upload support for $host from serverinfo: $support")
+
+        uploadSupportByHost[host] = support
+
+        return support
+    }
+
+    // null when serverinfo could not be read
+    private suspend fun fetchServerCalls(brAPIService: BrAPIServiceV2): List<BrAPIServerCallInfo>? =
+        withTimeoutOrNull(TimeUnit.SECONDS.toMillis(BrAPIService.getTimeoutValue(context).toLong())) {
+            suspendCancellableCoroutine { continuation ->
+                brAPIService.serverInfoService.fetchServerInfo(
+                    onSuccess = { response ->
+                        if (continuation.isActive) continuation.resume(response?.result?.calls)
+                        null
+                    },
+                    onFail = { code ->
+                        Log.w(TAG, "serverinfo failed with $code, uploads are not checked")
+                        if (continuation.isActive) continuation.resume(null)
+                        null
+                    }
+                )
+            }
+        }
 
     // A new formatter and time on every call, the engine is shared between concurrent syncs.
     fun syncTimestamp(): String =
@@ -118,7 +239,10 @@ class BrapiSyncEngine @Inject constructor(
         val newImageObservations: List<Observation> = emptyList(),
         val editedImageObservations: List<Observation> = emptyList(),
         val incompleteImageObservations: List<Observation> = emptyList(),
-        val unsyncableObservationCount: Int = 0
+        val unsyncableObservationCount: Int = 0,
+        // Taken before the read. Uploads of these observations record it as their sync time, so
+        // anything edited after the read, in Collect while the sync runs, still counts as edited.
+        val loadedAt: String = ""
     ) {
         val unsyncedCount: Int
             get() = newObservations.size + editedObservations.size + newImageObservations.size +
@@ -160,6 +284,8 @@ class BrapiSyncEngine @Inject constructor(
 
     fun loadLocalStatus(studyId: Int): LocalStatus {
 
+        val loadedAt = syncTimestamp()
+
         val hostURL = BrAPIService.getHostUrl(context)
         val exportData = dataHelper.getBrAPIExportData(studyId, hostURL)
 
@@ -181,7 +307,8 @@ class BrapiSyncEngine @Inject constructor(
             newImageObservations = exportData["newImageObservations"] ?: emptyList(),
             editedImageObservations = exportData["editedImageObservations"] ?: emptyList(),
             incompleteImageObservations = exportData["incompleteImageObservations"] ?: emptyList(),
-            unsyncableObservationCount = unsyncableObservationCount
+            unsyncableObservationCount = unsyncableObservationCount,
+            loadedAt = loadedAt
         )
     }
 
@@ -357,16 +484,21 @@ class BrapiSyncEngine @Inject constructor(
 
         Log.d(TAG, "Updating local database with ${resolution.updates.size} updates")
 
-        applyServerValues(resolution.updates, traitsById)
+        // These were unedited when the sync read them, but Collect may have changed one since.
+        applyServerValues(resolution.updates, traitsById, onlyIfUnedited = true)
     }
 
     /**
      * Overwrites local observations with the server's copy, re-encoding raw BrAPI server values
      * to Field Book's internal format before persisting.
+     *
+     * @param onlyIfUnedited skip observations edited locally since their last sync, for updates
+     * found by a download. A user choosing the server's value in a conflict passes false.
      */
     fun applyServerValues(
         serverObservations: List<Observation>,
-        traitsById: Map<String, TraitObject>
+        traitsById: Map<String, TraitObject>,
+        onlyIfUnedited: Boolean = false
     ) {
         serverObservations.forEach { obs ->
             if (obs.internalVariableDbId.isNullOrBlank()) {
@@ -375,7 +507,11 @@ class BrapiSyncEngine @Inject constructor(
             obs.value = normalizeDownloadedObservationValue(obs, traitsById)
         }
 
-        dataHelper.updateObservationsByBrapiId(serverObservations)
+        if (onlyIfUnedited) {
+            dataHelper.updateUneditedObservationsByBrapiId(serverObservations)
+        } else {
+            dataHelper.updateObservationsByBrapiId(serverObservations)
+        }
     }
 
     fun getObservations(
@@ -660,7 +796,7 @@ class BrapiSyncEngine @Inject constructor(
                 } else {
                     localObservation.setLastSyncedTime(syncTimestamp())
                 }
-                dataHelper.updateObservationsByFieldBookId(listOf(localObservation))
+                dataHelper.markObservationsSynced(listOf(localObservation))
                 adoptServerKeys.remove(choiceKey)
                 uploadAsNewKeys.remove(choiceKey)
                 recoveredCount++
@@ -702,7 +838,19 @@ class BrapiSyncEngine @Inject constructor(
      * @return conflicts: observations changed on this device and on the server since the last sync
      *         resyncChoices: new observations whose values already appear on the server
      */
-    suspend fun checkForReview(brAPIService: BrAPIService, study: FieldObject): ReviewCheck {
+    /**
+     * @param onServerCheck called only when the server has to be asked, the last automatic
+     * sync's result is reused otherwise
+     */
+    suspend fun checkForReview(
+        brAPIService: BrAPIService,
+        study: FieldObject,
+        onServerCheck: () -> Unit = {}
+    ): ReviewCheck {
+
+        cachedReview(study.studyId)?.let { return it }
+
+        onServerCheck()
 
         val server = downloadServerObservations(brAPIService, study)
         val local = loadLocalStatus(study.studyId)
@@ -764,7 +912,8 @@ class BrapiSyncEngine @Inject constructor(
     fun processNewObservations(
         brAPIService: BrAPIService,
         newObs: List<Observation>,
-        localValuesByFieldBookId: Map<String, String>
+        localValuesByFieldBookId: Map<String, String>,
+        syncedAt: String
     ): Flow<UploadProgressUpdate> =
         channelFlow {
 
@@ -780,6 +929,7 @@ class BrapiSyncEngine @Inject constructor(
                     val (incompats, news, edits) = processChunk(
                         chunk,
                         newObs,
+                        syncedAt = syncedAt,
                         localValuesByFieldBookId = localValuesByFieldBookId
                     )
 
@@ -799,10 +949,14 @@ class BrapiSyncEngine @Inject constructor(
 
         }.flowOn(Dispatchers.IO)
 
+    /**
+     * @param syncedAt when the uploaded observations were read, see [LocalStatus.loadedAt]
+     */
     private fun processChunk(
         chunk: List<Observation>,
         referenceObservations: List<Observation>,
         isNew: Boolean = true,
+        syncedAt: String,
         localValuesByFieldBookId: Map<String, String> = emptyMap()
     ): Triple<Int, Int, Int> {
 
@@ -814,8 +968,6 @@ class BrapiSyncEngine @Inject constructor(
         chunk.forEach { observation ->
 
             var retVal = UploadError.NONE
-
-            val syncTime = syncTimestamp()
 
             // find observation with matching keys and update observationDbId
             val firstIndex =
@@ -840,8 +992,9 @@ class BrapiSyncEngine @Inject constructor(
                     }
                 }
                 update.dbId = observation.dbId
-                update.setLastSyncedTime(syncTime)
-                dataHelper.updateObservationsByFieldBookId(listOf(update))
+                update.setLastSyncedTime(syncedAt)
+                // only the id and sync time, the value may have been edited in Collect meanwhile
+                dataHelper.markObservationsSynced(listOf(update))
 
             }
 
@@ -873,7 +1026,8 @@ class BrapiSyncEngine @Inject constructor(
     fun processEditedObservations(
         brAPIService: BrAPIService,
         editedObs: List<Observation>,
-        localValuesByFieldBookId: Map<String, String>
+        localValuesByFieldBookId: Map<String, String>,
+        syncedAt: String
     ): Flow<UploadProgressUpdate> =
         channelFlow {
 
@@ -889,6 +1043,7 @@ class BrapiSyncEngine @Inject constructor(
                         chunk,
                         editedObs,
                         isNew = false,
+                        syncedAt = syncedAt,
                         localValuesByFieldBookId = localValuesByFieldBookId
                     )
 
@@ -907,10 +1062,14 @@ class BrapiSyncEngine @Inject constructor(
 
         }.flowOn(Dispatchers.IO)
 
+    /**
+     * @param syncedAt when the images' observations were read, see [LocalStatus.loadedAt]
+     */
     suspend fun processImages(
         brAPIService: BrAPIService,
         images: List<FieldBookImage>,
         isNew: Boolean = true,
+        syncedAt: String,
         onEvent: (ImageUploadEvent) -> Unit = {}
     ) = coroutineScope {
 
@@ -933,9 +1092,9 @@ class BrapiSyncEngine @Inject constructor(
 
                     if (!isActive) return@withPermit
                     val message = if (isNew) {
-                        processNewImage(brAPIService, image, onEvent)
+                        processNewImage(brAPIService, image, syncedAt, onEvent)
                     } else {
-                        updateImages(brAPIService, image, onEvent)
+                        updateImages(brAPIService, image, syncedAt, onEvent)
                     }
 
                     onEvent(ImageUploadEvent.Finished(message))
@@ -956,6 +1115,7 @@ class BrapiSyncEngine @Inject constructor(
     private suspend fun processNewImage(
         brAPIService: BrAPIService,
         image: FieldBookImage,
+        syncedAt: String,
         onEvent: (ImageUploadEvent) -> Unit
     ): String {
 
@@ -987,7 +1147,7 @@ class BrapiSyncEngine @Inject constructor(
 
             val finalImage = brAPIService.awaitPutImageContent(imageWithDbId)
 
-            val retVal = processImageResponse(finalImage, finalImage.fieldBookDbId)
+            val retVal = processImageResponse(finalImage, finalImage.fieldBookDbId, syncedAt)
 
             if (retVal != UploadError.NONE) {
 
@@ -1029,6 +1189,7 @@ class BrapiSyncEngine @Inject constructor(
     private suspend fun updateImages(
         brAPIService: BrAPIService,
         image: FieldBookImage,
+        syncedAt: String,
         onEvent: (ImageUploadEvent) -> Unit
     ): String {
 
@@ -1060,6 +1221,10 @@ class BrapiSyncEngine @Inject constructor(
 
             brAPIService.awaitPutImageContent(responseImage)
 
+            // Without this the image stayed edited or incomplete and was sent again every sync.
+            image.setLastSyncedTime(syncedAt)
+            dataHelper.updateImage(image)
+
             onEvent(ImageUploadEvent.Edited)
 
         } catch (e: CancellationException) {
@@ -1086,11 +1251,12 @@ class BrapiSyncEngine @Inject constructor(
     private fun processImageResponse(
         converted: FieldBookImage,
         fieldBookId: String?,
+        syncedAt: String,
     ): UploadError {
 
         var retVal = UploadError.NONE
 
-        converted.setLastSyncedTime(syncTimestamp())
+        converted.setLastSyncedTime(syncedAt)
         converted.fieldbookDbId = fieldBookId
 
         if (converted.dbId != null && converted.fieldBookDbId != null) {
@@ -1150,18 +1316,20 @@ class BrapiSyncEngine @Inject constructor(
             val heldBack = resolution.conflicts.mapNotNull { it.localObservation.fieldBookDbId }.toSet()
             val local = loadLocalStatus(studyId)
 
+            // Only what the server accepts, otherwise every sync would fail on the same calls.
+            val support = uploadSupport(brAPIService)
+
             // Automatic syncs can leave edits to the sync screen, where they are checked first.
-            val uploadEdited = preferences.getString(
+            val uploadEdited = support.editedObservations && preferences.getString(
                 PreferenceKeys.BRAPI_SYNC_UPLOAD_MODE,
                 UPLOAD_MODE_ALL
             ) != UPLOAD_MODE_NEW
 
             var uploaded = 0
-            var needsReview = resolution.conflicts.size
             var failedCode: Int? = null
 
             listOf(
-                local.newObservations to true,
+                (if (support.newObservations) local.newObservations else emptyList()) to true,
                 (if (uploadEdited) local.editedObservations.filter { it.fieldBookDbId !in heldBack } else emptyList()) to false
             ).forEach { (observations, isNew) ->
 
@@ -1174,14 +1342,12 @@ class BrapiSyncEngine @Inject constructor(
                     observations,
                     localValues
                 )
-                needsReview += resync.pendingChoices.size
-
                 if (resync.observationsToUpload.isEmpty()) return@forEach
 
                 val flow = if (isNew) {
-                    processNewObservations(brAPIService, resync.observationsToUpload, localValues)
+                    processNewObservations(brAPIService, resync.observationsToUpload, localValues, local.loadedAt)
                 } else {
-                    processEditedObservations(brAPIService, resync.observationsToUpload, localValues)
+                    processEditedObservations(brAPIService, resync.observationsToUpload, localValues, local.loadedAt)
                 }
 
                 flow.collect { update ->
@@ -1196,11 +1362,12 @@ class BrapiSyncEngine @Inject constructor(
             // Images upload concurrently, so their events can arrive from several threads at once.
             val uploadedImages = AtomicInteger(0)
 
-            if (failedCode != UNAUTHORIZED) {
+            if (failedCode != UNAUTHORIZED && support.images) {
 
                 processImages(
                     brAPIService,
-                    dataHelper.getImageDetails(context, local.newImageObservations)
+                    dataHelper.getImageDetails(context, local.newImageObservations),
+                    syncedAt = local.loadedAt
                 ) { event -> if (event == ImageUploadEvent.Inserted) uploadedImages.incrementAndGet() }
 
                 // An incomplete image is a new one whose content never finished uploading, so it
@@ -1211,13 +1378,38 @@ class BrapiSyncEngine @Inject constructor(
                 processImages(
                     brAPIService,
                     dataHelper.getImageDetails(context, imageUpdates),
-                    isNew = false
+                    isNew = false,
+                    syncedAt = local.loadedAt
                 ) { event -> if (event == ImageUploadEvent.Edited) uploadedImages.incrementAndGet() }
             }
 
             uploaded += uploadedImages.get()
 
             if (uploaded > 0) markStudySynced(studyId)
+
+            // What is left for the user, found from this sync's download rather than asking the
+            // server again: the conflicts held back, and new observations still not uploaded
+            // whose values are already on the server. Read after this sync's own writes, a fresh
+            // copy, the upload converted the values of the copies it sent.
+            val remaining = loadLocalStatus(studyId)
+            val resyncChoices = matchResyncCandidates(
+                remaining.newObservations,
+                prepareForUpload(remaining.newObservations),
+                downloaded,
+                mutableSetOf(),
+                mutableSetOf()
+            ).pendingChoices
+
+            val review = ReviewCheck(resolution.conflicts, resyncChoices)
+
+            reviewByStudy[studyId] = CachedReview(
+                review = review,
+                host = BrAPIService.getHostUrl(context),
+                revision = ObservationChangeTracker.current,
+                createdAt = System.currentTimeMillis()
+            )
+
+            val needsReview = review.conflicts.size + review.resyncChoices.size
 
             AutoSyncResult(
                 downloaded = resolution.inserts.size + resolution.updates.size,
@@ -1236,6 +1428,8 @@ class BrapiSyncEngine @Inject constructor(
 
         } catch (e: BrapiException) {
 
+            reviewByStudy.remove(studyId)
+
             Log.e(TAG, "Automatic sync of study $studyId failed", e)
 
             AutoSyncResult(
@@ -1243,6 +1437,8 @@ class BrapiSyncEngine @Inject constructor(
             )
 
         } catch (e: Exception) {
+
+            reviewByStudy.remove(studyId)
 
             Log.e(TAG, "Automatic sync of study $studyId failed", e)
 

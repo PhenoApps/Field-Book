@@ -176,7 +176,19 @@ class BrapiSyncViewModel @Inject constructor(
             resyncAdoptServerKeys.clear()
             keepLocalDbIds.clear()
 
+            loadUploadSupport()
             checkForReview()
+        }
+    }
+
+    /**
+     * Asks the server which uploads it accepts, so the screen can grey out the rest. Runs beside
+     * the review check rather than as the active job, it never blocks the buttons.
+     */
+    private fun loadUploadSupport() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val support = engine.uploadSupport(brAPIService)
+            _uiState.update { it.copy(uploadSupport = support) }
         }
     }
 
@@ -212,7 +224,10 @@ class BrapiSyncViewModel @Inject constructor(
                     // finished since may have uploaded or downloaded some of them.
                     refreshLocalStatus()
 
-                    engine.checkForReview(brAPIService, study)
+                    // Only shown when the server is really asked, not for a reused result.
+                    engine.checkForReview(brAPIService, study) {
+                        _uiState.update { it.copy(checkingServer = true) }
+                    }
                 }
 
                 setPendingConflicts(review.conflicts)
@@ -230,7 +245,9 @@ class BrapiSyncViewModel @Inject constructor(
                 // Upload repeats the conflict check, so a failure here only delays the listing.
                 Log.w(TAG, "Review check failed", e)
             } finally {
-                _uiState.update { it.copy(viewMode = ViewMode.IDLE, waitingForAutoSync = false) }
+                _uiState.update {
+                    it.copy(viewMode = ViewMode.IDLE, waitingForAutoSync = false, checkingServer = false)
+                }
             }
         }
     }
@@ -254,8 +271,17 @@ class BrapiSyncViewModel @Inject constructor(
             return
         }
 
-        if (localStatus.newObservations.isEmpty() && localStatus.editedObservations.isEmpty()
-            && localStatus.newImageObservations.isEmpty() && localStatus.editedImageObservations.isEmpty()) {
+        // Only what the server accepts counts, the rest is skipped and explained on the screen.
+        val support = _uiState.value.uploadSupport
+        val uploadImages = _uiState.value.uploadImages && support.images
+
+        val hasNew = support.newObservations && localStatus.newObservations.isNotEmpty()
+        val hasEdited = support.editedObservations && localStatus.editedObservations.isNotEmpty()
+        val hasImages = uploadImages && (localStatus.newImageObservations.isNotEmpty()
+                || localStatus.editedImageObservations.isNotEmpty()
+                || localStatus.incompleteImageObservations.isNotEmpty())
+
+        if (!hasNew && !hasEdited && !hasImages) {
             _uiState.update {
                 it.copy(
                     isUploadFinished = false,
@@ -280,9 +306,12 @@ class BrapiSyncViewModel @Inject constructor(
 
                     refreshLocalStatus()
 
+                    // when these observations were read, recorded as their sync time on upload
+                    val syncedAt = localStatus.loadedAt
+
                     // Edits are only sent once the server copy is known not to have changed too,
                     // otherwise an upload would silently overwrite an edit made elsewhere.
-                    if (localStatus.editedObservations.isNotEmpty()) {
+                    if (support.editedObservations && localStatus.editedObservations.isNotEmpty()) {
 
                         _uiState.update {
                             it.copy(
@@ -332,7 +361,7 @@ class BrapiSyncViewModel @Inject constructor(
                     val editedImageObservations = localStatus.editedImageObservations
                     val incompleteImageObservations = localStatus.incompleteImageObservations
 
-                    if (newObservations.isNotEmpty()) {
+                    if (support.newObservations && newObservations.isNotEmpty()) {
 
                         _uiState.update {
                             it.copy(
@@ -346,12 +375,12 @@ class BrapiSyncViewModel @Inject constructor(
                         }
 
                         processObservations(newObservations) { observations, localValues ->
-                            engine.processNewObservations(brAPIService, observations, localValues)
+                            engine.processNewObservations(brAPIService, observations, localValues, syncedAt)
                         }
                         if (uiState.value.pendingResyncChoicesCount > 0) return@launch
                     }
 
-                    if (editedObservations.isNotEmpty()) {
+                    if (support.editedObservations && editedObservations.isNotEmpty()) {
 
                         _uiState.update {
                             it.copy(
@@ -365,12 +394,12 @@ class BrapiSyncViewModel @Inject constructor(
                         }
 
                         processObservations(editedObservations) { observations, localValues ->
-                            engine.processEditedObservations(brAPIService, observations, localValues)
+                            engine.processEditedObservations(brAPIService, observations, localValues, syncedAt)
                         }
                         if (uiState.value.pendingResyncChoicesCount > 0) return@launch
                     }
 
-                    if (newImageObservations.isNotEmpty() && uiState.value.uploadImages) {
+                    if (newImageObservations.isNotEmpty() && uploadImages) {
 
                         _uiState.update {
                             it.copy(
@@ -386,14 +415,14 @@ class BrapiSyncViewModel @Inject constructor(
 
                         Log.d(TAG, "Uploading new images to BrAPI")
 
-                        processImages(dataHelper.getImageDetails(context, newImageObservations))
+                        processImages(dataHelper.getImageDetails(context, newImageObservations), syncedAt = syncedAt)
 
                     }
 
                     val totalImageEdits =
                         editedImageObservations.size + incompleteImageObservations.size
 
-                    if (totalImageEdits > 0 && uiState.value.uploadImages) {
+                    if (totalImageEdits > 0 && uploadImages) {
 
                         _uiState.update {
                             it.copy(
@@ -411,7 +440,8 @@ class BrapiSyncViewModel @Inject constructor(
                         processImages(
                             dataHelper.getImageDetails(context, editedImageObservations)
                                     + dataHelper.getImageDetails(context, incompleteImageObservations),
-                            isNew = false
+                            isNew = false,
+                            syncedAt = syncedAt
                         )
                     }
                 }
@@ -822,7 +852,7 @@ class BrapiSyncViewModel @Inject constructor(
 
         if (updatesToPersist.isNotEmpty()) {
             viewModelScope.launch(Dispatchers.IO) {
-                dataHelper.updateObservationsByFieldBookId(updatesToPersist)
+                dataHelper.markObservationsSynced(updatesToPersist)
                 refreshLocalStatus()
             }
         }
@@ -942,9 +972,9 @@ class BrapiSyncViewModel @Inject constructor(
         Log.d(TAG, "Observation processing complete.")
     }
 
-    private suspend fun processImages(images: List<FieldBookImage>, isNew: Boolean = true) {
+    private suspend fun processImages(images: List<FieldBookImage>, isNew: Boolean = true, syncedAt: String) {
 
-        engine.processImages(brAPIService, images, isNew) { event ->
+        engine.processImages(brAPIService, images, isNew, syncedAt) { event ->
 
             _uiState.update {
                 when (event) {

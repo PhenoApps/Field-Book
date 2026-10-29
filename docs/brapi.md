@@ -138,3 +138,9 @@ Uploading also checks the server for conflicts first, so an upload never overwri
 A summary of new observations is displayed in the last card.
 These observations can be uploaded to the connected BrAPI database.
 Images can be optionally skipped during upload to decrease upload time.
+
+Field Book checks which calls the server lists in its BrAPI server information before uploading.
+If the server does not accept new observations, edited observations, or images, that part of the upload is skipped and the upload card explains why, and the upload button is disabled when nothing else can be sent.
+Automatic syncs skip the same uploads.
+A server that does not provide this information is not restricted.
+See [Check Compatibility](./settings/settings-brapi.md#check-compatibility) for the full list of calls.
