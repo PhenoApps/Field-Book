@@ -48,6 +48,10 @@ class BrapiSyncActivity : ThemedActivity() {
         super.onCreate(savedInstanceState)
 
         val fieldIds = intent.getIntegerArrayListExtra(FIELD_IDS)
+
+        // The field is being synced now, so its reconnect reminder is answered. This covers the
+        // notification's Sync button too, which unlike a tap does not dismiss the notification.
+        fieldIds?.forEach { BrapiReconnectNotifier.cancel(this, it) }
         if (!validatePrerequisites(fieldIds)) {
             finish()
             return

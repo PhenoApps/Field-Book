@@ -1788,8 +1788,6 @@
     <string name="preferences_brapi_sync_summary">Automatic sync and reminders</string>
     <string name="preferences_brapi_sync_on_field_open_title">Sync When Opening a Field</string>
     <string name="preferences_brapi_sync_on_field_open_summary">Download and upload observations when a BrAPI field is opened</string>
-    <string name="preferences_brapi_sync_interval_title">Background Sync</string>
-    <string name="preferences_brapi_sync_interval_summary">%s</string>
     <string name="preferences_brapi_sync_upload_mode_title">Automatic Upload</string>
     <string name="preferences_brapi_sync_upload_mode_summary">%s</string>
     <string name="preferences_brapi_sync_upload_images_title">Include Images</string>
@@ -1805,10 +1803,6 @@
     <string name="brapi_sync_notification_text_field">Tap to sync %s</string>
     <string name="brapi_sync_notification_action_sync">Sync</string>
     <string name="brapi_sync_notification_action_dismiss">Dismiss</string>
-    <plurals name="brapi_sync_notification_text_fields">
-        <item quantity="one">In %d field, tap to review</item>
-        <item quantity="other">In %d fields, tap to review</item>
-    </plurals>
     <plurals name="brapi_sync_unsynced_count">
         <item quantity="one">%d observation not synced</item>
         <item quantity="other">%d observations not synced</item>

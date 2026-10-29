@@ -291,7 +291,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             true
         }
 
-        // Follows automatic syncs of this field, whether started here or by the interval sync.
+        // Follows automatic syncs of this field, including one still running from an earlier visit.
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 var previous: AutoSyncStatus? = null

@@ -3,7 +3,6 @@ package com.fieldbook.tracker.activities.brapi.io.sync
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
-import com.fieldbook.tracker.activities.brapi.io.sync.BrapiSyncEngine.AutoSyncError
 import com.fieldbook.tracker.activities.brapi.io.sync.BrapiSyncEngine.AutoSyncResult
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
@@ -24,8 +23,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Runs [BrapiSyncEngine.autoSync] outside of any screen, for syncing on field open, on an interval
- * and in the background, and publishes each study's progress so field details can show it.
+ * Runs [BrapiSyncEngine.autoSync] outside of any screen, for syncing on field open, and publishes
+ * each study's progress so field details can show it.
  */
 @Singleton
 class BrapiAutoSyncManager @Inject constructor(
@@ -82,42 +81,6 @@ class BrapiAutoSyncManager @Inject constructor(
     fun clearStatus(studyId: Int) {
         _status.update { current ->
             if (current[studyId] is AutoSyncStatus.Done) current - studyId else current
-        }
-    }
-
-    /**
-     * Syncs every eligible field one after another. Stops early when the server rejects the
-     * credentials, every other field would fail the same way.
-     */
-    suspend fun syncAllBrapiFields() = syncFields { true }
-
-    /**
-     * Syncs the given studies, those that are still eligible, as [syncAllBrapiFields] does.
-     */
-    suspend fun syncStudies(studyIds: Collection<Int>) = syncFields { it.studyId in studyIds }
-
-    private suspend fun syncFields(include: (FieldObject) -> Boolean) {
-
-        if (!canSync()) return
-
-        // Runs unattended from a timer or worker, a database error must not take the app down.
-        val fields = try {
-            eligibleFields().filter(include)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to list BrAPI fields for sync", e)
-            return
-        }
-
-        for (field in fields) {
-
-            if (!markRunning(field.studyId)) continue
-
-            val result = sync(field.studyId)
-
-            if (result.error == AutoSyncError.UNAUTHORIZED) {
-                Log.w(TAG, "BrAPI authorization failed, skipping the remaining fields")
-                break
-            }
         }
     }
 

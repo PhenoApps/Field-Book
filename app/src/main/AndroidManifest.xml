@@ -294,7 +294,7 @@
                 android:resource="@xml/brapi_authenticator" />
         </service>
 
-        <!-- Sync and Dismiss buttons on the BrAPI reconnect notification -->
+        <!-- Dismiss button on the BrAPI reconnect notifications -->
         <receiver
             android:name=".activities.brapi.io.sync.BrapiNotificationActionReceiver"
             android:exported="false" />

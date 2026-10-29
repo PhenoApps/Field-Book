@@ -9,16 +9,6 @@
         android:title="@string/preferences_brapi_sync_on_field_open_title" />
 
     <ListPreference
-        android:defaultValue="0"
-        android:dialogTitle="@string/preferences_brapi_sync_interval_title"
-        android:entries="@array/pref_brapi_sync_interval_entries"
-        android:entryValues="@array/pref_brapi_sync_interval_values"
-        android:icon="@drawable/timer"
-        android:key="BRAPI_SYNC_INTERVAL"
-        android:summary="@string/preferences_brapi_sync_interval_summary"
-        android:title="@string/preferences_brapi_sync_interval_title" />
-
-    <ListPreference
         android:defaultValue="all"
         android:dialogTitle="@string/preferences_brapi_sync_upload_mode_title"
         android:entries="@array/pref_brapi_sync_upload_mode_entries"

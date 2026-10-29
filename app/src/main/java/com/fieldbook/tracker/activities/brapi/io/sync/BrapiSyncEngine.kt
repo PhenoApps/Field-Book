@@ -55,7 +55,7 @@ import javax.inject.Singleton
 
 /**
  * The BrAPI observation sync work, separated from any UI so that both the sync screen and the
- * automatic syncs (field open, interval, background) run the same code.
+ * automatic sync when a field is opened run the same code.
  *
  * [BrapiSyncViewModel] drives the interactive flow and turns these results into UI state, while
  * [autoSync] runs a whole download and upload without asking the user anything.

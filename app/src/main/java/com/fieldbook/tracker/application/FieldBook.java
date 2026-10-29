@@ -7,7 +7,6 @@ import androidx.work.Configuration;
 
 import com.fieldbook.tracker.BuildConfig;
 import com.fieldbook.tracker.activities.brapi.io.sync.BrapiReconnectNotifier;
-import com.fieldbook.tracker.activities.brapi.io.sync.BrapiSyncScheduler;
 
 import javax.inject.Inject;
 
@@ -18,9 +17,6 @@ public class FieldBook extends MultiDexApplication implements Configuration.Prov
 
     @Inject
     HiltWorkerFactory workerFactory;
-
-    @Inject
-    BrapiSyncScheduler brapiSyncScheduler;
 
     @Inject
     BrapiReconnectNotifier brapiReconnectNotifier;
@@ -36,11 +32,10 @@ public class FieldBook extends MultiDexApplication implements Configuration.Prov
     public void onCreate() {
         super.onCreate();
 
-        brapiSyncScheduler.start();
         brapiReconnectNotifier.start();
     }
 
-    // WorkManager is initialized on demand with Hilt's factory so the BrAPI sync workers get their
+    // WorkManager is initialized on demand with Hilt's factory so the BrAPI reconnect worker gets its
     // dependencies injected, the default startup initializer is removed in the manifest.
     @NonNull
     @Override

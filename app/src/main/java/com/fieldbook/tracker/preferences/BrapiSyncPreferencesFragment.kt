@@ -14,7 +14,7 @@ import com.fieldbook.tracker.activities.PreferencesActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
- * Sub-screen fragment for automatic BrAPI sync (on field open, background, reconnect notification).
+ * Sub-screen fragment for automatic BrAPI sync (on field open, reconnect notification).
  * Navigated to from the main BrAPI preferences screen via the "Sync" preference.
  */
 @AndroidEntryPoint
