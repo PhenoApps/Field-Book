@@ -1828,6 +1828,15 @@
         <item quantity="other">%d need review</item>
     </plurals>
     <string name="brapi_sync_clause_auto_failed">last automatic sync failed</string>
+    <!-- Observations and images the server does not accept, so no sync can send them, e.g. "3 observations not synced, 12 cannot be sent to DeltaBreed" -->
+    <plurals name="brapi_sync_clause_unsupported">
+        <item quantity="one">%1$d cannot be sent to %2$s</item>
+        <item quantity="other">%1$d cannot be sent to %2$s</item>
+    </plurals>
+    <plurals name="brapi_sync_unsupported_count">
+        <item quantity="one">%1$d observation cannot be sent to %2$s</item>
+        <item quantity="other">%1$d observations cannot be sent to %2$s</item>
+    </plurals>
     <string name="brapi_review_title">Needs Review</string>
     <string name="brapi_review_checking">Checking %s for changes…</string>
     <string name="brapi_review_waiting_auto_sync">Waiting for the automatic sync to finish…</string>

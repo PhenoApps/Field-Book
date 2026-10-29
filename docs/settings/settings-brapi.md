@@ -108,6 +108,8 @@ They only include fields imported from the active server.
 
 Automatic syncs never make a choice on your behalf.
 If an observation was edited both on the device and on the server, both values are left as they are and the local edit is not uploaded.
+This includes an observation edited in Collect while a sync is running.
+See [Importing and merging observations](../brapi.md#importing-and-merging-observations) for how Field Book tells that the server copy changed, and when it cannot.
 If a new observation appears to already be on the server, it is not uploaded.
 The field's Sync card shows how many observations need review, and they can be resolved in the [Needs Review](../brapi.md#needs-review) card on the sync screen.
 Observations edited only on the device are uploaded, and observations changed only on the server are downloaded.
@@ -122,6 +124,7 @@ Defaults to `New and edited observations`.
 Turn it off to save data on slow or metered connections, images are then only uploaded from the sync screen.
 Defaults to on.
 - **Notify on Reconnect** shows a notification for each BrAPI field with observations that are not synced, when the device gets a network connection back.
+Observations the server does not accept are left out, since no sync can send them.
 Tapping a notification or its **Sync** button opens that field's sync screen, and **Dismiss** closes it.
 Going back from the sync screen returns to that field's details.
 Opening a field's sync screen also clears its notification.

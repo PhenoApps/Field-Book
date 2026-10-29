@@ -126,8 +126,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private var adapter: FieldDetailAdapter? = null
     private var fieldDetailsJob: Job? = null
 
-    // Observations a sync would upload, null until counted or when the field cannot sync here.
-    private var unsyncedCount: Int? = null
+    // Observations not on the server yet, null until counted or when the field cannot sync here.
+    private var unsyncedCounts: BrapiSyncEngine.UnsyncedCounts? = null
 
     // Sync on open fires once per visit, not on every resume or rotation.
     private var autoSyncRequested = false
@@ -405,7 +405,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                 adapter?.updateItems(items)
             }
 
-            unsyncedCount = unsyncedDeferred?.await()
+            unsyncedCounts = unsyncedDeferred?.await()
             renderSyncStatus()
         }
     }
@@ -456,7 +456,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
         val status = autoSyncManager.status.value[field.studyId]
         val result = (status as? AutoSyncStatus.Done)?.result
-        val count = unsyncedCount
+        val count = unsyncedCounts?.sendable
+        val unsupported = unsyncedCounts?.unsupported ?: 0
 
         val needsAttention = result != null && (result.error != null || result.needsReview > 0)
 
@@ -477,19 +478,44 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             else -> null
         }
 
+        // Data the server does not accept is never synced, so it is named apart from the count of
+        // what still can be rather than leaving the field looking unsynced forever.
+        val server = preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, null) ?: "BrAPI"
+        val unsupportedClause = if (unsupported > 0) {
+            resources.getQuantityString(R.plurals.brapi_sync_clause_unsupported, unsupported, unsupported, server)
+        } else {
+            null
+        }
+
+        fun withUnsupported(text: String) = if (unsupportedClause == null) {
+            text
+        } else {
+            getString(R.string.brapi_sync_status_with_clause, text, unsupportedClause)
+        }
+
         lastSyncTextView.text = when {
             status is AutoSyncStatus.Running -> getString(R.string.brapi_sync_in_progress)
             // Tapping the card logs in while this shows, so it is never mixed with anything else.
             result?.error == BrapiSyncEngine.AutoSyncError.UNAUTHORIZED -> getString(R.string.brapi_error_unauthorized)
             count != null && count > 0 -> {
                 val unsynced = resources.getQuantityString(R.plurals.brapi_sync_unsynced_count, count, count)
-                if (clause == null) unsynced else getString(R.string.brapi_sync_status_with_clause, unsynced, clause)
+                withUnsupported(
+                    if (clause == null) unsynced else getString(R.string.brapi_sync_status_with_clause, unsynced, clause)
+                )
             }
-            result?.error != null -> getString(R.string.brapi_sync_auto_failed)
-            result != null && result.needsReview > 0 -> resources.getQuantityString(
-                R.plurals.brapi_sync_needs_review,
-                result.needsReview,
-                result.needsReview
+            result?.error != null -> withUnsupported(getString(R.string.brapi_sync_auto_failed))
+            result != null && result.needsReview > 0 -> withUnsupported(
+                resources.getQuantityString(
+                    R.plurals.brapi_sync_needs_review,
+                    result.needsReview,
+                    result.needsReview
+                )
+            )
+            unsupported > 0 -> resources.getQuantityString(
+                R.plurals.brapi_sync_unsupported_count,
+                unsupported,
+                unsupported,
+                server
             )
             // Nothing left to upload only reads as synced once a sync has actually happened.
             count == 0 && !lastSync.isNullOrEmpty() -> allSyncedText(context, lastSync)

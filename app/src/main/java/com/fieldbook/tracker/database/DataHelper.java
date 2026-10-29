@@ -66,6 +66,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -558,7 +559,7 @@ public class DataHelper {
         ObservationDao.Companion.markObservationsSynced(observations);
     }
 
-    public int updateUneditedObservationsByBrapiId(List<Observation> observations) {
+    public Set<String> updateUneditedObservationsByBrapiId(List<Observation> observations) {
 
         open();
 

@@ -897,13 +897,14 @@ class ObservationDao {
          * Writes server values over local observations that are still unedited, as
          * [updateObservationsByBrapiId] does unconditionally. Each row is checked again inside one
          * transaction, so an edit made in Collect after a sync read the observations is never
-         * overwritten. The skipped observation is then seen as a conflict by the next sync.
+         * overwritten.
          *
-         * @return the number of observations updated
+         * @return the BrAPI ids of the observations skipped because they were edited, or no longer
+         * exist. Every id when the database is unavailable, nothing was written.
          */
-        fun updateUneditedObservationsByBrapiId(observations: List<BrapiObservation>): Int = withDatabase { db ->
+        fun updateUneditedObservationsByBrapiId(observations: List<BrapiObservation>): Set<String> = withDatabase { db ->
 
-            var updated = 0
+            val skipped = mutableSetOf<String>()
 
             db.beginTransaction()
 
@@ -928,9 +929,12 @@ class ObservationDao {
                         syncedTime == null || (editTime != null && editTime > syncedTime)
                     }
 
-                    if (editedSinceSync) return@forEach
+                    if (editedSinceSync) {
+                        obs.dbId?.let { skipped.add(it) }
+                        return@forEach
+                    }
 
-                    updated += db.update(
+                    db.update(
                         Observation.tableName,
                         ContentValues().apply {
                             put("collector", obs.collector)
@@ -949,9 +953,9 @@ class ObservationDao {
 
             }
 
-            updated
+            skipped
 
-        }.also { ObservationChangeTracker.markChanged() } ?: 0
+        }.also { ObservationChangeTracker.markChanged() } ?: observations.mapNotNull { it.dbId }.toSet()
 
         fun updateObservationMediaUris(observation: ObservationModel) = withDatabase {
             db.update(Observation.tableName, contentValuesOf().apply {

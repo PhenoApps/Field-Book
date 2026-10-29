@@ -80,6 +80,7 @@ Once you are satisified with the traits, press the Import button at the bottom o
 
 Fields imported using BrAPI include a <img class="icon" src="./_static/icons/fields/sync.png"> **Sync** option in the field detail page to transfer data between Field Book and BrAPI-compatible databases.
 The Sync card shows when the field was last synced and how many observations on the device have not been synced yet.
+Observations the server does not accept, for example new observations on a server that only allows downloads, are counted separately because no sync can send them.
 Fields can also be synced automatically, see [Sync Settings](./settings/settings-brapi.md#sync-settings).
 The top card shows a summary of transfers to the BrAPI database including uploaded observations and images.
 
@@ -102,6 +103,11 @@ Observations edited only on the device are uploaded, and observations changed on
 An observation is a conflict when it was edited on the device and also changed on the server since the last sync.
 Field Book compares the server's observation time with the time the observation was last synced to tell whether the server copy changed.
 
+The observation time is when the value was recorded or edited, on whichever device did it, not when it reached the server.
+An edit made on another device while it was offline, and uploaded after this device last synced, can carry an earlier time.
+That edit is then not seen as a server change, and an edit made on this device replaces it without a conflict.
+A device clock that is set wrong has the same effect.
+
 ### Needs Review
 
 When the sync screen opens, Field Book checks the server for observations that need a decision and lists them in a **Needs Review** card.
@@ -121,7 +127,7 @@ Conflicts can be resolved with several different merge options:
 - Recent: keep the most recent observation value
 - Manual: decide for each conflict
 
-Uploading also checks the server for conflicts first, so an upload never overwrites a change made on the server.
+Uploading also checks the server for conflicts first, so an edit is not uploaded over a server change that Field Book can detect.
 
 <figure class="image">
   <img class="screenshot" src="./_static/images/brapi/joined_brapi_sync_conflict.png" alt="BrAPI sync main screen" width="1100px">

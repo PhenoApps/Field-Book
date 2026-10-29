@@ -147,14 +147,18 @@ class BrapiSyncEngine @Inject constructor(
         return cached?.review
     }
 
-    suspend fun uploadSupport(brAPIService: BrAPIService): UploadSupport {
+    /**
+     * @param brAPIService the service to ask, only used the first time a server is asked. A new
+     * one is created when none is given.
+     */
+    suspend fun uploadSupport(brAPIService: BrAPIService? = null): UploadSupport {
 
         val host = BrAPIService.getHostUrl(context) ?: return UploadSupport()
 
         uploadSupportByHost[host]?.let { return it }
 
         // BrAPI V1 has no serverinfo calls list to check
-        val v2 = brAPIService as? BrAPIServiceV2 ?: return UploadSupport()
+        val v2 = (brAPIService ?: newService()) as? BrAPIServiceV2 ?: return UploadSupport()
 
         val serverCalls = fetchServerCalls(v2)
         if (serverCalls.isNullOrEmpty()) {
@@ -244,10 +248,33 @@ class BrapiSyncEngine @Inject constructor(
         // anything edited after the read, in Collect while the sync runs, still counts as edited.
         val loadedAt: String = ""
     ) {
-        val unsyncedCount: Int
-            get() = newObservations.size + editedObservations.size + newImageObservations.size +
-                    editedImageObservations.size + incompleteImageObservations.size
+        /**
+         * What is not on the server yet, split by whether the server accepts that kind of upload.
+         */
+        fun unsyncedCounts(support: UploadSupport): UnsyncedCounts {
+
+            val images = newImageObservations.size + editedImageObservations.size +
+                    incompleteImageObservations.size
+
+            val kinds = listOf(
+                newObservations.size to support.newObservations,
+                editedObservations.size to support.editedObservations,
+                images to support.images
+            )
+
+            return UnsyncedCounts(
+                sendable = kinds.filter { (_, accepted) -> accepted }.sumOf { (count, _) -> count },
+                unsupported = kinds.filterNot { (_, accepted) -> accepted }.sumOf { (count, _) -> count }
+            )
+        }
     }
+
+    /**
+     * @param sendable observations and images the sync screen can upload, including any that
+     * need review first
+     * @param unsupported observations and images the server does not accept, no sync can send them
+     */
+    data class UnsyncedCounts(val sendable: Int = 0, val unsupported: Int = 0)
 
     sealed class ImageUploadEvent {
         data class Message(val text: String) : ImageUploadEvent()
@@ -313,10 +340,17 @@ class BrapiSyncEngine @Inject constructor(
     }
 
     /**
-     * Observations, including images, that would be uploaded by a sync of this study. Uses the
-     * same categories as the sync screen so the two counts always agree.
+     * Observations, including images, not on the server yet. Uses the same categories as the
+     * sync screen so the two counts always agree.
+     *
+     * @param support what the server accepts, asked for when not given, see [uploadSupport]
      */
-    fun countUnsynced(studyId: Int): Int = loadLocalStatus(studyId).unsyncedCount
+    suspend fun countUnsynced(studyId: Int, support: UploadSupport? = null): UnsyncedCounts {
+
+        val local = loadLocalStatus(studyId)
+
+        return local.unsyncedCounts(support ?: uploadSupport())
+    }
 
     /**
      * Records that the study exchanged data with the server, this is what the field detail
@@ -442,13 +476,16 @@ class BrapiSyncEngine @Inject constructor(
 
     /**
      * Writes a resolved download to the local database: inserts the new server observations and
-     * applies the updates.
+     * applies the updates. The server observations keep their BrAPI values.
+     *
+     * @return the updates skipped because Collect edited the observation after the sync read it,
+     * conflicts now that both sides changed, see [conflictsFor]
      */
     fun saveDownloadedObservations(
         study: FieldObject,
         resolution: DownloadResolution,
         traitsById: Map<String, TraitObject>
-    ) {
+    ): List<Observation> {
 
         Log.d(TAG, "Saving ${resolution.inserts.size} new observations")
 
@@ -459,7 +496,7 @@ class BrapiSyncEngine @Inject constructor(
             obs.internalVariableDbId = obs.variableDbId
 
             // Store categorical BrAPI values using Field Book's internal JSON format.
-            obs.value = normalizeDownloadedObservationValue(obs, traitsById)
+            val value = normalizeDownloadedObservationValue(obs, traitsById)
 
             val rep = dataHelper.getNextRep(
                 study.studyId.toString(),
@@ -470,7 +507,7 @@ class BrapiSyncEngine @Inject constructor(
             dataHelper.insertObservation(
                 obs.unitDbId,
                 obs.internalVariableDbId,
-                obs.value ?: "",
+                value,
                 obs.collector ?: "",
                 "",
                 "",
@@ -485,7 +522,7 @@ class BrapiSyncEngine @Inject constructor(
         Log.d(TAG, "Updating local database with ${resolution.updates.size} updates")
 
         // These were unedited when the sync read them, but Collect may have changed one since.
-        applyServerValues(resolution.updates, traitsById, onlyIfUnedited = true)
+        return applyServerValues(resolution.updates, traitsById, onlyIfUnedited = true)
     }
 
     /**
@@ -494,12 +531,18 @@ class BrapiSyncEngine @Inject constructor(
      *
      * @param onlyIfUnedited skip observations edited locally since their last sync, for updates
      * found by a download. A user choosing the server's value in a conflict passes false.
+     * @return the observations skipped by [onlyIfUnedited]
      */
     fun applyServerValues(
         serverObservations: List<Observation>,
         traitsById: Map<String, TraitObject>,
         onlyIfUnedited: Boolean = false
-    ) {
+    ): List<Observation> {
+
+        // The values are converted in place for the write and put back after it, callers still
+        // compare these server copies with local observations.
+        val brapiValues = serverObservations.map { it.value }
+
         serverObservations.forEach { obs ->
             if (obs.internalVariableDbId.isNullOrBlank()) {
                 obs.internalVariableDbId = obs.variableDbId
@@ -507,10 +550,39 @@ class BrapiSyncEngine @Inject constructor(
             obs.value = normalizeDownloadedObservationValue(obs, traitsById)
         }
 
-        if (onlyIfUnedited) {
-            dataHelper.updateUneditedObservationsByBrapiId(serverObservations)
-        } else {
-            dataHelper.updateObservationsByBrapiId(serverObservations)
+        try {
+
+            if (!onlyIfUnedited) {
+                dataHelper.updateObservationsByBrapiId(serverObservations)
+                return emptyList()
+            }
+
+            val skipped = dataHelper.updateUneditedObservationsByBrapiId(serverObservations)
+
+            return serverObservations.filter { it.dbId in skipped }
+
+        } finally {
+
+            serverObservations.forEachIndexed { index, obs -> obs.value = brapiValues[index] }
+        }
+    }
+
+    /**
+     * Pairs server observations with their local copies edited since the last sync, for the
+     * updates a download skipped because Collect edited the observation while the sync ran.
+     *
+     * @param localStatus read after the download was saved
+     */
+    fun conflictsFor(serverObservations: List<Observation>, localStatus: LocalStatus): List<Conflict> {
+
+        val editedByDbId = localStatus.editedObservations
+            .filter { it.dbId != null }
+            .associateBy { it.dbId }
+
+        return serverObservations.mapNotNull { server ->
+            editedByDbId[server.dbId]?.let { local ->
+                Conflict(serverObservation = server, localObservation = local)
+            }
         }
     }
 
@@ -662,77 +734,18 @@ class BrapiSyncEngine @Inject constructor(
     }
 
     /**
-     * Re-sync check for issue #550. Before upload, verify if observations were already stored
-     * by a prior request (for example, app crash after server write but before local sync update).
+     * Re-sync check for issue #550. Before upload, finds observations a prior request already
+     * stored on the server, for example when the app crashed after the server write but before
+     * the local sync update. Matches against the study's observations as just downloaded, so the
+     * check needs no request of its own.
      *
+     * Matches that already carry a BrAPI id are linked here, matches without one are returned for
+     * the user to choose. For observations without a BrAPI id, new ones, nothing is written.
+     *
+     * @param allCandidateObservations the study's observations on the server
      * @param adoptServerKeys choice keys the user chose to link to the existing server observation
      * @param uploadAsNewKeys choice keys the user chose to upload again as new observations
      * @return the observations still to upload, and the matches that need a user choice
-     */
-    suspend fun performResyncCheckBeforeUpload(
-        brAPIService: BrAPIService,
-        studyDbId: String?,
-        observations: List<Observation>,
-        localValuesByFieldBookId: Map<String, String>,
-        adoptServerKeys: MutableSet<String> = mutableSetOf(),
-        uploadAsNewKeys: MutableSet<String> = mutableSetOf()
-    ): PreUploadResyncResult {
-
-        if (observations.isEmpty()) return PreUploadResyncResult(observations, emptyList())
-
-        if (studyDbId.isNullOrEmpty()) return PreUploadResyncResult(observations, emptyList())
-
-        val variableDbIds = observations.mapNotNull { it.variableDbId }.distinct()
-        if (variableDbIds.isEmpty()) return PreUploadResyncResult(observations, emptyList())
-
-        return try {
-            val pageSize =
-                preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50")?.toInt() ?: 50
-            val paginationManager = BrapiPaginationManager(0, pageSize)
-
-            val firstPage = brAPIService.awaitGetSingleObservationPage(
-                studyDbId,
-                variableDbIds,
-                paginationManager
-            )
-
-            val allCandidateObservations = if ((paginationManager.totalPages ?: 1) <= 1) {
-                firstPage
-            } else {
-                brAPIService.awaitGetObservations(
-                    brapiStudyId = studyDbId,
-                    variableDbIds = variableDbIds,
-                    paginationManager = paginationManager,
-                    initialPages = firstPage,
-                    concurrencyLimit = preferences.getString(
-                        PreferenceKeys.BRAPI_MAX_CONCURRENT_OBSERVATION_TRANSFER,
-                        "5"
-                    )?.toInt() ?: 5
-                ) { _, _ ->
-                    // Re-sync check runs silently without changing upload progress UI.
-                }
-            }
-
-            matchResyncCandidates(
-                observations,
-                localValuesByFieldBookId,
-                allCandidateObservations,
-                adoptServerKeys,
-                uploadAsNewKeys
-            )
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            Log.w(TAG, "Pre-upload re-sync check failed; continuing with normal upload", e)
-            PreUploadResyncResult(observations, emptyList())
-        }
-    }
-
-    /**
-     * Matches local observations against server observations already fetched, see
-     * [performResyncCheckBeforeUpload]. Matches that already carry a BrAPI id are linked here,
-     * matches without one are returned for the user to choose. For observations without a BrAPI
-     * id, new ones, nothing is written.
      */
     fun matchResyncCandidates(
         observations: List<Observation>,
@@ -1277,7 +1290,8 @@ class BrapiSyncEngine @Inject constructor(
      * decision is left untouched for the sync screen:
      *
      * - An observation changed both here and on the server since the last sync is a conflict, see
-     *   [resolveObservationStatus]. Neither side is changed and the local edit is held back.
+     *   [resolveObservationStatus], including one edited in Collect while this sync runs. Neither
+     *   side is changed and the local edit is held back.
      * - A new observation that the re-sync check finds already on the server needs the user to
      *   choose between linking and re-uploading it, so it is skipped.
      *
@@ -1307,14 +1321,19 @@ class BrapiSyncEngine @Inject constructor(
 
             val beforeDownload = loadLocalStatus(studyId)
             val resolution = resolveObservationStatus(downloaded, beforeDownload, traitsById)
-            saveDownloadedObservations(study, resolution, traitsById)
+            val skippedUpdates = saveDownloadedObservations(study, resolution, traitsById)
 
             markStudySynced(studyId)
 
             // Upload
 
-            val heldBack = resolution.conflicts.mapNotNull { it.localObservation.fieldBookDbId }.toSet()
             val local = loadLocalStatus(studyId)
+
+            // An update skipped because Collect edited the observation after the read above is a
+            // conflict too, both sides changed. Otherwise the edit would be uploaded over the
+            // server's change.
+            val conflicts = resolution.conflicts + conflictsFor(skippedUpdates, local)
+            val heldBack = conflicts.mapNotNull { it.localObservation.fieldBookDbId }.toSet()
 
             // Only what the server accepts, otherwise every sync would fail on the same calls.
             val support = uploadSupport(brAPIService)
@@ -1336,11 +1355,14 @@ class BrapiSyncEngine @Inject constructor(
                 if (observations.isEmpty() || failedCode == UNAUTHORIZED) return@forEach
 
                 val localValues = prepareForUpload(observations)
-                val resync = performResyncCheckBeforeUpload(
-                    brAPIService,
-                    study.studyDbId,
+
+                // Against this sync's own download, it already holds the study's observations.
+                val resync = matchResyncCandidates(
                     observations,
-                    localValues
+                    localValues,
+                    downloaded,
+                    mutableSetOf(),
+                    mutableSetOf()
                 )
                 if (resync.observationsToUpload.isEmpty()) return@forEach
 
@@ -1403,7 +1425,7 @@ class BrapiSyncEngine @Inject constructor(
                 mutableSetOf()
             ).pendingChoices
 
-            val review = ReviewCheck(resolution.conflicts, resyncChoices)
+            val review = ReviewCheck(conflicts, resyncChoices)
 
             reviewByStudy[studyId] = CachedReview(
                 review = review,

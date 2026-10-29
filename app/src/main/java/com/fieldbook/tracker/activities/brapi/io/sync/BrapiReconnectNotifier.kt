@@ -33,6 +33,7 @@ import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.Utils
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
@@ -199,8 +200,15 @@ class BrapiReconnectNotifier @Inject constructor(
 
         if (!isEnabled() || !canNotify()) return@withContext
 
+        // Only what the server accepts, a reminder about data it never will is no use. Every field
+        // belongs to the same server, so it is asked once.
         val counts = try {
-            autoSyncManager.eligibleFields().map { field -> field to engine.countUnsynced(field.studyId) }
+            val support = engine.uploadSupport()
+            autoSyncManager.eligibleFields().map { field ->
+                field to engine.countUnsynced(field.studyId, support).sendable
+            }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Failed to count unsynced observations", e)
             return@withContext

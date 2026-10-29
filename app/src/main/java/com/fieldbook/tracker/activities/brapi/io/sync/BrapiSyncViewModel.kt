@@ -309,9 +309,15 @@ class BrapiSyncViewModel @Inject constructor(
                     // when these observations were read, recorded as their sync time on upload
                     val syncedAt = localStatus.loadedAt
 
-                    // Edits are only sent once the server copy is known not to have changed too,
-                    // otherwise an upload would silently overwrite an edit made elsewhere.
-                    if (support.editedObservations && localStatus.editedObservations.isNotEmpty()) {
+                    val uploadingNew = support.newObservations && localStatus.newObservations.isNotEmpty()
+                    val uploadingEdited = support.editedObservations && localStatus.editedObservations.isNotEmpty()
+
+                    // One download serves the whole upload: the conflict check for edits and the
+                    // re-sync check for both kinds. Null when it failed and only new observations
+                    // are uploaded, they are then sent without the re-sync check.
+                    var serverObservations: List<Observation>? = null
+
+                    if (uploadingNew || uploadingEdited) {
 
                         _uiState.update {
                             it.copy(
@@ -323,30 +329,45 @@ class BrapiSyncViewModel @Inject constructor(
                             )
                         }
 
-                        val conflicts = try {
-                            val traitsById = traitRepo.getTraits().associateBy { it.id }
-                            engine.resolveObservationStatus(
-                                engine.downloadServerObservations(brAPIService, study),
-                                localStatus,
-                                traitsById
-                            ).conflicts
+                        serverObservations = try {
+                            engine.downloadServerObservations(brAPIService, study)
                         } catch (e: CancellationException) {
                             throw e
                         } catch (e: Exception) {
-                            Log.e(TAG, "Pre-upload conflict check failed", e)
-                            _uiState.update {
-                                it.copy(
-                                    viewMode = ViewMode.IDLE,
-                                    // the code itself, so a 401 shows the authentication message
-                                    uploadError = (e as? BrapiException)?.code?.toString()
-                                        ?: e.message
-                                        ?: context.getString(R.string.upload_failed)
-                                )
-                            }
-                            return@launch
-                        }
 
-                        setPendingConflicts(conflicts)
+                            Log.e(TAG, "Pre-upload download failed", e)
+
+                            // Without the server copies there is no conflict check, so no edits.
+                            if (uploadingEdited) {
+                                _uiState.update {
+                                    it.copy(
+                                        viewMode = ViewMode.IDLE,
+                                        // the code itself, so a 401 shows the authentication message
+                                        uploadError = (e as? BrapiException)?.code?.toString()
+                                            ?: e.message
+                                            ?: context.getString(R.string.upload_failed)
+                                    )
+                                }
+                                return@launch
+                            }
+
+                            null
+                        }
+                    }
+
+                    // Edits are only sent once the server copy is known not to have changed too,
+                    // otherwise an upload would silently overwrite an edit made elsewhere.
+                    if (uploadingEdited) {
+
+                        val traitsById = traitRepo.getTraits().associateBy { it.id }
+
+                        setPendingConflicts(
+                            engine.resolveObservationStatus(
+                                serverObservations.orEmpty(),
+                                localStatus,
+                                traitsById
+                            ).conflicts
+                        )
 
                         if (uiState.value.pendingConflictsCount > 0) {
                             _uiState.update { it.copy(viewMode = ViewMode.IDLE) }
@@ -374,7 +395,7 @@ class BrapiSyncViewModel @Inject constructor(
                             )
                         }
 
-                        processObservations(newObservations) { observations, localValues ->
+                        processObservations(newObservations, serverObservations) { observations, localValues ->
                             engine.processNewObservations(brAPIService, observations, localValues, syncedAt)
                         }
                         if (uiState.value.pendingResyncChoicesCount > 0) return@launch
@@ -393,7 +414,7 @@ class BrapiSyncViewModel @Inject constructor(
                             )
                         }
 
-                        processObservations(editedObservations) { observations, localValues ->
+                        processObservations(editedObservations, serverObservations) { observations, localValues ->
                             engine.processEditedObservations(brAPIService, observations, localValues, syncedAt)
                         }
                         if (uiState.value.pendingResyncChoicesCount > 0) return@launch
@@ -569,9 +590,17 @@ class BrapiSyncViewModel @Inject constructor(
                                             traitsById
                                         )
 
-                                        engine.saveDownloadedObservations(study, resolved, traitsById)
+                                        val skipped = engine.saveDownloadedObservations(study, resolved, traitsById)
 
-                                        resolved
+                                        // An update skipped because Collect edited the observation
+                                        // during the download is a conflict now, both sides changed.
+                                        resolved.copy(
+                                            updates = resolved.updates - skipped.toSet(),
+                                            conflicts = resolved.conflicts + engine.conflictsFor(
+                                                skipped,
+                                                engine.loadLocalStatus(study.studyId)
+                                            )
+                                        )
                                     }
 
                                     val inserts = resolved.inserts
@@ -870,22 +899,33 @@ class BrapiSyncViewModel @Inject constructor(
         }
     }
 
+    /**
+     * @param serverObservations the study's observations on the server, downloaded by the upload,
+     * for the re-sync check. Null skips the check.
+     */
     private suspend fun processObservations(
         observations: List<Observation>,
+        serverObservations: List<Observation>?,
         processor: suspend (List<Observation>, Map<String, String>) -> Flow<UploadProgressUpdate>
     ) {
         Log.d(TAG, "Starting upload observations")
 
         val localValuesByFieldBookId = engine.prepareForUpload(observations)
 
-        val preUploadResyncResult = engine.performResyncCheckBeforeUpload(
-            brAPIService,
-            uiState.value.study?.studyDbId,
-            observations,
-            localValuesByFieldBookId,
-            adoptServerKeys = resyncAdoptServerKeys,
-            uploadAsNewKeys = resyncUploadAsNewKeys
-        )
+        val preUploadResyncResult = try {
+            serverObservations?.let {
+                engine.matchResyncCandidates(
+                    observations,
+                    localValuesByFieldBookId,
+                    it,
+                    adoptServerKeys = resyncAdoptServerKeys,
+                    uploadAsNewKeys = resyncUploadAsNewKeys
+                )
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Pre-upload re-sync check failed; continuing with normal upload", e)
+            null
+        } ?: BrapiSyncEngine.PreUploadResyncResult(observations, emptyList())
         if (preUploadResyncResult.pendingChoices.isNotEmpty()) {
             setPendingResyncChoices(preUploadResyncResult.pendingChoices)
             resyncFromUpload = true
