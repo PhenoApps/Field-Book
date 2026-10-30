@@ -8,9 +8,12 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
+import android.widget.ScrollView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.documentfile.provider.DocumentFile
+import androidx.media3.common.Player
+import androidx.media3.common.VideoSize
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.devices.camera.GoProApi
@@ -30,9 +33,31 @@ class GoProTraitLayout :
     companion object {
         const val TAG = "GoProTrait"
         const val type = "gopro"
+
+        //used until the stream reports its real size, GoPro previews are 16:9
+        private const val DEFAULT_PREVIEW_ASPECT_RATIO = 16f / 9f
+
+        //matches the margins on the thumbnail strip and shutter row in trait_camera.xml
+        private const val CONTROL_MARGIN_DP = 8
     }
 
     private var dialogWaitForStream: AlertDialog? = null
+
+    /** Guards posted fits so one landing after [onExit] cannot resize another camera trait's preview. */
+    private var watchingPreview = false
+
+    private val previewFitListener =
+        View.OnLayoutChangeListener { _, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+            if (right - left != oldRight - oldLeft || bottom - top != oldBottom - oldTop) {
+                schedulePreviewFit()
+            }
+        }
+
+    private val videoSizeListener = object : Player.Listener {
+        override fun onVideoSizeChanged(videoSize: VideoSize) {
+            schedulePreviewFit()
+        }
+    }
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -54,6 +79,8 @@ class GoProTraitLayout :
         //keep the api pointed at the entry the user is currently on so a photo taken with the
         //camera's own shutter button is filed against the right plot
         api.currentEntry = getImageRequestData()
+
+        watchPreviewBounds()
 
         when (api.state()) {
 
@@ -77,6 +104,9 @@ class GoProTraitLayout :
 
         dismissWaitDialog()
 
+        unwatchPreviewBounds()
+
+        styledPlayerView?.player?.removeListener(videoSizeListener)
         styledPlayerView?.player = null
 
         shutterButton?.setOnClickListener(null)
@@ -119,19 +149,125 @@ class GoProTraitLayout :
         }
     }
 
-    private fun preparePreviewLayout() {
+    /**
+     * Refits the preview whenever the space around it changes: the thumbnail strip grows with the
+     * first photo, and the trait container shrinks when the input view above it does.
+     */
+    private fun watchPreviewBounds() {
 
-        previewCardView?.layoutParams = ConstraintLayout.LayoutParams(
-            ConstraintLayout.LayoutParams.MATCH_PARENT,
-            ConstraintLayout.LayoutParams.WRAP_CONTENT
-        ).also {
-            it.topToBottom = recyclerView?.id ?: 0
+        watchingPreview = true
+
+        listOfNotNull(recyclerView, findScrollContainer()).forEach {
+            it.removeOnLayoutChangeListener(previewFitListener)
+            it.addOnLayoutChangeListener(previewFitListener)
         }
+    }
+
+    private fun unwatchPreviewBounds() {
+
+        watchingPreview = false
+
+        listOfNotNull(recyclerView, findScrollContainer()).forEach {
+            it.removeOnLayoutChangeListener(previewFitListener)
+        }
+    }
+
+    //posted because a resize requested from inside a layout pass is deferred or dropped
+    private fun schedulePreviewFit() {
+        previewCardView?.post { fitPreview() }
+    }
+
+    /**
+     * Sizes the preview to the stream's aspect ratio, as wide as the trait allows but no taller than
+     * the visible space between the thumbnail strip and the shutter row. Filling the width alone
+     * pushed the shutter below the fold whenever the trait area was short or wide.
+     */
+    private fun fitPreview() {
+
+        if (!watchingPreview) return
+
+        val card = previewCardView ?: return
+        val container = card.parent as? View ?: return
+        val scroll = findScrollContainer() ?: return
+
+        val viewport = scroll.height - scroll.paddingTop - scroll.paddingBottom
+
+        if (container.width <= 0 || viewport <= 0) return
+
+        val margin = (CONTROL_MARGIN_DP * resources.displayMetrics.density).toInt()
+
+        val above = recyclerView?.let { offsetWithin(it, scroll) + it.height + margin }
+            ?: offsetWithin(container, scroll)
+
+        val below = resources.getDimensionPixelSize(R.dimen.fb_trait_fab_size) + 2 * margin
+
+        val maxWidth = container.width
+        val maxHeight = viewport - above - below
+
+        val aspect = previewAspectRatio()
+
+        var width = maxWidth
+        var height = (width / aspect).toInt()
+
+        if (height > maxHeight) {
+            //on a very short screen keep a usable preview and let the container scroll instead
+            height = maxOf(maxHeight, resources.getDimensionPixelSize(R.dimen.camera_preview_landscape_height))
+            width = minOf(maxWidth, (height * aspect).toInt())
+        }
+
+        val topAnchor = recyclerView?.id ?: ConstraintLayout.LayoutParams.PARENT_ID
+
+        val current = card.layoutParams as? ConstraintLayout.LayoutParams
+
+        if (current != null && current.width == width && current.height == height &&
+            current.topToBottom == topAnchor &&
+            current.startToStart == ConstraintLayout.LayoutParams.PARENT_ID
+        ) return
+
+        card.layoutParams = ConstraintLayout.LayoutParams(width, height).also {
+            it.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            it.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+            it.topToBottom = topAnchor
+        }
+    }
+
+    private fun previewAspectRatio(): Float {
+
+        val size = styledPlayerView?.player?.videoSize
+
+        return if (size != null && size.width > 0 && size.height > 0) {
+            size.width * size.pixelWidthHeightRatio / size.height
+        } else DEFAULT_PREVIEW_ASPECT_RATIO
+    }
+
+    private fun findScrollContainer(): ScrollView? {
+
+        var parent = previewCardView?.parent
+
+        while (parent != null) {
+            if (parent is ScrollView) return parent
+            parent = parent.parent
+        }
+
+        return null
+    }
+
+    private fun offsetWithin(view: View, ancestor: View): Int {
+
+        var offset = 0
+        var current: View? = view
+
+        while (current != null && current !== ancestor) {
+            offset += current.top
+            current = current.parent as? View
+        }
+
+        return offset
     }
 
     private fun setupDisconnected() {
 
-        preparePreviewLayout()
+        schedulePreviewFit()
 
         dismissWaitDialog()
 
@@ -148,7 +284,7 @@ class GoProTraitLayout :
 
     private fun showConnectingUi() {
 
-        preparePreviewLayout()
+        schedulePreviewFit()
 
         connectBtn?.visibility = View.GONE
         connectProgress?.visibility = View.VISIBLE
@@ -163,7 +299,7 @@ class GoProTraitLayout :
      */
     private fun bindExistingSession() {
 
-        preparePreviewLayout()
+        schedulePreviewFit()
 
         dismissWaitDialog()
 
@@ -349,8 +485,15 @@ class GoProTraitLayout :
 
     override fun onStreamRequested() {
         ui.launch {
-            styledPlayerView?.player = api.createPlayer()
+
+            val player = api.createPlayer()
+
+            styledPlayerView?.player = player
             styledPlayerView?.requestFocus()
+
+            //the same player is handed back after every capture, so never stack the listener
+            player.removeListener(videoSizeListener)
+            player.addListener(videoSizeListener)
         }
     }
 
