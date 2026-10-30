@@ -152,13 +152,15 @@ Field Book can either copy the full image to the Android device or save the name
 If photos are copied to the Android device, they are stored in `.jpg` format, and named with entry's unique_id, the trait name, the photo number, and a timestamp.
 The resulting files are stored in a gopro folder within a field-specific subfolder of `plot_data`.
 An example photo filepath would be `plot_data/FIELD_NAME/gopro/PHOTO_FILE_NAME.jpg`.
+If photos are not copied, the observation is the camera's serial number followed by the photo's name on the GoPro, for example `C3501324500711/GOPR0001.JPG`.
+The serial number tells apart photos with the same name from different cameras, or from before the memory card was formatted.
 
 #### GoPro video
 
 GoPro traits can record video instead of photos.
 Tap the `Photo` chip in the trait's options to switch it to `Video`, or turn on `Record video` when creating the trait.
 Videos stay on the GoPro memory card and are never copied to the Android device.
-Field Book saves the name of each video file as the observation, for example `GX010001.MP4`.
+Field Book saves the camera's serial number followed by the name of each video file as the observation, for example `C3501324500711/GX010001.MP4`.
 When a long recording is split into several files, Field Book saves the name of the first file.
 The remaining files share its four digit number, for example `GX020001.MP4`.
 Field Book switches the camera into video or photo mode to match the trait when it connects.

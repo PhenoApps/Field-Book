@@ -86,8 +86,17 @@ class GoProApi @Inject constructor(
         val fileName: String,
         val mod: Long,
         val byteSize: Long,
-        val url: String
-    )
+        val url: String,
+        val cameraSerial: String? = null
+    ) {
+        /**
+         * Value saved for a file kept on the camera, written like a path under the camera's serial.
+         * File numbering restarts when a card is formatted and is identical across cameras, so the
+         * serial is what makes the name unique.
+         */
+        val observationName: String
+            get() = cameraSerial?.let { "$it/$fileName" } ?: fileName
+    }
 
     data class ImageRequestData(
         val studyId: String,
@@ -347,6 +356,10 @@ class GoProApi @Inject constructor(
     /** Entry the running recording is filed against, null while nothing is recording. */
     private var recordingEntry: ImageRequestData? = null
 
+    /** Serial of the connected camera, reported over BLE before the wifi credentials. */
+    @Volatile
+    private var serialNumber: String? = null
+
     fun state(): ConnectionState = connectionState
 
     private fun setState(state: ConnectionState, @StringRes messageRes: Int? = null) {
@@ -451,6 +464,9 @@ class GoProApi @Inject constructor(
             closeGatt()
 
             lastRequestedUrl = null
+
+            //never label this camera's files with the previous camera's serial
+            serialNumber = null
 
             setState(ConnectionState.CONNECTING_BLE)
 
@@ -1236,6 +1252,8 @@ class GoProApi @Inject constructor(
 
             val images = arrayListOf<GoProImage>()
 
+            val serial = serialNumber
+
             for (i in 0 until mediaArray.length()) {
 
                 val media = mediaArray.getJSONObject(i)
@@ -1256,7 +1274,8 @@ class GoProApi @Inject constructor(
                             fileName,
                             file.getString("mod").toLong(),
                             file.getString("s").toLong(),
-                            "$BASE_URL/videos/DCIM/$dir/$fileName"
+                            "$BASE_URL/videos/DCIM/$dir/$fileName",
+                            serial
                         )
                     )
                 }
@@ -1515,7 +1534,9 @@ class GoProApi @Inject constructor(
 
     override fun onModelName(modelName: String) {}
 
-    override fun onSerialNumber(serialNumber: String) {}
+    override fun onSerialNumber(serialNumber: String) {
+        this.serialNumber = serialNumber.trim().takeIf { it.isNotEmpty() }
+    }
 
     override fun onSsid(wifiSSID: String) {}
 
