@@ -305,13 +305,26 @@ class GoProTraitLayout :
 
         connectBtn?.visibility = View.GONE
         connectProgress?.visibility = View.GONE
-        previewCardView?.visibility = View.VISIBLE
-        styledPlayerView?.visibility = View.VISIBLE
         imageView?.visibility = View.INVISIBLE
         shutterButton?.visibility = View.VISIBLE
         settingsButton?.visibility = View.VISIBLE
 
+        applyPreviewVisibility()
+
         bindShutterAndSettings()
+    }
+
+    /**
+     * Hides the preview without touching the stream: the session only counts as live once a frame
+     * has arrived, and captures restart the stream regardless, so stopping it here would break both.
+     */
+    private fun applyPreviewVisibility() {
+
+        val visibility = if (prefs.getBoolean(GeneralKeys.GOPRO_CAMERA_PREVIEW, true))
+            View.VISIBLE else View.GONE
+
+        previewCardView?.visibility = visibility
+        styledPlayerView?.visibility = visibility
     }
 
     private fun getImageRequestData(): GoProApi.ImageRequestData {
@@ -401,6 +414,10 @@ class GoProTraitLayout :
             .setPositiveButton(android.R.string.ok) { dialog, _ ->
                 settingsView.commitChanges()
                 dialog.dismiss()
+                //before the first frame the connecting ui owns the preview, it applies this once live
+                if (api.state() == GoProApi.ConnectionState.STREAMING ||
+                    api.state() == GoProApi.ConnectionState.CAPTURING
+                ) applyPreviewVisibility()
             }
             .setNeutralButton(R.string.disconnect) { dialog, _ ->
                 settingsView.commitChanges()

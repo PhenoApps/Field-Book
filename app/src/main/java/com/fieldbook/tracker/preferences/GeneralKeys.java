@@ -190,6 +190,8 @@ public class GeneralKeys {
 
     public static final String USB_CAMERA_PREVIEW = "com.fieldbook.tracker.traits.camera.usb.PREVIEW";
 
+    public static final String GOPRO_CAMERA_PREVIEW = "com.fieldbook.tracker.traits.camera.gopro.PREVIEW";
+
     public static final String USB_CAMERA_RESOLUTION_INDEX = "com.fieldbook.tracker.traits.camera.USB_RESOLUTION_INDEX";
 
     public static final String USB_CAMERA_AUTO_WHITE_BALANCE = "com.fieldbook.tracker.traits.camera.usb.AUTO_WHITE_BALANCE";
