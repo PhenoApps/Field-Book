@@ -224,12 +224,6 @@ class GoProApi @Inject constructor(
 
         //budget for stopping a recording and saving its name while the session is torn down
         private const val RECORD_STOP_TIMEOUT_MS = 30000L
-
-        //GXccnnnn.MP4: encoding, two digit chapter and four digit recording number. Every chapter
-        //of a long recording shares the recording number.
-        private val VIDEO_NAME = Regex("^G([A-Z])(\\d{2})(\\d{4})\\.MP4$", RegexOption.IGNORE_CASE)
-
-        private val VIDEO_EXTENSIONS = listOf(".mp4", ".360")
     }
 
     private val gatt by lazy {
@@ -1242,7 +1236,7 @@ class GoProApi @Inject constructor(
     }
 
     /**
-     * Parses the media list and returns the most recently numbered file.
+     * Parses the media list and returns the file the last capture produced, see [GoProMediaSelector].
      */
     private fun parseMediaQueryResponse(responseBody: String): GoProImage? {
 
@@ -1281,54 +1275,12 @@ class GoProApi @Inject constructor(
                 }
             }
 
-            if (videoMode) latestRecording(images) else latestPhoto(images)
+            GoProMediaSelector.latest(images, video = videoMode)
 
         } catch (e: JSONException) {
             Log.e(TAG, "Unable to parse media list", e)
             null
         }
-    }
-
-    /**
-     * Returns the most recently numbered photo. Videos are left out: their names carry a chapter
-     * prefix that outnumbers every photo, so one on the card was picked as the "new photo".
-     */
-    private fun latestPhoto(media: List<GoProImage>): GoProImage? {
-
-        val pattern = Regex("^([a-zA-Z]*)([0-9]*).([a-zA-Z]*)$")
-
-        return media
-            .filterNot { file -> VIDEO_EXTENSIONS.any { file.fileName.endsWith(it, ignoreCase = true) } }
-            .maxByOrNull {
-                pattern.matchEntire(it.fileName)?.destructured?.let { (_, number, _) ->
-                    number.toIntOrNull() ?: -1
-                } ?: -1
-            }
-    }
-
-    /**
-     * Returns the first chapter of the newest recording. The newest file found by time decides the
-     * recording, and its first chapter names it: later chapters share its number, so they are
-     * never mistaken for a new recording and the name points at the start of the footage.
-     */
-    private fun latestRecording(media: List<GoProImage>): GoProImage? {
-
-        data class Chapter(val file: GoProImage, val chapter: Int, val recording: Int)
-
-        val chapters = media.mapNotNull { file ->
-            VIDEO_NAME.matchEntire(file.fileName)?.destructured?.let { (_, chapter, recording) ->
-                Chapter(file, chapter.toInt(), recording.toInt())
-            }
-        }
-
-        val newest = chapters.maxWithOrNull(
-            compareBy<Chapter>({ it.file.mod }, { it.recording }, { it.chapter })
-        ) ?: return null
-
-        return chapters
-            .filter { it.file.fileDir == newest.file.fileDir && it.recording == newest.recording }
-            .minByOrNull { it.chapter }
-            ?.file
     }
 
     /**
