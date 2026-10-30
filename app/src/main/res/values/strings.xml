@@ -561,6 +561,8 @@
     <string name="trait_detail_chip_automatic_switch">Automatic advance</string>
     <string name="trait_detail_chip_format_date">Format: %s</string>
     <string name="trait_detail_chip_transfer_images">Transfer images</string>
+    <string name="trait_detail_chip_capture_photo">Photo</string>
+    <string name="trait_detail_chip_capture_video">Video</string>
     <string name="trait_detail_chip_invalid_value">Outlier values</string>
     <string name="trait_detail_chip_severities">Severities</string>
     <string name="trait_detail_chip_duration">Duration: %s</string>
@@ -748,6 +750,14 @@
     <string name="gopro_error_capture_failed">The GoPro capture failed.</string>
     <string name="gopro_error_no_new_photo">The GoPro did not produce a new photo.</string>
     <string name="gopro_error_download_failed">Could not copy the photo from the GoPro.</string>
+    <string name="gopro_error_record_failed">The GoPro did not start recording.</string>
+    <string name="gopro_error_no_new_video">The GoPro did not produce a new video.</string>
+    <string name="gopro_error_record_busy">Still finishing the previous recording.</string>
+    <string name="gopro_video_notice_title">GoPro video</string>
+    <string name="gopro_video_notice_message">Videos stay on the GoPro memory card and are not copied to Field Book. Field Book saves the name of each video file as the observation.</string>
+    <string name="capture_mode_locked_title">Capture mode locked</string>
+    <string name="capture_mode_locked_message">Photo or video cannot be changed because data has already been collected with this trait. Create a new trait to collect the other type.</string>
+    <string name="range_navigation_locked">Finish the current capture before moving to another plot.</string>
 
     <!-- Trait Layout: USB Camera -->
     <string name="trait_usb_camera_zoom_in_button_text">Zoom in</string>
@@ -1956,6 +1966,7 @@
     <string name="logging_out_please_wait">Logging out, please wait.</string>
 
     <string name="traits_save_image_parameter">Copy image to Field Book</string>
+    <string name="traits_capture_video_parameter">Record video</string>
 
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="reset">Reset</string>

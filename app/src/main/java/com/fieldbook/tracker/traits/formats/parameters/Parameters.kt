@@ -15,7 +15,8 @@ enum class Parameters {
     ATTACH_MEDIA,
     ALLOW_OTHER,
     CANOPY_SENSITIVITY,
-    DURATION;
+    DURATION,
+    CAPTURE_VIDEO;
 
     companion object {
 

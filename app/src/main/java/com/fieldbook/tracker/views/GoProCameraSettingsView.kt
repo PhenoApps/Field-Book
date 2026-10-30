@@ -60,6 +60,9 @@ open class GoProCameraSettingsView: ConstraintLayout {
         setupPreviewCheckBox()
 
         setupSaveImageCheckBox()
+
+        //videos are never copied off the camera, only their file name is saved
+        saveImageCb.visibility = if (traitObject?.captureVideo == true) GONE else VISIBLE
     }
 
     private fun setupPreviewCheckBox() {

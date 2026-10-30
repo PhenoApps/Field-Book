@@ -241,7 +241,11 @@ abstract class AbstractCameraTrait :
 
     /**
      * Records an observation whose value is a file name on a connected camera rather than a file
-     * in Field Book's storage. Used when a camera trait has its copy-image setting turned off.
+     * in Field Book's storage. Used when a camera trait has its copy-image setting turned off, and
+     * for videos that stay on the camera.
+     *
+     * Written against [obsUnit] rather than the plot on screen: a recording can finish after the
+     * user has left the trait, so the screen is not a reliable guide to which entry it belongs to.
      */
     protected fun saveFileNameObservation(
         obsUnit: RangeObject,
@@ -249,11 +253,17 @@ abstract class AbstractCameraTrait :
         fileName: String
     ) {
 
+        val plot = obsUnit.uniqueId
         val studyId = collectActivity.studyId
+        val person = (activity as? CollectActivity)?.person
+        val location = (activity as? CollectActivity)?.locationByPreferences
+        val rep = database.getNextRep(studyId, plot, traitObj.id)
 
-        val rep = database.getNextRep(studyId, obsUnit.uniqueId, traitObj.id)
-
-        (context as? CollectActivity)?.updateObservation(traitObj, fileName, rep)
+        database.insertObservation(
+            plot, traitObj.id, fileName,
+            person, location, "", studyId,
+            null, null, null, rep
+        )
 
         ui.launch {
 

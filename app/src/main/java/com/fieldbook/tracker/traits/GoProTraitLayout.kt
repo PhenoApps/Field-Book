@@ -7,6 +7,7 @@ import android.content.Intent
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.Toast
@@ -43,8 +44,14 @@ class GoProTraitLayout :
 
     private var dialogWaitForStream: AlertDialog? = null
 
-    /** Guards posted fits so one landing after [onExit] cannot resize another camera trait's preview. */
+    /**
+     * True while this trait is on screen. Guards posted fits and late capture callbacks, so work
+     * landing after [onExit] cannot change another camera trait's preview or shutter.
+     */
     private var watchingPreview = false
+
+    /** Whether the recording ui (stop button, navigation lock, screen kept on) is applied. */
+    private var recordingUi = false
 
     private val previewFitListener =
         View.OnLayoutChangeListener { _, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
@@ -88,7 +95,8 @@ class GoProTraitLayout :
             GoProApi.ConnectionState.ERROR -> setupDisconnected()
 
             GoProApi.ConnectionState.STREAMING,
-            GoProApi.ConnectionState.CAPTURING -> bindExistingSession()
+            GoProApi.ConnectionState.CAPTURING,
+            GoProApi.ConnectionState.RECORDING -> bindExistingSession()
 
             else -> showConnectingUi()
         }
@@ -103,6 +111,10 @@ class GoProTraitLayout :
         super.onExit()
 
         dismissWaitDialog()
+
+        //the teardown below stops a running recording and saves its name, so release the
+        //navigation lock and screen now rather than waiting on the camera
+        setRecordingUi(false)
 
         unwatchPreviewBounds()
 
@@ -311,7 +323,50 @@ class GoProTraitLayout :
 
         applyPreviewVisibility()
 
+        updateShutterIcon()
+
         bindShutterAndSettings()
+    }
+
+    /**
+     * Applies or releases everything a running recording needs from the screen. Plot navigation is
+     * blocked so the recording stays filed against the plot it started on, and the screen is kept
+     * on because the activity stopping ends the session, and the recording with it.
+     */
+    private fun setRecordingUi(recording: Boolean) {
+
+        if (recording == recordingUi) return
+
+        //a start still in flight when the user left lands here during teardown, which then stops
+        //it, so it must not lock navigation on whatever trait is now showing
+        if (recording && !watchingPreview) return
+
+        recordingUi = recording
+
+        controller.getRangeBox().toggleNavigation(!recording)
+
+        activity?.window?.let { window ->
+            if (recording) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+
+        if (recording) shutterButton?.isEnabled = true
+
+        updateShutterIcon()
+    }
+
+    private fun updateShutterIcon() {
+
+        //capture callbacks can land after onExit, when the button belongs to another trait
+        if (!watchingPreview) return
+
+        shutterButton?.setImageResource(
+            when {
+                !currentTrait.captureVideo -> R.drawable.camera_24px
+                recordingUi -> R.drawable.ic_media_stop
+                else -> R.drawable.ic_media_record
+            }
+        )
     }
 
     /**
@@ -346,9 +401,17 @@ class GoProTraitLayout :
 
             shutterButton?.isEnabled = false
 
-            controller.getSoundHelper().playShutter()
+            when {
 
-            api.capture(getImageRequestData(), currentTrait.saveImage)
+                !currentTrait.captureVideo -> {
+                    controller.getSoundHelper().playShutter()
+                    api.capture(getImageRequestData(), currentTrait.saveImage)
+                }
+
+                api.state() == GoProApi.ConnectionState.RECORDING -> api.stopRecording()
+
+                else -> api.startRecording(getImageRequestData())
+            }
         }
 
         settingsButton?.setOnClickListener { showSettings() }
@@ -397,7 +460,7 @@ class GoProTraitLayout :
             }
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 if (selected < devices.size) {
-                    api.onConnect(devices[selected], this)
+                    api.onConnect(devices[selected], this, currentTrait.captureVideo)
                 }
             }
             .create()
@@ -416,7 +479,8 @@ class GoProTraitLayout :
                 dialog.dismiss()
                 //before the first frame the connecting ui owns the preview, it applies this once live
                 if (api.state() == GoProApi.ConnectionState.STREAMING ||
-                    api.state() == GoProApi.ConnectionState.CAPTURING
+                    api.state() == GoProApi.ConnectionState.CAPTURING ||
+                    api.state() == GoProApi.ConnectionState.RECORDING
                 ) applyPreviewVisibility()
             }
             .setNeutralButton(R.string.disconnect) { dialog, _ ->
@@ -445,6 +509,9 @@ class GoProTraitLayout :
                 Toast.makeText(context, it, Toast.LENGTH_LONG).show()
             }
 
+            //every other state, including a failure, ends the recording ui
+            setRecordingUi(state == GoProApi.ConnectionState.RECORDING)
+
             when (state) {
 
                 GoProApi.ConnectionState.DISCONNECTED,
@@ -462,7 +529,8 @@ class GoProTraitLayout :
                 GoProApi.ConnectionState.DISCONNECTING -> showConnectingUi()
 
                 GoProApi.ConnectionState.STREAMING,
-                GoProApi.ConnectionState.CAPTURING -> Unit
+                GoProApi.ConnectionState.CAPTURING,
+                GoProApi.ConnectionState.RECORDING -> Unit
             }
         }
     }
@@ -527,12 +595,14 @@ class GoProTraitLayout :
     override fun onCaptureFinished() {
         ui.launch {
             shutterButton?.isEnabled = true
+            updateShutterIcon()
         }
     }
 
     override fun onCaptureFailed(messageRes: Int) {
         ui.launch {
             shutterButton?.isEnabled = true
+            updateShutterIcon()
             Toast.makeText(context, messageRes, Toast.LENGTH_SHORT).show()
         }
     }

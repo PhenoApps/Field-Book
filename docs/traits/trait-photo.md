@@ -13,6 +13,7 @@ Field Book allows photos to be captured from different camera sources including 
 - `Name` assign a value for trait name.
 - `Details` text is displayed under the trait name on the Collect screen.
 - `Crop` when enabled, define a crop region through the <img class="icon" src="_static/icons/formats/cog.png"> in Collect to apply to all future pictures for the trait.
+- `Record video` (GoPro only) records video kept on the camera instead of taking photos, see [GoPro video](#gopro-video).
 - `Automatically Switch to Next Plot` toggles immediately moving to next entry when the user records an observation for an entry in the Collect screen.
 - `Resource File` sets an image for the trait that will be opened by default when accessing resources from Collect.
 
@@ -151,3 +152,19 @@ Field Book can either copy the full image to the Android device or save the name
 If photos are copied to the Android device, they are stored in `.jpg` format, and named with entry's unique_id, the trait name, the photo number, and a timestamp.
 The resulting files are stored in a gopro folder within a field-specific subfolder of `plot_data`.
 An example photo filepath would be `plot_data/FIELD_NAME/gopro/PHOTO_FILE_NAME.jpg`.
+
+#### GoPro video
+
+GoPro traits can record video instead of photos.
+Tap the `Photo` chip in the trait's options to switch it to `Video`, or turn on `Record video` when creating the trait.
+Videos stay on the GoPro memory card and are never copied to the Android device.
+Field Book saves the name of each video file as the observation, for example `GX010001.MP4`.
+When a long recording is split into several files, Field Book saves the name of the first file.
+The remaining files share its four digit number, for example `GX020001.MP4`.
+Field Book switches the camera into video or photo mode to match the trait when it connects.
+
+Press the record button to start recording and press it again to stop.
+Moving to another plot is blocked while recording, so the video is saved to the plot where the recording started.
+Leaving the trait or disconnecting stops the recording and saves its file name.
+
+Photo or video cannot be changed once data has been collected with the trait.
