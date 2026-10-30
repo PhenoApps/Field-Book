@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.adapters
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.BitmapFactory
@@ -76,6 +77,10 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
         val videoView: android.widget.VideoView? = view.findViewById(R.id.list_item_video_vv)
         val playButton: ImageButton? = view.findViewById(R.id.list_item_play_btn)
         val pauseButton: ImageButton? = view.findViewById(R.id.list_item_pause_btn)
+        val nameLayout: View = view.findViewById(R.id.list_item_image_name_ll)
+        val nameIconView: ImageView = view.findViewById(R.id.list_item_image_name_icon_iv)
+        val nameTextView: TextView = view.findViewById(R.id.list_item_image_name_tv)
+        val nameSerialView: TextView = view.findViewById(R.id.list_item_image_name_serial_tv)
 
         init {
 
@@ -108,6 +113,18 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
                     width = actualWidth
                     height = actualHeight
                 }
+
+                val nameOnly = isNameOnly(model.uri)
+
+                nameLayout.visibility = if (nameOnly) View.VISIBLE else View.GONE
+
+                if (nameOnly) {
+                    bindName(model)
+                    return
+                }
+
+                //a recycled name card hides the thumbnail, restore it for media
+                imageView.visibility = View.VISIBLE
 
                 val isVideo = model.uri?.lowercase()?.endsWith(".mp4") == true || (model.uri?.startsWith("content://") == true && view.context.contentResolver.getType(android.net.Uri.parse(model.uri))?.startsWith("video/") == true)
 
@@ -307,7 +324,50 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
 
             }
         }
+
+        /**
+         * Shows the saved name, e.g. SERIAL/GX010001.MP4, where a thumbnail would be. There is no
+         * file on the device to preview or play, so tapping explains where the file lives instead.
+         */
+        private fun bindName(model: Model) {
+
+            val value = model.uri.orEmpty()
+            val fileName = value.substringAfterLast('/')
+            val serial = value.substringBeforeLast('/', missingDelimiterValue = "")
+
+            nameIconView.setImageResource(
+                if (fileName.lowercase().endsWith(".mp4")) R.drawable.video
+                else R.drawable.ic_trait_camera
+            )
+
+            nameTextView.text = fileName
+            nameSerialView.text = serial
+            nameSerialView.visibility = if (serial.isEmpty()) View.GONE else View.VISIBLE
+
+            imageView.setImageDrawable(null)
+            imageView.visibility = View.GONE
+            videoView?.visibility = View.GONE
+            playButton?.visibility = View.GONE
+            pauseButton?.visibility = View.GONE
+
+            view.setOnClickListener {
+                AlertDialog.Builder(view.context, R.style.AppAlertDialog)
+                    .setTitle(R.string.list_item_image_on_camera_title)
+                    .setMessage(view.context.getString(R.string.list_item_image_on_camera_message, value))
+                    .setPositiveButton(R.string.dialog_ok, null)
+                    .show()
+            }
+        }
     }
+
+    /**
+     * True when the value names a file kept on a camera, e.g. a GoPro capture that was not copied.
+     * Copied media is stored as a uri with a scheme, NA has its own placeholder, and a leading
+     * slash is an absolute device path rather than a camera file.
+     */
+    private fun isNameOnly(uri: String?): Boolean =
+        !uri.isNullOrEmpty() && uri != "NA" && !uri.startsWith("/") &&
+                android.net.Uri.parse(uri).scheme.isNullOrEmpty()
 
     class PreviewViewHolder(view: View) : ViewHolder(view) {
 

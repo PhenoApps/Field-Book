@@ -750,6 +750,8 @@
     <string name="gopro_error_capture_failed">The GoPro capture failed.</string>
     <string name="gopro_error_no_new_photo">The GoPro did not produce a new photo.</string>
     <string name="gopro_error_download_failed">Could not copy the photo from the GoPro.</string>
+    <string name="list_item_image_on_camera_title">Stored on camera</string>
+    <string name="list_item_image_on_camera_message">This file was not copied to Field Book. It is saved on the camera as:\n\n%s</string>
     <string name="gopro_error_record_failed">The GoPro did not start recording.</string>
     <string name="gopro_error_no_new_video">The GoPro did not produce a new video.</string>
     <string name="gopro_error_record_busy">Still finishing the previous recording.</string>
