@@ -153,6 +153,7 @@ class GoProTraitLayout :
         connectBtn?.visibility = View.GONE
         connectProgress?.visibility = View.VISIBLE
         shutterButton?.visibility = View.GONE
+        settingsButton?.visibility = View.GONE
         styledPlayerView?.visibility = View.GONE
         previewCardView?.visibility = View.GONE
     }
@@ -258,15 +259,26 @@ class GoProTraitLayout :
 
         val settingsView = GoProCameraSettingsView(context, currentTrait)
 
-        AlertDialog.Builder(context, R.style.AppAlertDialog)
+        val dialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
             .setTitle(R.string.go_pro_trait_settings_title)
             .setView(settingsView)
             .setPositiveButton(android.R.string.ok) { dialog, _ ->
                 settingsView.commitChanges()
                 dialog.dismiss()
             }
+            .setNeutralButton(R.string.disconnect) { dialog, _ ->
+                settingsView.commitChanges()
+                dialog.dismiss()
+                showConnectingUi()
+                api.teardownAsync()
+            }
             .create()
-            .show()
+
+        dialog.show()
+
+        //teardown cancels an in flight capture, which would silently drop the photo
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.isEnabled =
+            api.state() != GoProApi.ConnectionState.CAPTURING
     }
 
     /**
@@ -293,9 +305,11 @@ class GoProTraitLayout :
                     showStage(state)
                 }
 
+                //teardown takes a few seconds, keep the controls hidden until it completes
+                GoProApi.ConnectionState.DISCONNECTING -> showConnectingUi()
+
                 GoProApi.ConnectionState.STREAMING,
-                GoProApi.ConnectionState.CAPTURING,
-                GoProApi.ConnectionState.DISCONNECTING -> Unit
+                GoProApi.ConnectionState.CAPTURING -> Unit
             }
         }
     }
