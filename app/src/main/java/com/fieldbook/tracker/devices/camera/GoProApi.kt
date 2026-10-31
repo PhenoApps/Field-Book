@@ -266,7 +266,10 @@ class GoProApi @Inject constructor(
                     streamWatchdog = null
                     playerRetries = 0
 
-                    if (connectionState != ConnectionState.CAPTURING) {
+                    //only the first frame makes a session live. The preview also comes back ready
+                    //mid session, e.g. when the camera starts recording, and that must not drop a
+                    //recording or capture back to streaming while the camera is still busy
+                    if (connectionState == ConnectionState.CONNECTED) {
                         setState(ConnectionState.STREAMING)
                     }
 
@@ -885,7 +888,7 @@ class GoProApi @Inject constructor(
 
         captureJob = ioScope.launch {
             captureMutex.withLock {
-                runCapture(data, saveImage, shutter = this::shutterOn)
+                runCapture(data, saveImage, shutter = this@GoProApi::shutterOn)
             }
         }
     }
@@ -954,8 +957,10 @@ class GoProApi @Inject constructor(
                     Log.e(TAG, "Start recording failed", t)
                     callbacks?.onCaptureFailed(R.string.gopro_error_record_failed)
                 } finally {
+                    //resumed even while recording: the poller is what notices the recording
+                    //being stopped on the camera's own button
+                    pollPaused = false
                     if (recordingEntry == null) {
-                        pollPaused = false
                         callbacks?.onCaptureFinished()
                     }
                 }
@@ -975,18 +980,59 @@ class GoProApi @Inject constructor(
         }
 
         captureJob = ioScope.launch {
-            captureMutex.withLock { finishRecording(resumePreview = true) }
+            captureMutex.withLock {
+                //the camera's own button may have ended it while this waited for the lock
+                if (recordingEntry == null) callbacks?.onCaptureFinished()
+                else finishRecording(resumePreview = true)
+            }
+        }
+    }
+
+    /**
+     * Treats a recording started on the camera's own button like one started in the app: it is
+     * filed against the current entry, and the trait shows stop and blocks navigation until it
+     * ends.
+     */
+    private fun adoptCameraRecording() {
+
+        val entry = currentEntry ?: return
+
+        if (captureMutex.isLocked || recordingEntry != null) return
+
+        Log.d(TAG, "Recording started on the camera for ${entry.range.uniqueId}")
+
+        recordingEntry = entry
+
+        setState(ConnectionState.RECORDING)
+    }
+
+    /**
+     * Saves a recording that was stopped on the camera's own button. The camera has already
+     * finished writing, so there is no shutter to press or wait on.
+     */
+    private fun finishCameraRecording() {
+
+        if (captureMutex.isLocked) return
+
+        captureJob = ioScope.launch {
+            captureMutex.withLock { finishRecording(resumePreview = true, pressShutter = false) }
         }
     }
 
     /** Caller must hold [captureMutex]. */
-    private suspend fun finishRecording(resumePreview: Boolean) {
+    private suspend fun finishRecording(resumePreview: Boolean, pressShutter: Boolean = true) {
 
         val entry = recordingEntry ?: return
 
         recordingEntry = null
 
-        runCapture(entry, saveImage = false, shutter = this::shutterOff, resumePreview = resumePreview)
+        runCapture(
+            entry,
+            saveImage = false,
+            shutter = if (pressShutter) this::shutterOff else null,
+            resumePreview = resumePreview,
+            reportFailures = true
+        )
     }
 
     /**
@@ -1019,22 +1065,24 @@ class GoProApi @Inject constructor(
      * already made on the camera.
      *
      * @param resumePreview false while tearing down, when the preview is about to be released
+     * @param reportFailures a harvest is speculative, so by default only a capture the user pressed
+     * the shutter for reports failures. A recording the user is watching reports them either way.
      */
     private suspend fun runCapture(
         data: ImageRequestData,
         saveImage: Boolean,
         shutter: (() -> Unit)?,
-        resumePreview: Boolean = true
+        resumePreview: Boolean = true,
+        reportFailures: Boolean = shutter != null
     ) {
 
         setState(ConnectionState.CAPTURING)
 
         pollPaused = true
 
-        //a harvest is speculative, so only a capture the user explicitly asked for reports failures
         val fail: (Int) -> Unit = { messageRes ->
             Log.w(TAG, "Capture unsuccessful: ${context.getString(messageRes)}")
-            if (shutter != null) {
+            if (reportFailures) {
                 callbacks?.onCaptureFailed(messageRes)
             }
         }
@@ -1193,10 +1241,27 @@ class GoProApi @Inject constructor(
 
                         val busy = state.first == 1 || state.second == 1
 
-                        //busy -> idle means a photo or recording was just written
-                        if (wasBusy && !busy) {
-                            currentEntry?.let { entry ->
-                                harvest(entry, entry.trait.saveImage)
+                        val encoding = state.second == 1
+
+                        when {
+
+                            //the recording, started in the app or on the camera, was stopped on
+                            //the camera's own button
+                            videoMode && connectionState == ConnectionState.RECORDING -> {
+                                if (!busy) finishCameraRecording()
+                            }
+
+                            //a recording was started on the camera's own button
+                            videoMode && encoding && connectionState == ConnectionState.STREAMING -> {
+                                adoptCameraRecording()
+                            }
+
+                            //busy -> idle means a photo, or a recording too short to catch
+                            //between polls, was just written
+                            wasBusy && !busy -> {
+                                currentEntry?.let { entry ->
+                                    harvest(entry, entry.trait.saveImage)
+                                }
                             }
                         }
 

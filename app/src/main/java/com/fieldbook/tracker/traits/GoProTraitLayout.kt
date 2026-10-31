@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
@@ -360,13 +361,19 @@ class GoProTraitLayout :
         //capture callbacks can land after onExit, when the button belongs to another trait
         if (!watchingPreview) return
 
+        val stop = currentTrait.captureVideo && recordingUi
+
         shutterButton?.setImageResource(
             when {
                 !currentTrait.captureVideo -> R.drawable.camera_24px
-                recordingUi -> R.drawable.ic_media_stop
+                stop -> R.drawable.ic_media_stop
                 else -> R.drawable.ic_media_record
             }
         )
+
+        //the stop square is white and disappears against the light button, as in the video trait
+        if (stop) shutterButton?.setColorFilter(Color.BLACK)
+        else shutterButton?.clearColorFilter()
     }
 
     /**
