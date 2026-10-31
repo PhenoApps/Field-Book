@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.util.AttributeSet
 import android.util.Log
@@ -97,24 +98,34 @@ class GoProTraitLayout :
 
             GoProApi.ConnectionState.STREAMING,
             GoProApi.ConnectionState.CAPTURING,
-            GoProApi.ConnectionState.RECORDING -> bindExistingSession()
+            GoProApi.ConnectionState.RECORDING -> {
+                bindExistingSession()
+                //cancels a park still waiting on a capture if the user came straight back
+                api.resume(currentTrait.captureVideo)
+            }
+
+            GoProApi.ConnectionState.PARKED -> {
+                showConnectingUi()
+                api.resume(currentTrait.captureVideo)
+            }
 
             else -> showConnectingUi()
         }
     }
 
     /**
-     * Releases the session when the user leaves the trait. Only job handles are cancelled here:
-     * the layout instance is created once per activity and reused, so cancelling the shared
-     * coroutine scopes would permanently disable the trait.
+     * Parks the session when the user leaves the trait, so coming back skips the bluetooth
+     * handshake and the wifi connect dialog. Only job handles are cancelled here: the layout
+     * instance is created once per activity and reused, so cancelling the shared coroutine scopes
+     * would permanently disable the trait.
      */
     override fun onExit() {
         super.onExit()
 
         dismissWaitDialog()
 
-        //the teardown below stops a running recording and saves its name, so release the
-        //navigation lock and screen now rather than waiting on the camera
+        //parking stops a running recording and saves its name, so release the navigation lock
+        //and screen now rather than waiting on the camera
         setRecordingUi(false)
 
         unwatchPreviewBounds()
@@ -124,7 +135,7 @@ class GoProTraitLayout :
 
         shutterButton?.setOnClickListener(null)
 
-        api.teardownAsync()
+        api.park()
     }
 
     private fun setupWaitForStreamDialog(): AlertDialog {
@@ -291,6 +302,7 @@ class GoProTraitLayout :
         styledPlayerView?.visibility = View.GONE
         previewCardView?.visibility = View.GONE
         imageView?.visibility = View.INVISIBLE
+        imageView?.setImageDrawable(null)
 
         connectBtn?.setOnClickListener { connect() }
     }
@@ -318,7 +330,6 @@ class GoProTraitLayout :
 
         connectBtn?.visibility = View.GONE
         connectProgress?.visibility = View.GONE
-        imageView?.visibility = View.INVISIBLE
         shutterButton?.visibility = View.VISIBLE
         settingsButton?.visibility = View.VISIBLE
 
@@ -382,11 +393,14 @@ class GoProTraitLayout :
      */
     private fun applyPreviewVisibility() {
 
-        val visibility = if (prefs.getBoolean(GeneralKeys.GOPRO_CAMERA_PREVIEW, true))
-            View.VISIBLE else View.GONE
+        val show = prefs.getBoolean(GeneralKeys.GOPRO_CAMERA_PREVIEW, true)
 
-        previewCardView?.visibility = visibility
-        styledPlayerView?.visibility = visibility
+        //a transcoded preview is drawn frame by frame into the image view instead of the player
+        val transcoded = api.isPreviewTranscoded
+
+        previewCardView?.visibility = if (show) View.VISIBLE else View.GONE
+        styledPlayerView?.visibility = if (show && !transcoded) View.VISIBLE else View.GONE
+        imageView?.visibility = if (show && transcoded) View.VISIBLE else View.INVISIBLE
     }
 
     private fun getImageRequestData(): GoProApi.ImageRequestData {
@@ -537,7 +551,8 @@ class GoProTraitLayout :
 
                 GoProApi.ConnectionState.STREAMING,
                 GoProApi.ConnectionState.CAPTURING,
-                GoProApi.ConnectionState.RECORDING -> Unit
+                GoProApi.ConnectionState.RECORDING,
+                GoProApi.ConnectionState.PARKED -> Unit
             }
         }
     }
@@ -578,6 +593,9 @@ class GoProTraitLayout :
     override fun onStreamRequested() {
         ui.launch {
 
+            //once transcoding, the player is never prepared again for this session
+            if (api.isPreviewTranscoded) return@launch
+
             val player = api.createPlayer()
 
             styledPlayerView?.player = player
@@ -586,6 +604,12 @@ class GoProTraitLayout :
             //the same player is handed back after every capture, so never stack the listener
             player.removeListener(videoSizeListener)
             player.addListener(videoSizeListener)
+        }
+    }
+
+    override fun onPreviewFrame(frame: Bitmap) {
+        ui.launch {
+            imageView?.setImageBitmap(frame)
         }
     }
 

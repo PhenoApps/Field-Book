@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothProfile
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Network
 import android.os.Build
 import android.os.SystemClock
@@ -15,9 +16,11 @@ import androidx.annotation.StringRes
 import androidx.core.net.toUri
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.UdpDataSource
+import androidx.media3.common.C
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.Tracks
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
@@ -84,6 +87,7 @@ class GoProApi @Inject constructor(
     data class GoProImage(
         val fileDir: String,
         val fileName: String,
+        val created: Long,
         val mod: Long,
         val byteSize: Long,
         val url: String,
@@ -129,6 +133,9 @@ class GoProApi @Inject constructor(
         STREAMING,
         CAPTURING,
         RECORDING,
+
+        /** Links kept open with the preview stopped while the user is on another trait. */
+        PARKED,
         DISCONNECTING,
         ERROR;
 
@@ -147,6 +154,7 @@ class GoProApi @Inject constructor(
         fun onConnected()
         fun onStreamReady()
         fun onStreamRequested()
+        fun onPreviewFrame(frame: Bitmap)
         fun onCaptureFinished()
         fun onCaptureFailed(@StringRes messageRes: Int)
         fun onImageSinkRequested(data: ImageRequestData, model: GoProImage): ImageSink?
@@ -158,7 +166,13 @@ class GoProApi @Inject constructor(
     //state id refers to https://gopro.github.io/OpenGoPro/http#tag/Query/operation/OGP_GET_STATE
     enum class GoProStateKeys(val key: String) {
         BUSY("8"),
-        IS_ENCODING("10")
+        IS_ENCODING("10"),
+        PHOTO_COUNT("38")
+    }
+
+    /** One read of the camera state, [photoCount] is null if the camera did not report it. */
+    private data class CameraState(val busy: Int, val encoding: Int, val photoCount: Int?) {
+        val isBusy get() = busy == 1 || encoding == 1
     }
 
     companion object {
@@ -222,8 +236,24 @@ class GoProApi @Inject constructor(
         //how long to wait for the camera to report it is encoding once the shutter is pressed
         private const val RECORD_START_TIMEOUT_MS = 5000L
 
-        //budget for stopping a recording and saving its name while the session is torn down
+        //budget for stopping a recording and saving its name before the session is parked or
+        //torn down
         private const val RECORD_STOP_TIMEOUT_MS = 30000L
+
+        //how long a parked session survives while the user is on other traits
+        private const val PARK_TIMEOUT_MS = 5 * 60 * 1000L
+
+        //Open GoPro recommends a keep alive every three seconds, otherwise auto power down can
+        //put the camera to sleep in the middle of a session
+        private const val KEEP_ALIVE_INTERVAL_MS = 3000L
+
+        //player failures that mean the device cannot decode the stream, not that it is late
+        private val DECODER_ERROR_CODES = setOf(
+            PlaybackException.ERROR_CODE_DECODER_INIT_FAILED,
+            PlaybackException.ERROR_CODE_DECODER_QUERY_FAILED,
+            PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED,
+            PlaybackException.ERROR_CODE_DECODING_FORMAT_EXCEEDS_CAPABILITIES
+        )
     }
 
     private val gatt by lazy {
@@ -262,6 +292,9 @@ class GoProApi @Inject constructor(
                 Player.STATE_READY -> {
                     Log.d(TAG, "Player Ready")
 
+                    //a preview restored by a capture that finished after the session was parked
+                    if (!connectionState.hasPlayer || transcodePreview) return
+
                     streamWatchdog?.cancel()
                     streamWatchdog = null
                     playerRetries = 0
@@ -285,15 +318,37 @@ class GoProApi @Inject constructor(
          * a few seconds and parks in STATE_IDLE, and nothing used to re-prepare it - the preview
          * then never arrived and the connect flow sat on its spinner indefinitely.
          */
+        /**
+         * A video track no decoder on the device can play is reported here rather than as an
+         * error: the player selects nothing and goes straight to STATE_ENDED. The HERO13 sends an
+         * HEVC preview and the Boox Palma has every HEVC decoder disabled, which used to leave the
+         * connect flow waiting on the stream watchdog.
+         */
+        override fun onTracksChanged(tracks: Tracks) {
+            super.onTracksChanged(tracks)
+
+            val undecodable = tracks.groups.firstOrNull {
+                it.type == C.TRACK_TYPE_VIDEO && !it.isSupported(true)
+            } ?: return
+
+            switchToTranscodedPreview("no decoder for ${undecodable.getTrackFormat(0).sampleMimeType}")
+        }
+
         override fun onPlayerError(error: PlaybackException) {
             super.onPlayerError(error)
 
             Log.e(TAG, "Player error (${error.errorCodeName})", error)
 
+            //a decoder that exists but cannot handle the stream, typically its resolution
+            if (error.errorCode in DECODER_ERROR_CODES) {
+                switchToTranscodedPreview(error.errorCodeName)
+                return
+            }
+
             //Retry for as long as the session owns a player, not just while the first frame is
             //still awaited. A preview that dies after it has started - which is exactly what a
             //capture can cause - otherwise stays dead for the rest of the session.
-            if (!connectionState.hasPlayer) return
+            if (!connectionState.hasPlayer || transcodePreview) return
 
             if (playerRetries >= MAX_PLAYER_RETRIES) {
                 Log.e(TAG, "Giving up on preview after $playerRetries retries")
@@ -330,12 +385,31 @@ class GoProApi @Inject constructor(
     private var captureJob: Job? = null
     private var pollJob: Job? = null
     private var pollPaused = false
+    private var keepAliveJob: Job? = null
+
+    private var parkJob: Job? = null
+    private var parkTimeoutJob: Job? = null
+    private var resumeJob: Job? = null
+
+    /** The camera network the session joined, checked on resume so a replaced one is not reused. */
+    private var cameraNetwork: Network? = null
 
     private var stateChangedAt = 0L
 
     /** Fails the session if the first preview frame never arrives. */
     private var streamWatchdog: Job? = null
     private var playerRetries = 0
+
+    /**
+     * Set once the player has shown it cannot decode the camera's stream. From then on, for the
+     * rest of the session, ffmpeg decodes the preview and delivers it through
+     * [Callbacks.onPreviewFrame] instead of the player.
+     */
+    @Volatile
+    private var transcodePreview = false
+
+    val isPreviewTranscoded: Boolean
+        get() = transcodePreview
 
     /**
      * Newest media url already consumed. A single value is enough to dedupe and, unlike the
@@ -606,11 +680,16 @@ class GoProApi @Inject constructor(
 
         setState(ConnectionState.DISCONNECTING)
 
+        parkJob?.cancel()
+        parkTimeoutJob?.cancel()
+        resumeJob?.cancel()
+
         try { captureJob?.cancel() } catch (_: Exception) {}
         streamWatchdog?.cancel()
         streamWatchdog = null
         playerRetries = 0
         stopPolling()
+        stopKeepAlive()
 
         withTimeoutOrNull(2000L) {
             try {
@@ -636,6 +715,7 @@ class GoProApi @Inject constructor(
         httpClient = null
 
         controller.getWifiHelper().disconnect()
+        cameraNetwork = null
 
         withContext(Dispatchers.Main) {
             player?.removeListener(playerListener)
@@ -648,6 +728,9 @@ class GoProApi @Inject constructor(
         lastRequestedUrl = null
         currentEntry = null
         recordingEntry = null
+
+        //the next session may be a different camera or device, so detect it again
+        transcodePreview = false
 
         setState(ConnectionState.DISCONNECTED)
     }
@@ -665,6 +748,146 @@ class GoProApi @Inject constructor(
         job.invokeOnCompletion {
             callbacks = null
             ioScope.cancel()
+        }
+    }
+
+    /**
+     * Park region
+     */
+
+    /**
+     * Called when the user leaves the trait. A live session keeps its bluetooth link and wifi
+     * request but stops the preview and unbinds the process, so other traits are not stuck behind
+     * the camera's access point. Coming back through [resume] then only restarts the preview
+     * instead of repeating the whole handshake and the system connect dialog. A session that is
+     * still connecting is torn down as before, and a recording is stopped and its name saved first.
+     */
+    fun park() {
+
+        when (connectionState) {
+            ConnectionState.STREAMING, ConnectionState.CAPTURING, ConnectionState.RECORDING -> Unit
+            ConnectionState.PARKED -> return
+            else -> {
+                teardownAsync()
+                return
+            }
+        }
+
+        if (parkJob?.isActive == true) return
+
+        parkJob = ioScope.launch {
+
+            //let a capture in flight finish and restore the preview before it is stopped
+            captureMutex.withLock {
+
+                //A recording does not outlive the trait. Not cancellable, so a quick return to the
+                //trait cannot lose the name, and the preview is restored so a park cancelled by
+                //that return still leaves a live session.
+                if (recordingEntry != null) {
+                    withContext(NonCancellable) {
+                        withTimeoutOrNull(RECORD_STOP_TIMEOUT_MS) {
+                            finishRecording(resumePreview = true)
+                        }
+                    }
+                }
+
+                //the user came back while the recording was saved, the session stays live
+                if (!isActive) return@launch
+
+                if (connectionState != ConnectionState.STREAMING) return@launch
+
+                //set first so player errors raised by the shutdown below are not retried
+                setState(ConnectionState.PARKED)
+
+                stopPolling()
+                streamWatchdog?.cancel()
+                streamWatchdog = null
+                playerRetries = 0
+
+                try {
+                    stopStreamSuspend()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.w(TAG, "Stop stream request failed while parking", e)
+                }
+
+                controller.getFfmpegHelper().cancel()
+
+                //stop rather than release: the instance is reused on resume, see createPlayer
+                withContext(Dispatchers.Main) { player?.stop() }
+
+                controller.getWifiHelper().releaseProcessBinding()
+
+                armParkTimeout()
+            }
+        }
+    }
+
+    private fun armParkTimeout() {
+
+        parkTimeoutJob?.cancel()
+
+        parkTimeoutJob = ioScope.launch {
+
+            delay(PARK_TIMEOUT_MS)
+
+            if (connectionState == ConnectionState.PARKED) {
+                Log.d(TAG, "Parked for ${PARK_TIMEOUT_MS}ms, releasing the camera")
+                teardownAsync()
+            }
+        }
+    }
+
+    /**
+     * Brings a parked session back when the user returns to the trait, through the same
+     * [ConnectionState.CONNECTED] path a fresh connection takes once wifi is joined. Safe to call
+     * on every layout load, it does nothing unless a park is pending or in place.
+     *
+     * @param videoMode the mode of the trait being returned to, which can differ from the one the
+     * session was parked by when the user moves between a GoPro photo and a GoPro video trait
+     */
+    fun resume(videoMode: Boolean) {
+
+        if (connectionState != ConnectionState.PARKED && parkJob?.isActive != true) return
+
+        if (resumeJob?.isActive == true) return
+
+        parkTimeoutJob?.cancel()
+        parkTimeoutJob = null
+
+        resumeJob = ioScope.launch {
+
+            val modeChanged = this@GoProApi.videoMode != videoMode
+
+            parkJob?.let { job ->
+                //back before a pending park got past the capture in flight: keep the session,
+                //unless it has to change mode, which the park and resume below take care of
+                if (connectionState != ConnectionState.PARKED && !modeChanged) job.cancel()
+                //a quick switch back can also land while the park is still stopping the stream
+                job.join()
+            }
+
+            if (connectionState != ConnectionState.PARKED) return@launch
+
+            val network = cameraNetwork
+
+            if (network == null || !controller.getWifiHelper().restoreProcessBinding(network)) {
+                Log.e(TAG, "Camera network gone while parked")
+                setState(ConnectionState.ERROR, R.string.gopro_error_wifi_lost)
+                teardownAsync()
+                return@launch
+            }
+
+            Log.d(TAG, "Resuming parked session, video mode $videoMode")
+
+            //the camera may also have been switched by hand while parked, so always reload it
+            this@GoProApi.videoMode = videoMode
+            loadPresetGroup()
+
+            setState(ConnectionState.CONNECTED)
+
+            callbacks?.onConnected()
         }
     }
 
@@ -713,11 +936,63 @@ class GoProApi @Inject constructor(
             throw IOException("Camera refused to start the preview stream")
         }
 
-        controller.getFfmpegHelper().initRequestTimer()
+        startPreviewPipeline()
 
         callbacks?.onStreamRequested()
 
         armStreamWatchdog()
+    }
+
+    private fun startPreviewPipeline() {
+        if (transcodePreview) {
+            controller.getFfmpegHelper().initRequestTimer(::onPreviewFrame)
+        } else {
+            controller.getFfmpegHelper().initRequestTimer()
+        }
+    }
+
+    /**
+     * Moves the session to the transcoded preview. The player is stopped rather than released so
+     * nothing else has to know it is unused, and ffmpeg is restarted to decode the stream itself.
+     * Called on the player's thread.
+     */
+    private fun switchToTranscodedPreview(reason: String) {
+
+        if (transcodePreview || !connectionState.hasPlayer) return
+
+        Log.w(TAG, "Player cannot decode the preview ($reason), transcoding it instead")
+
+        transcodePreview = true
+        playerRetries = 0
+
+        player?.stop()
+
+        ioScope.launch {
+            startPreviewPipeline()
+            //decoding in software takes longer to produce a first frame than remuxing
+            armStreamWatchdog()
+        }
+    }
+
+    /**
+     * A frame of the transcoded preview, on ffmpeg's reader thread. The first one plays the part
+     * STATE_READY plays for the player.
+     */
+    private fun onPreviewFrame(frame: Bitmap) {
+
+        if (!connectionState.hasPlayer) return
+
+        if (connectionState == ConnectionState.CONNECTED) {
+
+            streamWatchdog?.cancel()
+            streamWatchdog = null
+
+            setState(ConnectionState.STREAMING)
+
+            callbacks?.onStreamReady()
+        }
+
+        callbacks?.onPreviewFrame(frame)
     }
 
     private suspend fun requestStreamStart(): Boolean =
@@ -1048,9 +1323,9 @@ class GoProApi @Inject constructor(
 
             if (state != null) {
 
-                callbacks?.onBusyStateChanged(state.first, state.second)
+                callbacks?.onBusyStateChanged(state.busy, state.encoding)
 
-                if (state.second == 1) return true
+                if (state.encoding == 1) return true
             }
 
             delay(CAPTURE_POLL_INTERVAL_MS)
@@ -1156,11 +1431,9 @@ class GoProApi @Inject constructor(
 
             if (state != null) {
 
-                callbacks?.onBusyStateChanged(state.first, state.second)
+                callbacks?.onBusyStateChanged(state.busy, state.encoding)
 
-                val busy = state.first == 1 || state.second == 1
-
-                if (busy) {
+                if (state.isBusy) {
                     sawBusy = true
                 } else if (sawBusy || System.currentTimeMillis() - start > CAPTURE_BUSY_WINDOW_MS) {
                     return true
@@ -1173,7 +1446,7 @@ class GoProApi @Inject constructor(
         return false
     }
 
-    private suspend fun fetchBusyState(): Pair<Int, Int>? {
+    private suspend fun fetchBusyState(): CameraState? {
 
         return try {
 
@@ -1196,12 +1469,13 @@ class GoProApi @Inject constructor(
         }
     }
 
-    private fun parseState(responseBody: String): Pair<Int, Int>? {
+    private fun parseState(responseBody: String): CameraState? {
         return try {
             val state = JSONObject(responseBody).getJSONObject("status")
-            Pair(
+            CameraState(
                 state.getInt(GoProStateKeys.BUSY.key),
-                state.getInt(GoProStateKeys.IS_ENCODING.key)
+                state.getInt(GoProStateKeys.IS_ENCODING.key),
+                state.optInt(GoProStateKeys.PHOTO_COUNT.key, -1).takeIf { it >= 0 }
             )
         } catch (e: JSONException) {
             Log.w(TAG, "Unable to parse camera state", e)
@@ -1222,14 +1496,16 @@ class GoProApi @Inject constructor(
         pollJob = ioScope.launch {
 
             var wasBusy = false
+            var lastPhotoCount: Int? = null
 
             while (isActive) {
 
                 if (pollPaused || !connectionState.isActive) {
 
-                    //drop the edge we were tracking, otherwise resuming after an app driven
-                    //capture looks like a fresh busy -> idle transition
+                    //drop the edge and count we were tracking, otherwise resuming after an app
+                    //driven capture looks like a fresh photo taken on the camera
                     wasBusy = false
+                    lastPhotoCount = null
 
                 } else {
 
@@ -1237,35 +1513,46 @@ class GoProApi @Inject constructor(
 
                     if (state != null) {
 
-                        callbacks?.onBusyStateChanged(state.first, state.second)
+                        callbacks?.onBusyStateChanged(state.busy, state.encoding)
 
-                        val busy = state.first == 1 || state.second == 1
-
-                        val encoding = state.second == 1
+                        //a single photo is usually written well inside one poll interval, so the
+                        //busy flag alone misses most shutter presses. A rising photo count does
+                        //not, the busy -> idle edge stays as a fallback for cameras without it.
+                        val countRose = lastPhotoCount != null && state.photoCount != null
+                                && state.photoCount > lastPhotoCount
+                        val busyEdge = wasBusy && !state.isBusy
 
                         when {
 
                             //the recording, started in the app or on the camera, was stopped on
                             //the camera's own button
                             videoMode && connectionState == ConnectionState.RECORDING -> {
-                                if (!busy) finishCameraRecording()
+                                if (!state.isBusy) finishCameraRecording()
                             }
 
                             //a recording was started on the camera's own button
-                            videoMode && encoding && connectionState == ConnectionState.STREAMING -> {
+                            videoMode && state.encoding == 1 &&
+                                    connectionState == ConnectionState.STREAMING -> {
                                 adoptCameraRecording()
                             }
 
-                            //busy -> idle means a photo, or a recording too short to catch
-                            //between polls, was just written
-                            wasBusy && !busy -> {
+                            //wait out a capture in progress so the media list already holds the
+                            //photo. In video mode this catches a recording too short to be seen
+                            //between polls.
+                            (countRose || busyEdge) && !state.isBusy -> {
+                                Log.d(TAG, "Camera shutter capture detected, count=${state.photoCount}")
                                 currentEntry?.let { entry ->
                                     harvest(entry, entry.trait.saveImage)
                                 }
                             }
                         }
 
-                        wasBusy = busy
+                        wasBusy = state.isBusy
+
+                        //hold the old count while busy so the rise is still seen once it settles
+                        if (!state.isBusy) {
+                            lastPhotoCount = state.photoCount
+                        }
                     }
                 }
 
@@ -1278,6 +1565,43 @@ class GoProApi @Inject constructor(
         pollJob?.cancel()
         pollJob = null
         pollPaused = false
+    }
+
+    /**
+     * Keeps the camera awake for the whole session, parked included, since nothing else resets
+     * its keep alive timer. Skipped during a capture: the shutter already resets auto power down,
+     * and the download should have the access point to itself.
+     */
+    private fun startKeepAlive() {
+
+        if (keepAliveJob?.isActive == true) return
+
+        keepAliveJob = ioScope.launch {
+
+            while (isActive) {
+
+                if (!pollPaused && connectionState.isActive) {
+                    try {
+                        executeWithRetrySuspend(url("/gopro/camera/keep_alive"), retries = 1).use {
+                            if (!it.isSuccessful) {
+                                Log.w(TAG, "Keep alive response = not success ${it.code}")
+                            }
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Keep alive request failed", e)
+                    }
+                }
+
+                delay(KEEP_ALIVE_INTERVAL_MS)
+            }
+        }
+    }
+
+    private fun stopKeepAlive() {
+        keepAliveJob?.cancel()
+        keepAliveJob = null
     }
 
     /**
@@ -1301,7 +1625,13 @@ class GoProApi @Inject constructor(
     }
 
     /**
-     * Parses the media list and returns the file the last capture produced, see [GoProMediaSelector].
+     * Parses the media list and returns the file the last capture produced, see
+     * [GoProMediaSelector] for how a photo or a recording is picked.
+     *
+     * Grouped media (burst, time lapse, night lapse) is skipped here for both. Group names do not
+     * share the photo numbering - G0010008.JPG outranks GOPR0123.JPG - so a burst was attached to
+     * every plot once one was on the card. That became easy to hit on the HERO13, whose photo
+     * preset can be switched to burst.
      */
     private fun parseMediaQueryResponse(responseBody: String): GoProImage? {
 
@@ -1327,12 +1657,18 @@ class GoProApi @Inject constructor(
 
                     val fileName = file.getString("n")
 
+                    //group items carry a group id, single photos and videos do not
+                    if (file.has("g")) continue
+
+                    val mod = file.optString("mod").toLongOrNull() ?: 0L
+
                     images.add(
                         GoProImage(
                             dir,
                             fileName,
-                            file.getString("mod").toLong(),
-                            file.getString("s").toLong(),
+                            file.optString("cre").toLongOrNull() ?: mod,
+                            mod,
+                            file.optString("s").toLongOrNull() ?: 0L,
                             "$BASE_URL/videos/DCIM/$dir/$fileName",
                             serial
                         )
@@ -1581,6 +1917,8 @@ class GoProApi @Inject constructor(
      */
     override fun onNetworkBound(network: Network) {
 
+        cameraNetwork = network
+
         ioScope.launch {
             // Assign a fresh client bound to the network. Evict old connections first.
             closeAndEvictClientConnections(httpClient)
@@ -1600,6 +1938,8 @@ class GoProApi @Inject constructor(
                 .build()
 
             delay(400L)
+
+            startKeepAlive()
 
             loadPresetGroup()
 

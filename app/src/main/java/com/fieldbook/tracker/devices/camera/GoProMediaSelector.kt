@@ -3,6 +3,8 @@ package com.fieldbook.tracker.devices.camera
 /**
  * Picks the file a capture produced out of the camera's media list. These rules decide which name
  * an observation is saved under, so they are kept free of Android and the session to be testable.
+ *
+ * Grouped media (bursts, time lapse photos) is expected to be filtered out before this is called.
  */
 object GoProMediaSelector {
 
@@ -10,25 +12,23 @@ object GoProMediaSelector {
     //of a long recording shares the recording number.
     private val VIDEO_NAME = Regex("^G([A-Z])(\\d{2})(\\d{4})\\.MP4$", RegexOption.IGNORE_CASE)
 
-    private val VIDEO_EXTENSIONS = listOf(".mp4", ".360")
-
-    private val PHOTO_NAME = Regex("^([a-zA-Z]*)([0-9]*).([a-zA-Z]*)$")
+    private val FILE_NUMBER = Regex("[0-9]+")
 
     fun latest(media: List<GoProApi.GoProImage>, video: Boolean): GoProApi.GoProImage? =
         if (video) latestRecording(media) else latestPhoto(media)
 
     /**
-     * Returns the most recently numbered photo. Videos are left out: their names carry a chapter
-     * prefix that outnumbers every photo, so one on the card was picked as the "new photo".
+     * Returns the most recently created photo. Only JPGs count: videos and RAW (.GPR) files share
+     * the card, and video names outrank every photo by number, so one used to be picked as the
+     * "new photo". The camera clock only has second resolution, so photos taken within the same
+     * second fall back to the directory and the file number.
      */
     fun latestPhoto(media: List<GoProApi.GoProImage>): GoProApi.GoProImage? =
         media
-            .filterNot { file -> VIDEO_EXTENSIONS.any { file.fileName.endsWith(it, ignoreCase = true) } }
-            .maxByOrNull {
-                PHOTO_NAME.matchEntire(it.fileName)?.destructured?.let { (_, number, _) ->
-                    number.toIntOrNull() ?: -1
-                } ?: -1
-            }
+            .filter { it.fileName.endsWith(".jpg", ignoreCase = true) }
+            .maxWithOrNull(
+                compareBy<GoProApi.GoProImage>({ it.created }, { it.fileDir }, { fileNumber(it.fileName) })
+            )
 
     /**
      * Returns the first chapter of the newest recording. The newest file found by time decides the
@@ -46,7 +46,7 @@ object GoProMediaSelector {
         }
 
         val newest = chapters.maxWithOrNull(
-            compareBy<Chapter>({ it.file.mod }, { it.recording }, { it.chapter })
+            compareBy<Chapter>({ it.file.created }, { it.recording }, { it.chapter })
         ) ?: return null
 
         return chapters
@@ -54,4 +54,7 @@ object GoProMediaSelector {
             .minByOrNull { it.chapter }
             ?.file
     }
+
+    private fun fileNumber(fileName: String): Int =
+        FILE_NUMBER.find(fileName.substringBeforeLast('.'))?.value?.toIntOrNull() ?: -1
 }

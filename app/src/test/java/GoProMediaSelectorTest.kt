@@ -14,10 +14,12 @@ class GoProMediaSelectorTest {
 
     private fun file(
         name: String,
-        mod: Long = 0L,
+        created: Long = 0L,
         dir: String = "100GOPRO",
         serial: String? = null
-    ) = GoProImage(dir, name, mod, 0L, "http://10.5.5.9:8080/videos/DCIM/$dir/$name", serial)
+    ) = GoProImage(
+        dir, name, created, created, 0L, "http://10.5.5.9:8080/videos/DCIM/$dir/$name", serial
+    )
 
     private fun GoProImage?.path() = this?.let { "${it.fileDir}/${it.fileName}" }
 
@@ -27,7 +29,7 @@ class GoProMediaSelectorTest {
     @Test
     fun singleRecordingIsReturned() {
 
-        val latest = GoProMediaSelector.latestRecording(listOf(file("GX010001.MP4", mod = 100)))
+        val latest = GoProMediaSelector.latestRecording(listOf(file("GX010001.MP4", created = 100)))
 
         assertEquals("100GOPRO/GX010001.MP4", latest.path())
     }
@@ -36,9 +38,9 @@ class GoProMediaSelectorTest {
     fun chapteredRecordingReturnsFirstChapter() {
 
         val media = listOf(
-            file("GX010001.MP4", mod = 100),
-            file("GX020001.MP4", mod = 200),
-            file("GX030001.MP4", mod = 300)
+            file("GX010001.MP4", created = 100),
+            file("GX020001.MP4", created = 200),
+            file("GX030001.MP4", created = 300)
         )
 
         assertEquals("100GOPRO/GX010001.MP4", GoProMediaSelector.latestRecording(media).path())
@@ -51,10 +53,10 @@ class GoProMediaSelectorTest {
     @Test
     fun laterChapterIsNotANewRecording() {
 
-        val first = GoProMediaSelector.latestRecording(listOf(file("GX010001.MP4", mod = 100)))
+        val first = GoProMediaSelector.latestRecording(listOf(file("GX010001.MP4", created = 100)))
 
         val afterSecondChapter = GoProMediaSelector.latestRecording(
-            listOf(file("GX010001.MP4", mod = 100), file("GX020001.MP4", mod = 200))
+            listOf(file("GX010001.MP4", created = 100), file("GX020001.MP4", created = 200))
         )
 
         assertEquals(first?.url, afterSecondChapter?.url)
@@ -64,9 +66,9 @@ class GoProMediaSelectorTest {
     fun chapterOfNewerRecordingBeatsHigherChapterOfOlderOne() {
 
         val media = listOf(
-            file("GX010001.MP4", mod = 100),
-            file("GX020001.MP4", mod = 200),
-            file("GX010002.MP4", mod = 300)
+            file("GX010001.MP4", created = 100),
+            file("GX020001.MP4", created = 200),
+            file("GX010002.MP4", created = 300)
         )
 
         assertEquals("100GOPRO/GX010002.MP4", GoProMediaSelector.latestRecording(media).path())
@@ -80,8 +82,8 @@ class GoProMediaSelectorTest {
     fun newestByTimeWinsOverHighestNumber() {
 
         val media = listOf(
-            file("GX019999.MP4", mod = 100, dir = "100GOPRO"),
-            file("GX010001.MP4", mod = 200, dir = "101GOPRO")
+            file("GX019999.MP4", created = 100, dir = "100GOPRO"),
+            file("GX010001.MP4", created = 200, dir = "101GOPRO")
         )
 
         assertEquals("101GOPRO/GX010001.MP4", GoProMediaSelector.latestRecording(media).path())
@@ -91,9 +93,9 @@ class GoProMediaSelectorTest {
     fun chaptersAreGroupedWithinTheirFolder() {
 
         val media = listOf(
-            file("GX010001.MP4", mod = 100, dir = "100GOPRO"),
-            file("GX010001.MP4", mod = 200, dir = "101GOPRO"),
-            file("GX020001.MP4", mod = 300, dir = "101GOPRO")
+            file("GX010001.MP4", created = 100, dir = "100GOPRO"),
+            file("GX010001.MP4", created = 200, dir = "101GOPRO"),
+            file("GX020001.MP4", created = 300, dir = "101GOPRO")
         )
 
         assertEquals("101GOPRO/GX010001.MP4", GoProMediaSelector.latestRecording(media).path())
@@ -103,8 +105,8 @@ class GoProMediaSelectorTest {
     fun sameTimestampFallsBackToRecordingNumber() {
 
         val media = listOf(
-            file("GX010002.MP4", mod = 100),
-            file("GX010001.MP4", mod = 100)
+            file("GX010002.MP4", created = 100),
+            file("GX010001.MP4", created = 100)
         )
 
         assertEquals("100GOPRO/GX010002.MP4", GoProMediaSelector.latestRecording(media).path())
@@ -113,7 +115,7 @@ class GoProMediaSelectorTest {
     @Test
     fun avcAndLowerCaseNamesAreRecognised() {
 
-        val latest = GoProMediaSelector.latestRecording(listOf(file("gh010003.mp4", mod = 100)))
+        val latest = GoProMediaSelector.latestRecording(listOf(file("gh010003.mp4", created = 100)))
 
         assertEquals("100GOPRO/gh010003.mp4", latest.path())
     }
@@ -122,8 +124,8 @@ class GoProMediaSelectorTest {
     fun photosAreIgnoredWhenRecording() {
 
         val media = listOf(
-            file("GX010001.MP4", mod = 100),
-            file("GOPR0005.JPG", mod = 999)
+            file("GX010001.MP4", created = 100),
+            file("GOPR0005.JPG", created = 999)
         )
 
         assertEquals("100GOPRO/GX010001.MP4", GoProMediaSelector.latestRecording(media).path())
@@ -141,11 +143,42 @@ class GoProMediaSelectorTest {
      * Photo region
      */
     @Test
-    fun highestNumberedPhotoIsReturned() {
+    fun newestPhotoByTimeIsReturned() {
+
+        val media = listOf(
+            file("GOPR0009.JPG", created = 100),
+            file("GOPR0001.JPG", created = 300, dir = "101GOPRO"),
+            file("GOPR0005.JPG", created = 200)
+        )
+
+        assertEquals("101GOPRO/GOPR0001.JPG", GoProMediaSelector.latestPhoto(media).path())
+    }
+
+    /**
+     * The camera clock only has second resolution, so photos taken within one second are told
+     * apart by their number.
+     */
+    @Test
+    fun sameSecondPhotosFallBackToNumber() {
 
         val media = listOf(file("GOPR0001.JPG"), file("GOPR0003.JPG"), file("GOPR0002.JPG"))
 
         assertEquals("100GOPRO/GOPR0003.JPG", GoProMediaSelector.latestPhoto(media).path())
+    }
+
+    /**
+     * A RAW capture writes a .GPR next to the .JPG with the same number and time. Copying it
+     * would save a RAW file under a .jpg name.
+     */
+    @Test
+    fun rawFilesAreIgnored() {
+
+        val media = listOf(
+            file("GOPR0004.GPR", created = 100),
+            file("GOPR0004.JPG", created = 100)
+        )
+
+        assertEquals("100GOPRO/GOPR0004.JPG", GoProMediaSelector.latestPhoto(media).path())
     }
 
     /**
@@ -175,7 +208,7 @@ class GoProMediaSelectorTest {
     @Test
     fun latestFollowsTheCaptureMode() {
 
-        val media = listOf(file("GOPR0005.JPG", mod = 200), file("GX010001.MP4", mod = 100))
+        val media = listOf(file("GOPR0005.JPG", created = 200), file("GX010001.MP4", created = 100))
 
         assertEquals("100GOPRO/GX010001.MP4", GoProMediaSelector.latest(media, video = true).path())
 
