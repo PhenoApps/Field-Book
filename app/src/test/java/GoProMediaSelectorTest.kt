@@ -216,6 +216,80 @@ class GoProMediaSelectorTest {
     }
 
     /**
+     * New file region
+     */
+    private fun urls(vararg media: GoProImage) = media.map { it.url }.toSet()
+
+    /**
+     * A camera whose clock went back after a battery swap dates its new files before the ones
+     * already on the card, so newest by time alone would file an old photo.
+     */
+    @Test
+    fun newestPicksTheFileNotOnTheCardBefore() {
+
+        val old = file("GOPR0009.JPG", created = 300)
+        val taken = file("GOPR0010.JPG", created = 100)
+
+        assertEquals(
+            "100GOPRO/GOPR0010.JPG",
+            GoProMediaSelector.newest(listOf(old, taken), urls(old), video = false).path()
+        )
+    }
+
+    /**
+     * A busy flag raised by something other than a capture, e.g. a settings change on the camera,
+     * must not file whatever was already on the card.
+     */
+    @Test
+    fun nothingNewReturnsNull() {
+
+        val photo = file("GOPR0009.JPG", created = 300)
+        val video = file("GX010001.MP4", created = 200)
+
+        assertNull(GoProMediaSelector.newest(listOf(photo, video), urls(photo, video), video = false))
+
+        assertNull(GoProMediaSelector.newest(listOf(photo, video), urls(photo, video), video = true))
+    }
+
+    @Test
+    fun newPhotoDoesNotFileAnOldRecording() {
+
+        val old = file("GX010001.MP4", created = 100)
+
+        val media = listOf(old, file("GOPR0005.JPG", created = 200))
+
+        assertNull(GoProMediaSelector.newest(media, urls(old), video = true))
+    }
+
+    /**
+     * A session that connected part way through a long recording already lists its first chapter,
+     * the recording is still named after it.
+     */
+    @Test
+    fun recordingKeepsItsFirstChapterWhenThatWasAlreadyListed() {
+
+        val first = file("GX010001.MP4", created = 100)
+
+        val media = listOf(first, file("GX020001.MP4", created = 200))
+
+        assertEquals(
+            "100GOPRO/GX010001.MP4",
+            GoProMediaSelector.newest(media, urls(first), video = true).path()
+        )
+    }
+
+    @Test
+    fun withoutAnEarlierListingNewestFallsBackToTheNewestFile() {
+
+        val media = listOf(file("GOPR0001.JPG", created = 100), file("GOPR0002.JPG", created = 200))
+
+        assertEquals(
+            "100GOPRO/GOPR0002.JPG",
+            GoProMediaSelector.newest(media, emptySet(), video = false).path()
+        )
+    }
+
+    /**
      * Saved name region
      */
     @Test

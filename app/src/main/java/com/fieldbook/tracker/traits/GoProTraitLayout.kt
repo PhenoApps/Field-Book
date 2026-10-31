@@ -55,6 +55,9 @@ class GoProTraitLayout :
     /** Whether the recording ui (stop button, navigation lock, screen kept on) is applied. */
     private var recordingUi = false
 
+    /** Id of the trait last loaded, cleared by [onExit] since the session is parked from there. */
+    private var boundTraitId: String? = null
+
     private val previewFitListener =
         View.OnLayoutChangeListener { _, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
             if (right - left != oldRight - oldLeft || bottom - top != oldBottom - oldTop) {
@@ -90,6 +93,17 @@ class GoProTraitLayout :
         api.currentEntry = getImageRequestData()
 
         watchPreviewBounds()
+
+        //Every GoPro trait shares this layout, so moving straight from one to another only reloads
+        //it, without the onExit that parks the session. The switch stops a recording, which
+        //belongs to the trait being left, and puts the camera in this trait's mode.
+        val traitChanged = boundTraitId != null && boundTraitId != currentTrait.id
+        boundTraitId = currentTrait.id
+
+        if (traitChanged) {
+            setRecordingUi(false)
+            api.switchTrait(currentTrait.captureVideo)
+        }
 
         when (api.state()) {
 
@@ -127,6 +141,8 @@ class GoProTraitLayout :
         //parking stops a running recording and saves its name, so release the navigation lock
         //and screen now rather than waiting on the camera
         setRecordingUi(false)
+
+        boundTraitId = null
 
         unwatchPreviewBounds()
 

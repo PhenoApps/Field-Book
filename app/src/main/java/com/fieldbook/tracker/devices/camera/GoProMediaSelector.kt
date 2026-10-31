@@ -18,6 +18,26 @@ object GoProMediaSelector {
         if (video) latestRecording(media) else latestPhoto(media)
 
     /**
+     * Returns what a capture produced: the newest file whose url is not in [known], the files that
+     * were already on the card. Picking the newest file overall filed an old one whenever nothing
+     * new had been made, e.g. when a settings change on the camera looked like a capture, and
+     * trusted the camera clock, which goes back when the battery is removed.
+     *
+     * A recording is still named after its first chapter even if that chapter is already known,
+     * which happens when the session connected part way through it.
+     */
+    fun newest(
+        media: List<GoProApi.GoProImage>,
+        known: Set<String>,
+        video: Boolean
+    ): GoProApi.GoProImage? {
+
+        val fresh = media.filter { it.url !in known }
+
+        return if (video) latestRecording(fresh, chaptersFrom = media) else latestPhoto(fresh)
+    }
+
+    /**
      * Returns the most recently created photo. Only JPGs count: videos and RAW (.GPR) files share
      * the card, and video names outrank every photo by number, so one used to be picked as the
      * "new photo". The camera clock only has second resolution, so photos taken within the same
@@ -34,26 +54,32 @@ object GoProMediaSelector {
      * Returns the first chapter of the newest recording. The newest file found by time decides the
      * recording, and its first chapter names it: later chapters share its number, so they are
      * never mistaken for a new recording and the name points at the start of the footage.
+     *
+     * @param chaptersFrom where the first chapter is looked up, by default [media] itself
      */
-    fun latestRecording(media: List<GoProApi.GoProImage>): GoProApi.GoProImage? {
+    fun latestRecording(
+        media: List<GoProApi.GoProImage>,
+        chaptersFrom: List<GoProApi.GoProImage> = media
+    ): GoProApi.GoProImage? {
 
-        data class Chapter(val file: GoProApi.GoProImage, val chapter: Int, val recording: Int)
-
-        val chapters = media.mapNotNull { file ->
-            VIDEO_NAME.matchEntire(file.fileName)?.destructured?.let { (_, chapter, recording) ->
-                Chapter(file, chapter.toInt(), recording.toInt())
-            }
-        }
-
-        val newest = chapters.maxWithOrNull(
+        val newest = chapters(media).maxWithOrNull(
             compareBy<Chapter>({ it.file.created }, { it.recording }, { it.chapter })
         ) ?: return null
 
-        return chapters
+        return chapters(chaptersFrom)
             .filter { it.file.fileDir == newest.file.fileDir && it.recording == newest.recording }
             .minByOrNull { it.chapter }
             ?.file
     }
+
+    private data class Chapter(val file: GoProApi.GoProImage, val chapter: Int, val recording: Int)
+
+    private fun chapters(media: List<GoProApi.GoProImage>): List<Chapter> =
+        media.mapNotNull { file ->
+            VIDEO_NAME.matchEntire(file.fileName)?.destructured?.let { (_, chapter, recording) ->
+                Chapter(file, chapter.toInt(), recording.toInt())
+            }
+        }
 
     private fun fileNumber(fileName: String): Int =
         FILE_NUMBER.find(fileName.substringBeforeLast('.'))?.value?.toIntOrNull() ?: -1

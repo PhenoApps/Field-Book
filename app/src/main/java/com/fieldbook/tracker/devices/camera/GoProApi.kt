@@ -183,6 +183,9 @@ class GoProApi @Inject constructor(
         private const val REQUEST_TIMEOUT_MS = 4000L
         private const val MAX_REQUEST_RETRIES = 3
 
+        //the timeout covers the whole body, and the media list of a full card runs to megabytes
+        private const val MEDIA_LIST_TIMEOUT_MS = 15000L
+
         //a multi megabyte photo over the camera's access point needs far more headroom
         private const val DOWNLOAD_TIMEOUT_MS = 60000L
         private const val DOWNLOAD_RETRIES = 2
@@ -312,13 +315,6 @@ class GoProApi @Inject constructor(
         }
 
         /**
-         * The player is opened as soon as ffmpeg is launched, so it routinely reaches the udp
-         * socket before the camera has sent anything: the camera only starts streaming once a keep
-         * alive lands, and those are on a five second cadence. media3 gives up on the source after
-         * a few seconds and parks in STATE_IDLE, and nothing used to re-prepare it - the preview
-         * then never arrived and the connect flow sat on its spinner indefinitely.
-         */
-        /**
          * A video track no decoder on the device can play is reported here rather than as an
          * error: the player selects nothing and goes straight to STATE_ENDED. The HERO13 sends an
          * HEVC preview and the Boox Palma has every HEVC decoder disabled, which used to leave the
@@ -334,6 +330,13 @@ class GoProApi @Inject constructor(
             switchToTranscodedPreview("no decoder for ${undecodable.getTrackFormat(0).sampleMimeType}")
         }
 
+        /**
+         * The player is opened as soon as ffmpeg is launched, so it routinely reaches the udp
+         * socket before the camera has sent anything: the camera only starts streaming once a keep
+         * alive lands, and those are on a five second cadence. media3 gives up on the source after
+         * a few seconds and parks in STATE_IDLE, and nothing used to re-prepare it - the preview
+         * then never arrived and the connect flow sat on its spinner indefinitely.
+         */
         override fun onPlayerError(error: PlaybackException) {
             super.onPlayerError(error)
 
@@ -390,6 +393,7 @@ class GoProApi @Inject constructor(
     private var parkJob: Job? = null
     private var parkTimeoutJob: Job? = null
     private var resumeJob: Job? = null
+    private var switchJob: Job? = null
 
     /** The camera network the session joined, checked on resume so a replaced one is not reused. */
     private var cameraNetwork: Network? = null
@@ -412,11 +416,13 @@ class GoProApi @Inject constructor(
         get() = transcodePreview
 
     /**
-     * Newest media url already consumed. A single value is enough to dedupe and, unlike the
-     * unbounded list this replaced, it does not silently swallow a re-taken photo after a
-     * reconnect.
+     * Urls of every file on the card the session has already accounted for: what was there when it
+     * went live, plus everything seen by a capture since. Only a file outside this set can be
+     * filed against a plot, see [GoProMediaSelector.newest]. Null until the card has been listed,
+     * in which case a speculative harvest only takes the listing rather than filing anything.
      */
-    private var lastRequestedUrl: String? = null
+    @Volatile
+    private var knownMedia: Set<String>? = null
 
     /** Entry/trait to attach the next photo to, kept current as the user navigates plots. */
     var currentEntry: ImageRequestData? = null
@@ -469,6 +475,11 @@ class GoProApi @Inject constructor(
                 lastException = e
                 break
             }
+
+            //withTimeout below cannot interrupt the blocking execute, so on its own a stalled
+            //request ran until the client's 30 second read timeout. The call timeout is enforced
+            //by okhttp itself and covers reading the body as well.
+            call.timeout().timeout(timeoutMs, TimeUnit.MILLISECONDS)
 
             try {
                 //if it times out it will cancel the call via the catch/finally
@@ -534,7 +545,8 @@ class GoProApi @Inject constructor(
             //always start from a clean slate, a half open link is the usual reason a reconnect fails
             closeGatt()
 
-            lastRequestedUrl = null
+            //a different camera or card, listed again once wifi is up
+            knownMedia = null
 
             //never label this camera's files with the previous camera's serial
             serialNumber = null
@@ -683,6 +695,7 @@ class GoProApi @Inject constructor(
         parkJob?.cancel()
         parkTimeoutJob?.cancel()
         resumeJob?.cancel()
+        switchJob?.cancel()
 
         try { captureJob?.cancel() } catch (_: Exception) {}
         streamWatchdog?.cancel()
@@ -725,7 +738,7 @@ class GoProApi @Inject constructor(
             player = null
         }
 
-        lastRequestedUrl = null
+        knownMedia = null
         currentEntry = null
         recordingEntry = null
 
@@ -885,9 +898,56 @@ class GoProApi @Inject constructor(
             this@GoProApi.videoMode = videoMode
             loadPresetGroup()
 
+            //files made on the camera while parked have no plot to be filed against
+            listKnownMedia()
+
             setState(ConnectionState.CONNECTED)
 
             callbacks?.onConnected()
+        }
+    }
+
+    /**
+     * Called when the user moves straight from one GoPro trait to another. Every GoPro trait shares
+     * one layout, so such a move never parks the session, and this does what the park and resume
+     * would have: a recording is stopped and saved against the trait it started on, and the camera
+     * is switched to the mode of the trait now on screen.
+     */
+    fun switchTrait(videoMode: Boolean) {
+
+        //a parked session is switched by resume, a closed one picks the mode up when it connects
+        if (!connectionState.isActive || connectionState == ConnectionState.PARKED) return
+
+        switchJob = ioScope.launch {
+            captureMutex.withLock {
+
+                //not cancellable, as in park, so a teardown cannot lose the name
+                if (recordingEntry != null) {
+                    withContext(NonCancellable) {
+                        withTimeoutOrNull(RECORD_STOP_TIMEOUT_MS) {
+                            finishRecording(resumePreview = true)
+                        }
+                    }
+                }
+
+                if (this@GoProApi.videoMode != videoMode) {
+
+                    Log.d(TAG, "Switching session to video mode $videoMode")
+
+                    this@GoProApi.videoMode = videoMode
+
+                    //before the network is bound, onNetworkBound loads the preset for the new mode.
+                    //The poller is held off because the mode change raises the busy flag.
+                    if (connectionState.hasPlayer) {
+                        pollPaused = true
+                        try {
+                            loadPresetGroup()
+                        } finally {
+                            pollPaused = false
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -1163,6 +1223,9 @@ class GoProApi @Inject constructor(
 
         captureJob = ioScope.launch {
             captureMutex.withLock {
+                //the camera may have been switched to video by hand, where the shutter would start
+                //a recording that nothing stops
+                loadPresetGroup()
                 runCapture(data, saveImage, shutter = this@GoProApi::shutterOn)
             }
         }
@@ -1209,6 +1272,10 @@ class GoProApi @Inject constructor(
 
                 try {
 
+                    //the camera may have been switched to photo by hand, where the shutter only
+                    //takes a photo
+                    loadPresetGroup()
+
                     shutterOn()
 
                     if (awaitEncoding()) {
@@ -1224,6 +1291,11 @@ class GoProApi @Inject constructor(
                         shutterOff()
 
                         callbacks?.onCaptureFailed(R.string.gopro_error_record_failed)
+
+                        //such a recording still leaves a short clip. List it as known so the
+                        //poller does not file it as a capture made on the camera's own button.
+                        awaitCaptureIdle()
+                        listKnownMedia()
                     }
 
                 } catch (e: CancellationException) {
@@ -1335,7 +1407,7 @@ class GoProApi @Inject constructor(
     }
 
     /**
-     * Presses [shutter], waits for the camera to finish writing and then saves the newest file:
+     * Presses [shutter], waits for the camera to finish writing and then saves the new file:
      * shutter on takes a photo, shutter off ends a recording, and no shutter collects a capture
      * already made on the camera.
      *
@@ -1374,16 +1446,27 @@ class GoProApi @Inject constructor(
                 }
             }
 
-            val latest = queryLatestMedia()
+            val media = queryMedia()
+
+            val known = knownMedia
+
+            val latest = media?.let { GoProMediaSelector.newest(it, known.orEmpty(), videoMode) }
+
+            //everything on the card has now been seen, so none of it can be filed by a later capture
+            if (media != null) knownMedia = media.mapTo(HashSet()) { it.url }
 
             when {
-                latest == null || latest.url == lastRequestedUrl -> {
+                latest == null -> {
                     fail(if (videoMode) R.string.gopro_error_no_new_video else R.string.gopro_error_no_new_photo)
                 }
 
-                else -> {
-                    lastRequestedUrl = latest.url
+                //a harvest is only a guess that something was captured, and with no earlier listing
+                //to compare against, the newest file may well be from another session
+                known == null && !reportFailures -> {
+                    Log.d(TAG, "No earlier media listing, not filing ${latest.fileName}")
+                }
 
+                else -> {
                     //videos are never copied off the camera, only their name is kept
                     if (saveImage && !videoMode) {
                         downloadImage(latest, data, fail)
@@ -1607,11 +1690,12 @@ class GoProApi @Inject constructor(
     /**
      * Media region
      */
-    private suspend fun queryLatestMedia(): GoProImage? {
+    /** Returns every single file on the card, or null if the camera did not give a usable list. */
+    private suspend fun queryMedia(): List<GoProImage>? {
 
         Log.d(TAG, "Attempting media list query.")
 
-        val response = executeWithRetrySuspend(url("/gopro/media/list"))
+        val response = executeWithRetrySuspend(url("/gopro/media/list"), MEDIA_LIST_TIMEOUT_MS)
 
         val body = response.use {
             if (!it.isSuccessful) {
@@ -1625,15 +1709,32 @@ class GoProApi @Inject constructor(
     }
 
     /**
-     * Parses the media list and returns the file the last capture produced, see
-     * [GoProMediaSelector] for how a photo or a recording is picked.
+     * Records what is already on the card, so that only files made from here on can be filed
+     * against a plot. Without it the first harvest of a session saved whatever was newest, which
+     * could belong to another session or plot. Not fatal: captures fall back to the newest file.
+     */
+    private suspend fun listKnownMedia() {
+
+        knownMedia = try {
+            queryMedia()?.mapTo(HashSet()) { it.url }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Unable to list the media already on the card", e)
+            null
+        }
+    }
+
+    /**
+     * Parses the media list, see [GoProMediaSelector] for how the file a capture produced is
+     * picked out of it.
      *
      * Grouped media (burst, time lapse, night lapse) is skipped here for both. Group names do not
      * share the photo numbering - G0010008.JPG outranks GOPR0123.JPG - so a burst was attached to
      * every plot once one was on the card. That became easy to hit on the HERO13, whose photo
      * preset can be switched to burst.
      */
-    private fun parseMediaQueryResponse(responseBody: String): GoProImage? {
+    private fun parseMediaQueryResponse(responseBody: String): List<GoProImage>? {
 
         return try {
 
@@ -1676,7 +1777,7 @@ class GoProApi @Inject constructor(
                 }
             }
 
-            GoProMediaSelector.latest(images, video = videoMode)
+            images
 
         } catch (e: JSONException) {
             Log.e(TAG, "Unable to parse media list", e)
@@ -1751,7 +1852,7 @@ class GoProApi @Inject constructor(
             Log.e(TAG, "Image download failed", t)
             sink.discard()
             //let the same file be retried on the next capture
-            lastRequestedUrl = null
+            knownMedia = knownMedia?.minus(model.url)
             fail(R.string.gopro_error_download_failed)
         } finally {
             withContext(NonCancellable) { unquietLink() }
@@ -1942,6 +2043,8 @@ class GoProApi @Inject constructor(
             startKeepAlive()
 
             loadPresetGroup()
+
+            listKnownMedia()
 
             setState(ConnectionState.CONNECTED)
 
