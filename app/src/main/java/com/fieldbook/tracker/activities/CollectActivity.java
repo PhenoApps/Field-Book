@@ -2351,6 +2351,9 @@ public class CollectActivity extends ThemedActivity
                 .setView(layout);
 
         builder.setPositiveButton(getString(R.string.dialog_go), (dialog, which) -> {
+            if (!rangeBox.allowNavigation()) {
+                return;
+            }
             inputPlotId = barcodeId.getText().toString();
             rangeBox.setAllRangeID();
             int[] rangeID = rangeBox.getRangeID();

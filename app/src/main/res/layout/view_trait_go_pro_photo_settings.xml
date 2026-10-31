@@ -14,9 +14,17 @@
             android:layout_margin="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:id="@+id/view_trait_go_pro_preview_cb"
+            android:text="@string/view_trait_photo_settings_preview_title"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <CheckBox
+            android:layout_margin="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:id="@+id/view_trait_go_pro_save_image_cb"
             android:text="@string/view_trait_photo_settings_save_image_title"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@id/view_trait_go_pro_preview_cb"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

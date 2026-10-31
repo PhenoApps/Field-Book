@@ -241,7 +241,11 @@ abstract class AbstractCameraTrait :
 
     /**
      * Records an observation whose value is a file name on a connected camera rather than a file
-     * in Field Book's storage. Used when a camera trait has its copy-image setting turned off.
+     * in Field Book's storage. Used when a camera trait has its copy-image setting turned off, and
+     * for videos that stay on the camera.
+     *
+     * Written against [obsUnit] rather than the plot on screen: a recording can finish after the
+     * user has left the trait, so the screen is not a reliable guide to which entry it belongs to.
      */
     protected fun saveFileNameObservation(
         obsUnit: RangeObject,
@@ -249,19 +253,33 @@ abstract class AbstractCameraTrait :
         fileName: String
     ) {
 
+        val plot = obsUnit.uniqueId
         val studyId = collectActivity.studyId
+        val person = (activity as? CollectActivity)?.person
+        val location = (activity as? CollectActivity)?.locationByPreferences
+        val rep = database.getNextRep(studyId, plot, traitObj.id)
 
-        val rep = database.getNextRep(studyId, obsUnit.uniqueId, traitObj.id)
-
-        (context as? CollectActivity)?.updateObservation(traitObj, fileName, rep)
+        database.insertObservation(
+            plot, traitObj.id, fileName,
+            person, location, "", studyId,
+            null, null, null, rep
+        )
 
         ui.launch {
 
-            notifyItemInserted(fileName.toUri())
+            if (isOnScreen(obsUnit, traitObj)) notifyItemInserted(fileName.toUri())
 
             (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
         }
     }
+
+    /**
+     * Whether the screen still shows [obsUnit] and [traitObj]. A capture can be saved after the user
+     * has moved on, and refreshing then would reload the gallery and mark the trait status of
+     * whatever is showing now. Call on the main thread.
+     */
+    private fun isOnScreen(obsUnit: RangeObject, traitObj: TraitObject): Boolean =
+        currentTrait?.id == traitObj.id && currentRange?.uniqueId == obsUnit.uniqueId
 
     /**
      * Creates the destination file for an image that will be streamed in rather than handed over
@@ -322,7 +340,10 @@ abstract class AbstractCameraTrait :
         writeExif(file, studyId, plot, traitObj.id, saveTime)
 
         ui.launch {
-            notifyItemInserted(file.uri)
+            //still cropped after a move to another plot, the crop settings belong to the trait
+            if (currentTrait?.id == traitObj.id) {
+                notifyItemInserted(file.uri, markStatus = isOnScreen(obsUnit, traitObj))
+            }
             (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
         }
     }
@@ -788,7 +809,11 @@ abstract class AbstractCameraTrait :
         }
     }
 
-    private fun notifyItemInserted(uri: Uri) {
+    /**
+     * @param markStatus false when the item belongs to a plot no longer on screen, whose status the
+     * trait bar is not showing
+     */
+    private fun notifyItemInserted(uri: Uri, markStatus: Boolean = true) {
 
         ui.launch {
 
@@ -812,7 +837,7 @@ abstract class AbstractCameraTrait :
                         } ?: Log.e(TAG, "Failed to open output stream for cropping uri: $uri")
 
                         withContext(Dispatchers.Main) {
-                            loadItems()
+                            loadItems(markStatus)
                         }
                     }
 
@@ -820,22 +845,22 @@ abstract class AbstractCameraTrait :
 
                     requestCropDefinition(currentTrait.id, uri)
 
-                    loadItems()
+                    loadItems(markStatus)
                 }
 
             } else {
 
-                loadItems()
+                loadItems(markStatus)
             }
         }
     }
 
-    private fun loadItems() {
+    private fun loadItems(markStatus: Boolean = true) {
 
         loadAdapterItems()
 
         // update trait status as observation was saved
-        (context as CollectActivity).updateCurrentTraitStatus(true)
+        if (markStatus) (context as CollectActivity).updateCurrentTraitStatus(true)
     }
 
     private fun getSelectedImage(): ImageAdapter.Model? {
