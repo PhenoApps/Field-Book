@@ -124,6 +124,12 @@ public class GeneralKeys {
     //preference key to save the last plot during collect activity
     public static final String LAST_PLOT = "lastplot";
 
+    //code display trait settings, shared by all code display traits
+    //format is a ZXing BarcodeFormat name, attribute/trait follow the infobar DROP keys
+    public static final String CODE_DISPLAY_FORMAT = "CODE_DISPLAY_FORMAT";
+    public static final String CODE_DISPLAY_ATTRIBUTE = "CODE_DISPLAY_ATTRIBUTE";
+    public static final String CODE_DISPLAY_TRAIT = "CODE_DISPLAY_TRAIT";
+
     // collect search activity defaults
     public static final String SEARCH_COLUMN_DEFAULT = "SEARCH_COLUMN_DEFAULT";
     public static final String SEARCH_LIKE_DEFAULT = "SEARCH_LIKE_DEFAULT";

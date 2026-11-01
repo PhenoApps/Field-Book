@@ -414,6 +414,15 @@
     <string name="trait_pollinator_summary">%1$d visits / %2$d:%3$02d</string>
     <string name="trait_pollinator_no_categories">Add categories to this trait to record pollinator counts.</string>
     <string name="trait_pollinator_data_loss_warning">The counts and elapsed time recorded for this entry will be permanently deleted.</string>
+    <string name="traits_format_code_display">Code Display</string>
+    <string name="trait_code_display_settings_title">Code Settings</string>
+    <string name="trait_code_display_format_title">Code Format</string>
+    <string name="trait_code_display_data_title">Code Data</string>
+    <string name="trait_code_display_format_item">Code format: %s</string>
+    <string name="trait_code_display_data_item">Code data: %s</string>
+    <string name="trait_code_display_code_description">Generated code for the current entry</string>
+    <string name="trait_code_display_empty">No data to encode for this entry.</string>
+    <string name="trait_code_display_invalid">%1$s cannot encode \"%2$s\"</string>
 
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Trait Format</string>

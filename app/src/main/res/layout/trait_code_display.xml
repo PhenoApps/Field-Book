@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- height is set at runtime to fill the trait container, see CodeDisplayTraitLayout -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/trait_code_display_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <com.fieldbook.tracker.views.CodeDisplayView
+        android:id="@+id/trait_code_display_code"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:contentDescription="@string/trait_code_display_code_description" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- equal side margins clear the settings button and keep the value centered under the code -->
+        <TextView
+            android:id="@+id/trait_code_display_value"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="64dp"
+            android:layout_marginEnd="64dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="2"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/trait_code_display_settings_btn"
+            style="@style/FloatingActionButtonStyle.SmallTraitButtons"
+            android:layout_width="@dimen/fb_trait_fab_size_small"
+            android:layout_height="@dimen/fb_trait_fab_size_small"
+            android:layout_gravity="start|center_vertical"
+            android:layout_margin="8dp"
+            android:contentDescription="@string/trait_code_display_settings_title"
+            android:src="@drawable/ic_nav_drawer_settings" />
+
+    </FrameLayout>
+
+</LinearLayout>

@@ -13,6 +13,7 @@
       * [Angle](traits/trait-angle.md)
       * [Boolean](traits/trait-boolean.md)
       * [Categorical](traits/trait-categorical.md)
+      * [Code Display](traits/trait-code-display.md)
       * [Counter](traits/trait-counter.md)
       * [Date](traits/trait-date.md)
       * [Disease Rating](traits/trait-disease.md)
