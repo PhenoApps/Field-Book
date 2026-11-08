@@ -52,6 +52,7 @@ import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.threeten.bp.OffsetDateTime;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -1109,7 +1110,6 @@ public class DataHelper {
         open();
         StudyDao.Companion.updateStudyAlias(studyId, newName);
         preferences.edit().putString(GeneralKeys.FIELD_ALIAS, newName).apply();
-        close();
     }
 
     /**
@@ -1300,11 +1300,13 @@ public class DataHelper {
     public void exportDatabase(Context ctx, String filename) throws IOException {
         String internalDbPath = getDatabasePath(this.context);
 
-        close();
+        File snapshot = null;
 
         try {
 
-            File oldDb = new File(internalDbPath);
+            // Snapshot the db file without closing the shared connection. This runs on a background
+            // thread (CollectActivity.onPause), and closing would crash any other thread mid-query.
+            snapshot = snapshotDatabase(internalDbPath);
 
             DocumentFile databaseDir = BaseDocumentTreeUtil.Companion.getDirectory(ctx, R.string.dir_database);
 
@@ -1349,7 +1351,7 @@ public class DataHelper {
                 OutputStream outputStream = context.getContentResolver().openOutputStream(zipFile.getUri());
                 if (backupDatabaseFile != null && backupPreferenceFile != null) {
 
-                    BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldDb), backupDatabaseFile);
+                    BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(snapshot), backupDatabaseFile);
 
                     if (outputStream != null){
                         ZipUtil.Companion.zip(context, new DocumentFile[] { backupDatabaseFile, backupPreferenceFile }, outputStream);
@@ -1373,11 +1375,47 @@ public class DataHelper {
 
         } finally {
 
-            open();
+            if (snapshot != null && snapshot.exists()) {
+                snapshot.delete();
+            }
+        }
+    }
 
+    /**
+     * Copies the database file to a temp file in the cache dir and returns it.
+     * The copy is taken inside an exclusive transaction so no other thread can write mid-copy;
+     * WAL is disabled, so the main file holds every committed change.
+     * The local copy keeps the lock short; the slower storage-access-framework copy happens after.
+     */
+    private File snapshotDatabase(String internalDbPath) throws IOException {
+
+        File snapshot = File.createTempFile("fieldbook_backup", ".db", context.getCacheDir());
+
+        // db is not yet assigned when this runs from onUpgrade, where the file is already safe to copy
+        SQLiteDatabase lockDb = db;
+        boolean locked = lockDb != null && lockDb.isOpen();
+
+        if (locked) {
+            lockDb.beginTransaction();
         }
 
-        open();
+        try (InputStream in = new FileInputStream(internalDbPath);
+             OutputStream out = new FileOutputStream(snapshot)) {
+
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+
+        } finally {
+
+            if (locked) {
+                lockDb.endTransaction();
+            }
+        }
+
+        return snapshot;
     }
 
     public static String getDatabasePath(Context context) {

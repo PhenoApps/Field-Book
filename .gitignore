@@ -43,6 +43,7 @@ local.properties
 !.github/ISSUE_TEMPLATE/
 !.github/PULL_REQUEST_TEMPLATE.md
 !.github/workflows/
+!.github/dependabot.yml
 
 # Keystore files
 *.jks

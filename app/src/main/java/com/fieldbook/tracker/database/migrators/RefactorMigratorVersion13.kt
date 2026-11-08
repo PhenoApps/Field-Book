@@ -56,26 +56,41 @@ class RefactorMigratorVersion13: FieldBookMigrator {
         migrateObservationUnitsTable(db)
 
         //update unit values to the first occurrence of an attribute name
+        //map each attribute id to the first id with the same name in an indexed temp table,
+        //a CTE in the correlated subquery can be re-evaluated per row on older SQLite versions (ANR)
+        db.execSQL("DROP TABLE IF EXISTS temp.attribute_id_map")
+
         db.execSQL("""
-            --create CTE for easy access to first occurrences of attribute names
-            WITH attribute_ids AS (
-                SELECT MIN(A.internal_id_observation_unit_attribute) AS first_id,
-                       A.observation_unit_attribute_name AS name
-                FROM observation_units_attributes AS A
-                JOIN observation_units_values AS V
-                    ON A.internal_id_observation_unit_attribute = V.observation_unit_attribute_db_id
-                GROUP BY A.observation_unit_attribute_name
+            CREATE TEMP TABLE attribute_id_map (
+                old_id INTEGER PRIMARY KEY,
+                new_id INTEGER
             )
-            --update actual values by joining values and attributes, and using the above CTE
+        """.trimIndent())
+
+        db.execSQL("""
+            INSERT INTO attribute_id_map (old_id, new_id)
+            SELECT A.internal_id_observation_unit_attribute, F.first_id
+            FROM observation_units_attributes AS A
+            --first occurrences of attribute names that have values
+            JOIN (SELECT MIN(A2.internal_id_observation_unit_attribute) AS first_id,
+                         A2.observation_unit_attribute_name AS name
+                  FROM observation_units_attributes AS A2
+                  JOIN observation_units_values AS V
+                      ON A2.internal_id_observation_unit_attribute = V.observation_unit_attribute_db_id
+                  GROUP BY A2.observation_unit_attribute_name) AS F
+                ON F.name = A.observation_unit_attribute_name
+        """.trimIndent())
+
+        db.execSQL("""
             UPDATE observation_units_values
             SET observation_unit_attribute_db_id = (
-                SELECT I.first_id
-                FROM attribute_ids AS I
-                JOIN observation_units_attributes AS A 
-                    ON A.internal_id_observation_unit_attribute = observation_units_values.observation_unit_attribute_db_id
-                WHERE I.name = A.observation_unit_attribute_name
-            );
+                SELECT M.new_id
+                FROM attribute_id_map AS M
+                WHERE M.old_id = observation_units_values.observation_unit_attribute_db_id
+            )
         """.trimIndent())
+
+        db.execSQL("DROP TABLE temp.attribute_id_map")
 
         //delete unused/redundant observation attribute rows
         db.execSQL("""

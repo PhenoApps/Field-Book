@@ -269,13 +269,6 @@ class TraitActivity : ThemedActivity() {
                 activeCanopySensitivityHolder = canopyHolder
             }
 
-            //required for using composable parameter ui
-            try {
-                dialogView.setViewTreeLifecycleOwner(this@TraitActivity)
-                dialogView.setViewTreeSavedStateRegistryOwner(this@TraitActivity)
-            } catch (_: Exception) {
-            }
-
             val dialogBuilder = AlertDialog.Builder(this, R.style.AppAlertDialog)
                 .setView(dialogView)
                 .setNegativeButton(R.string.dialog_cancel, null)
@@ -288,6 +281,12 @@ class TraitActivity : ThemedActivity() {
             }
 
             val dialog = dialogBuilder.create()
+
+            //required for using composable parameter ui, compose resolves owners from the window root
+            dialog.window?.decorView?.let { decorView ->
+                decorView.setViewTreeLifecycleOwner(this@TraitActivity)
+                decorView.setViewTreeSavedStateRegistryOwner(this@TraitActivity)
+            }
             dialog.setOnDismissListener {
                 if (activeCanopySensitivityHolder === canopyHolder) {
                     activeCanopySensitivityHolder = null
