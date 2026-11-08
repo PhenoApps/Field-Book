@@ -128,6 +128,17 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
     // Skip the RecyclerView-based PreviewViewHolder polling; we have a plain PreviewView.
     override fun awaitPreviewHolder(callback: () -> Unit) = callback()
 
+    override fun updateCropRegion() {
+        val view = canopyPreviewView
+        if (view != null) {
+            controller.getCameraXFacade().updateCropRegion(
+                view,
+                currentTrait?.id,
+                showCropRegion = false
+            )
+        }
+    }
+
     override fun bindPreviewLifecycleForMode(resolution: Size?) {
         previewResolution = resolution
         updatePreviewFrameAspectRatio(resolution)

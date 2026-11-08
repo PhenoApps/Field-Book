@@ -12,6 +12,7 @@ import android.hardware.camera2.CameraCharacteristics
 import android.util.Log
 import android.util.Size
 import android.util.TypedValue
+import android.view.View
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
@@ -171,6 +172,95 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
     // previously used an OverlayEffect; replaced with a Drawable that is added to PreviewView.overlay
     private var cropDrawable: CropOverlayDrawable? = null
 
+    // the view and coordinates the current overlay was built for, used to skip redundant updates
+    private var cropDrawableHost: PreviewView? = null
+    private var cropDrawableCoordinates: String? = null
+
+    private val cropLayoutListener = View.OnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
+        cropDrawable?.setBounds(0, 0, v.width, v.height)
+        v.invalidate()
+    }
+
+    fun updateCropRegion(
+        previewView: PreviewView?,
+        traitId: String?,
+        showCropRegion: Boolean = true
+    ) {
+        if (previewView == null) return
+
+        // parse crop from prefs
+        val cropCoordinates = (context as? ThemedActivity)?.prefs?.getString(
+            GeneralKeys.getCropCoordinatesKey(traitId?.toIntOrNull() ?: -1), ""
+        )
+
+        val rect = if (showCropRegion && !cropCoordinates.isNullOrEmpty() && cropCoordinates != CropImageView.DEFAULT_CROP_COORDINATES) {
+            CropImageView.parseRectCoordinates(cropCoordinates)
+        } else null
+
+        val desiredCoordinates = if (rect != null) cropCoordinates else null
+
+        // nothing changed (e.g. navigating between entries of the same trait), keep the current overlay to avoid flicker
+        if (previewView === cropDrawableHost && desiredCoordinates == cropDrawableCoordinates) return
+
+        // remove previous drawable overlay if present
+        val oldDrawable = cropDrawable
+        val oldHost = cropDrawableHost
+        try {
+            oldHost?.removeOnLayoutChangeListener(cropLayoutListener)
+            if (oldHost != null && oldDrawable != null && oldHost !== previewView) {
+                oldHost.overlay.remove(oldDrawable)
+                oldHost.invalidate()
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Error removing previous crop drawable: ${e.message}")
+        }
+
+        cropDrawable = null
+        cropDrawableHost = previewView
+        cropDrawableCoordinates = desiredCoordinates
+
+        // If crop coordinates are valid, add a drawable to the PreviewView overlay that dims outside the crop rect
+        if (rect != null) {
+            val typedValue = TypedValue()
+            context.theme?.resolveAttribute(
+                R.attr.fb_inverse_crop_region_color,
+                typedValue,
+                true
+            )
+            val color = typedValue.data
+
+            val drawable = CropOverlayDrawable(previewView, rect, color)
+            cropDrawable = drawable
+
+            // swap old and new drawables in the same frame so the overlay never disappears
+            val attach = {
+                try {
+                    if (oldHost === previewView) oldDrawable?.let { previewView.overlay.remove(it) }
+                    if (cropDrawable === drawable) {
+                        drawable.setBounds(0, 0, previewView.width, previewView.height)
+                        previewView.overlay.add(drawable)
+                    }
+                    previewView.invalidate()
+                } catch (e: Exception) {
+                    Log.w(TAG, "Error adding crop drawable: ${e.message}")
+                }
+            }
+
+            // Add overlay after layout if width/height are not yet known
+            if (previewView.width > 0 && previewView.height > 0) attach() else previewView.post { attach() }
+
+            // listen for layout changes to update bounds
+            previewView.addOnLayoutChangeListener(cropLayoutListener)
+        } else {
+            try {
+                if (oldHost === previewView) oldDrawable?.let { previewView.overlay.remove(it) }
+            } catch (e: Exception) {
+                Log.w(TAG, "Error removing previous crop drawable: ${e.message}")
+            }
+            previewView.invalidate()
+        }
+    }
+
     @Suppress("UNUSED_PARAMETER")
     fun bindPreview(
         previewView: PreviewView?,
@@ -210,52 +300,7 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
 
         p.surfaceProvider = previewView?.surfaceProvider
 
-        // remove previous drawable overlay if present
-        try {
-            previewView?.let { pv ->
-                cropDrawable?.let { pv.overlay.remove(it) }
-                cropDrawable = null
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "Error removing previous crop drawable: ${e.message}")
-        }
-
-        //parse crop from prefs
-        val cropCoordinates = (context as? ThemedActivity)?.prefs?.getString(GeneralKeys.getCropCoordinatesKey(
-            traitId?.toInt() ?: -1), "")
-
-        // If crop coordinates are valid, add a drawable to the PreviewView overlay that dims outside the crop rect
-        if (showCropRegion && !cropCoordinates.isNullOrEmpty() && cropCoordinates != CropImageView.DEFAULT_CROP_COORDINATES && previewView != null) {
-            val rect = CropImageView.parseRectCoordinates(cropCoordinates)
-            if (rect != null) {
-                val typedValue = TypedValue()
-                context.theme?.resolveAttribute(
-                    R.attr.fb_inverse_crop_region_color,
-                    typedValue,
-                    true
-                )
-                val color = typedValue.data
-
-                cropDrawable = CropOverlayDrawable(previewView, rect, color)
-                // Ensure drawable bounds cover the preview view
-                // Add overlay after layout to ensure width/height are known
-                previewView.post {
-                    try {
-                        cropDrawable?.setBounds(0, 0, previewView.width, previewView.height)
-                        cropDrawable?.let { previewView.overlay.add(it) }
-                        previewView.invalidate()
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Error adding crop drawable: ${e.message}")
-                    }
-                }
-
-                // listen for layout changes to update bounds
-                previewView.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
-                    cropDrawable?.setBounds(0, 0, v.width, v.height)
-                    v.invalidate()
-                }
-            }
-        }
+        updateCropRegion(previewView, traitId, showCropRegion)
 
         val useCaseGroupBuilder = UseCaseGroup.Builder()
 
@@ -318,46 +363,7 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
 
         p.surfaceProvider = previewView?.surfaceProvider
 
-        try {
-            previewView?.let { pv ->
-                cropDrawable?.let { pv.overlay.remove(it) }
-                cropDrawable = null
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "Error removing previous crop drawable: ${e.message}")
-        }
-
-        val cropCoordinates = (context as? ThemedActivity)?.prefs?.getString(GeneralKeys.getCropCoordinatesKey(
-            traitId?.toInt() ?: -1), "")
-
-        if (showCropRegion && !cropCoordinates.isNullOrEmpty() && cropCoordinates != CropImageView.DEFAULT_CROP_COORDINATES && previewView != null) {
-            val rect = CropImageView.parseRectCoordinates(cropCoordinates)
-            if (rect != null) {
-                val typedValue = TypedValue()
-                context.theme?.resolveAttribute(
-                    R.attr.fb_inverse_crop_region_color,
-                    typedValue,
-                    true
-                )
-                val color = typedValue.data
-
-                cropDrawable = CropOverlayDrawable(previewView, rect, color)
-                previewView.post {
-                    try {
-                        cropDrawable?.setBounds(0, 0, previewView.width, previewView.height)
-                        cropDrawable?.let { previewView.overlay.add(it) }
-                        previewView.invalidate()
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Error adding crop drawable: ${e.message}")
-                    }
-                }
-
-                previewView.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
-                    cropDrawable?.setBounds(0, 0, v.width, v.height)
-                    v.invalidate()
-                }
-            }
-        }
+        updateCropRegion(previewView, traitId, showCropRegion)
 
         // create Recorder and VideoCapture use case
         val exec = executor ?: Executors.newSingleThreadExecutor()
