@@ -260,8 +260,6 @@
     <string name="search_attribute_updated_all">Атрибут поиска обновлён для %1$d полей</string>
     <string name="search_multiple_matches_found">Найдено %1$d совпадающих делянок. Показана первая.</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
-    <string name="field_data_title">Данные</string>
-    <string name="field_trait_observation_total">\"%d\" наблюдений</string>
     <!-- Field Detail Charts -->
     <string name="chart_no_data">Нет данных для построения графика</string>
     <string name="chart_incompatible_format">Для этого формата признака график недоступен</string>

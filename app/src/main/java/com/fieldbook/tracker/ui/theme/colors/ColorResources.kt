@@ -56,6 +56,9 @@ object BaseColors {
     val HeatmapMedium = Color(0xFF69DB7C)
     val HeatmapHigh = Color(0xFF40C057)
     val HeatmapMax = Color(0xFF2F9E44)
+    val CorrelationNegative = Color(0xFFD73027)
+    val CorrelationNeutral = Color(0xFFF7F7F7)
+    val CorrelationPositive = Color(0xFF1A9850)
     val CategoricalButtonSelected = Primary
     val TraitButtonBackgroundTint = LightGray
     val PreferencesHorizontalBreak = Color.Transparent

@@ -141,7 +141,6 @@ public class GeneralKeys {
 
     // Field and trait detail
     public static final String FIELD_DETAIL_OVERVIEW_COLLAPSED = "FIELD_DETAIL_OVERVIEW_COLLAPSED";
-    public static final String FIELD_DETAIL_DATA_COLLAPSED = "FIELD_DETAIL_DATA_COLLAPSED";
     public static final String FIELD_DETAIL_FIELD_ID = "FIELD_DETAIL_FIELD_ID";
     public static final String TRAIT_DETAIL_OVERVIEW_COLLAPSED = "TRAIT_DETAIL_OVERVIEW_COLLAPSED";
     public static final String TRAIT_DETAIL_OPTIONS_COLLAPSED = "TRAIT_DETAIL_OPTIONS_COLLAPSED";

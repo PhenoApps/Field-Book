@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.preferences
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.Toast
@@ -78,21 +79,47 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
                     .setMessage(getString(R.string.pref_experimental_generate_sample_data_confirm_message))
                     .setPositiveButton(android.R.string.ok) { dialog, _ ->
                         dialog.dismiss()
-                        lifecycleScope.launch {
-                            val studyId = withContext(Dispatchers.IO) {
-                                sampleGenerator.generateSampleField()
-                            }
-                            val messageRes = if (studyId >= 0)
-                                R.string.pref_experimental_generate_sample_data_success
-                            else
-                                R.string.pref_experimental_generate_sample_data_failure
-                            Toast.makeText(ctx, messageRes, Toast.LENGTH_LONG).show()
-                        }
+                        generateSampleField(ctx)
                     }
                     .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
                     .show()
             }
             true
+        }
+    }
+
+    /**
+     * Runs the sample generator off the main thread behind a progress dialog that can't be
+     * dismissed, so the field can't be opened, or the button pressed again, while it is written.
+     *
+     * The generator keeps going if this screen is left: it is not cancellable part way, and its
+     * own guard turns away a second run until it finishes.
+     */
+    private fun generateSampleField(ctx: Context) {
+
+        val progress = AlertDialog.Builder(ctx, R.style.AppAlertDialog)
+            .setTitle(getString(R.string.pref_experimental_generate_sample_data_title))
+            .setMessage(getString(R.string.pref_experimental_generate_sample_data_running))
+            .setCancelable(false)
+            .show()
+
+        lifecycleScope.launch {
+            try {
+                val studyId = withContext(Dispatchers.IO) {
+                    sampleGenerator.generateSampleField()
+                }
+                val messageRes = when {
+                    studyId == SampleDataGenerator.ALREADY_RUNNING ->
+                        R.string.pref_experimental_generate_sample_data_running
+                    studyId >= 0 -> R.string.pref_experimental_generate_sample_data_success
+                    else -> R.string.pref_experimental_generate_sample_data_failure
+                }
+                Toast.makeText(ctx, messageRes, Toast.LENGTH_LONG).show()
+            } finally {
+                // The activity may already be gone, taking the dialog's window with it, and
+                // dismissing then throws.
+                runCatching { if (progress.isShowing) progress.dismiss() }
+            }
         }
     }
 

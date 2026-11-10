@@ -95,6 +95,15 @@ data class DataVisualizationColors(
     val heatmap: HeatmapColors,
     val graph: GraphColors,
     val dataGrid: DataGridColors,
+    val correlation: CorrelationColors,
+)
+
+/** A diverging scale for correlations, from -1 through 0 to +1. */
+@Immutable
+data class CorrelationColors(
+    val negative: Color,
+    val neutral: Color,
+    val positive: Color,
 )
 
 @Immutable
