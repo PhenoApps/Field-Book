@@ -101,4 +101,18 @@
     <string name="prefs_brapi_cache_invalidate_choice_weekly">Weekly</string>
     <string name="prefs_brapi_cache_invalidate_choice_none">Never</string>
 
+    <!-- What automatic syncs upload, values match BrapiSyncEngine.UPLOAD_MODE_* -->
+    <string-array name="pref_brapi_sync_upload_mode_values" translatable="false">
+        <item>all</item>
+        <item>new</item>
+    </string-array>
+
+    <string-array name="pref_brapi_sync_upload_mode_entries">
+        <item>@string/prefs_brapi_sync_upload_mode_choice_all</item>
+        <item>@string/prefs_brapi_sync_upload_mode_choice_new</item>
+    </string-array>
+
+    <string name="prefs_brapi_sync_upload_mode_choice_all">New and edited observations</string>
+    <string name="prefs_brapi_sync_upload_mode_choice_new">New observations only</string>
+
 </resources>

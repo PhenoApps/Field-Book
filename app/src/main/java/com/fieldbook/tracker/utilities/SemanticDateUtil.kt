@@ -18,7 +18,7 @@ object SemanticDateUtil {
         return formatSemanticDate(context, semanticValue, dateStr) // Format based on the semantic result
     }
 
-    private fun calculateSemanticValue(dateStr: String?): SemanticDate {
+    fun calculateSemanticValue(dateStr: String?): SemanticDate {
         if (dateStr.isNullOrEmpty()) {
             return SemanticDate(DateResult.INVALID_DATE)
         }

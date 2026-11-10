@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities.brapi.io.sync
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,7 +48,10 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
@@ -102,10 +106,20 @@ fun BrapiSyncScreen(
     onApplyManualChoices: (Map<String, Boolean>) -> Unit = {},
     onApplyPendingResyncChoice: (Boolean) -> Unit = {},
 ) {
-    // Local UI state to allow the user to temporarily dismiss the conflict-resolution prompt
-    var suppressConflictDialog by remember { mutableStateOf(false) }
+    // Review dialogs, opened from the Needs Review card or when a download or upload finds items
+    var showConflictDialog by remember { mutableStateOf(false) }
+    var showResyncDialog by remember { mutableStateOf(false) }
     // Prompt shown when user attempts to download but there are unuploaded items
     var showUploadPrompt by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState.reviewRequest) {
+        if (uiState.reviewRequest > 0) {
+            showConflictDialog = uiState.pendingConflictsCount > 0
+            showResyncDialog = !showConflictDialog && uiState.pendingResyncChoicesCount > 0
+        }
+    }
+
+    val needsReview = uiState.pendingConflictsCount > 0 || uiState.pendingResyncChoicesCount > 0
 
     // When the UI state reports a new last-checked text, persist it via the provided callbacks
     LaunchedEffect(uiState.lastCheckedDownloadText) {
@@ -155,6 +169,173 @@ fun BrapiSyncScreen(
                     uiState.syncedObservationCount
                 )
                 CountRow(stringResource(R.string.synced_images), uiState.syncedImageCount)
+
+                if (uiState.viewMode == ViewMode.CHECKING && (uiState.waitingForAutoSync || uiState.checkingServer)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = if (uiState.waitingForAutoSync) {
+                                stringResource(R.string.brapi_review_waiting_auto_sync)
+                            } else {
+                                stringResource(R.string.brapi_review_checking, uiState.brapiServerDisplayName)
+                            },
+                            style = AppTheme.typography.bodyStyle
+                        )
+                    }
+                }
+            }
+
+            // observations that need a decision before they can be uploaded
+            if (needsReview) {
+                InfoCard(
+                    title = stringResource(R.string.brapi_review_title),
+                    icon = painterResource(R.drawable.ic_alert_rhombus)
+                ) {
+                    if (uiState.pendingConflictsCount > 0) {
+                        Text(
+                            text = pluralStringResource(
+                                R.plurals.brapi_review_conflicts_message,
+                                uiState.pendingConflictsCount,
+                                uiState.pendingConflictsCount
+                            ),
+                            style = AppTheme.typography.bodyStyle
+                        )
+                        Button(
+                            onClick = { showConflictDialog = true },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = uiState.viewMode == ViewMode.IDLE
+                        ) {
+                            Text(stringResource(R.string.conflict_resolution_strategy))
+                        }
+                    }
+
+                    if (uiState.pendingResyncChoicesCount > 0) {
+                        Text(
+                            text = pluralStringResource(
+                                R.plurals.brapi_review_resync_message,
+                                uiState.pendingResyncChoicesCount,
+                                uiState.pendingResyncChoicesCount
+                            ),
+                            style = AppTheme.typography.bodyStyle
+                        )
+                        Button(
+                            onClick = { showResyncDialog = true },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = uiState.viewMode == ViewMode.IDLE
+                        ) {
+                            Text(stringResource(R.string.brapi_review_resync_button))
+                        }
+                    }
+                }
+            }
+
+            if (showConflictDialog && uiState.pendingConflictsCount > 0) {
+                var selectedStrategy by remember { mutableStateOf(uiState.downloadMergeStrategy) }
+                // initialize selection map for manual mode
+                val selectionMap = remember { mutableStateMapOf<String, Boolean?>() }
+                uiState.pendingConflicts.forEach { c ->
+                    if (!selectionMap.containsKey(c.brapiId)) selectionMap[c.brapiId] = null
+                }
+
+                AppAlertDialog(
+                    positiveButtonText = stringResource(R.string.dialog_ok),
+                    negativeButtonText = stringResource(R.string.dialog_cancel),
+                    onPositive = {
+                        if (selectedStrategy is MergeStrategy.Manual) {
+                            // convert nullable map to non-nullable by defaulting nulls to 'true' to preserve previous behavior
+                            onApplyManualChoices(selectionMap.mapValues { it.value ?: true })
+                        } else {
+                            onMergeStrategyChange(selectedStrategy)
+                        }
+                        showConflictDialog = false
+                    },
+                    onNegative = {
+                        showConflictDialog = false
+                    },
+                    title = stringResource(R.string.conflict_resolution_strategy),
+                    content = {
+                        Column {
+                            Text(
+                                stringResource(
+                                    R.string.brapi_conflicts_found,
+                                    uiState.pendingConflictsCount
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            MergeConflictStrategy(
+                                selectedStrategy = selectedStrategy,
+                                onStrategyChange = { new -> selectedStrategy = new }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            if (selectedStrategy is MergeStrategy.Manual) {
+                                PendingConflictsList(
+                                    conflicts = uiState.pendingConflicts,
+                                    selectionMap = selectionMap,
+                                    onToggleAllServer = {
+                                        uiState.pendingConflicts.forEach {
+                                            selectionMap[it.brapiId] = true
+                                        }
+                                    },
+                                    onToggleAllLocal = {
+                                        uiState.pendingConflicts.forEach {
+                                            selectionMap[it.brapiId] = false
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                )
+            }
+
+            if (showResyncDialog && uiState.pendingResyncChoicesCount > 0) {
+                AppAlertDialog(
+                    positiveButtonText = stringResource(R.string.brapi_resync_update_existing),
+                    negativeButtonText = stringResource(R.string.brapi_resync_upload_new),
+                    title = stringResource(R.string.brapi_resync_dialog_title),
+                    content = {
+                        Column {
+                            Text(
+                                stringResource(
+                                    R.string.brapi_resync_dialog_message,
+                                    uiState.pendingResyncChoicesCount
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            LazyColumn(modifier = Modifier.height(180.dp)) {
+                                itemsIndexed(uiState.pendingResyncChoices) { _, c ->
+                                    Text(
+                                        text = c.localFieldBookId ?: c.key,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(vertical = 4.dp)
+                                    )
+                                    Text(
+                                        text = stringResource(
+                                            R.string.brapi_resync_dialog_values,
+                                            c.localValue,
+                                            c.serverValue
+                                        ),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.padding(bottom = 6.dp)
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    onPositive = {
+                        showResyncDialog = false
+                        onApplyPendingResyncChoice(true)
+                    },
+                    onNegative = {
+                        showResyncDialog = false
+                        onApplyPendingResyncChoice(false)
+                    }
+                )
             }
 
             //the download card
@@ -199,65 +380,6 @@ fun BrapiSyncScreen(
                                 MaterialTheme.colorScheme.error
                             )
                         }
-                        // If the ViewModel reported pending conflicts, prompt the user to choose a merge strategy.
-                        if (uiState.pendingConflictsCount > 0 && !suppressConflictDialog) {
-                            var selectedStrategy by remember { mutableStateOf(uiState.downloadMergeStrategy) }
-                            // initialize selection map for manual mode
-                            val selectionMap = remember { mutableStateMapOf<String, Boolean?>() }
-                            uiState.pendingConflicts.forEach { c ->
-                                if (!selectionMap.containsKey(c.brapiId)) selectionMap[c.brapiId] = null
-                            }
-
-                            AppAlertDialog(
-                                positiveButtonText = stringResource(R.string.dialog_ok),
-                                negativeButtonText = stringResource(R.string.dialog_cancel),
-                                onPositive = {
-                                    if (selectedStrategy is MergeStrategy.Manual) {
-                                        // convert nullable map to non-nullable by defaulting nulls to 'true' to preserve previous behavior
-                                        onApplyManualChoices(selectionMap.mapValues { it.value ?: true })
-                                    } else {
-                                        onMergeStrategyChange(selectedStrategy)
-                                    }
-                                    suppressConflictDialog = true
-                                },
-                                onNegative = {
-                                    suppressConflictDialog = true
-                                },
-                                title = stringResource(R.string.conflict_resolution_strategy),
-                                content = {
-                                    Column {
-                                        Text(
-                                            stringResource(
-                                                R.string.brapi_conflicts_found,
-                                                uiState.pendingConflictsCount
-                                            )
-                                        )
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        MergeConflictStrategy(
-                                            selectedStrategy = selectedStrategy,
-                                            onStrategyChange = { new -> selectedStrategy = new }
-                                        )
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        if (selectedStrategy is MergeStrategy.Manual) {
-                                            PendingConflictsList(
-                                                conflicts = uiState.pendingConflicts,
-                                                selectionMap = selectionMap,
-                                                onToggleAllServer = {
-                                                    uiState.pendingConflicts.forEach {
-                                                        selectionMap[it.brapiId] = true
-                                                    }
-                                                },
-                                                onToggleAllLocal = {
-                                                    uiState.pendingConflicts.forEach {
-                                                        selectionMap[it.brapiId] = false
-                                                    }
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
-                            )
-                        }
                         // Show last-checked text for download if available (appears above the download button)
                         if (uiState.lastCheckedDownloadText != null) {
                             Text(
@@ -274,7 +396,6 @@ fun BrapiSyncScreen(
 
                         Button(
                             onClick = {
-                                suppressConflictDialog = false
                                 if (hasUnuploadedItems) {
                                     showUploadPrompt = true
                                 } else {
@@ -325,56 +446,22 @@ fun BrapiSyncScreen(
                 val totalImages = uiState.newImageCount + uiState.editedImageCount
                 val hasObservationsToUpload = (totalObservations + totalImages) > 0
 
+                // Uploads the server does not list in serverinfo are greyed out and explained.
+                // Review items are held back, so they alone leave nothing to upload.
+                val support = uiState.uploadSupport
+                val canUpload = (support.newObservations
+                        && uiState.newObservationCount > uiState.pendingResyncChoicesCount)
+                        || (support.editedObservations
+                        && uiState.editedObservationCount > uiState.pendingConflictsCount)
+                        || (support.images && uiState.uploadImages
+                        && totalImages + uiState.incompleteImageCount > 0)
+
                 if (uiState.viewMode == ViewMode.EXPORTING) {
                     ExportProgressIndicator(uiState.progress, Modifier.fillMaxWidth())
                     Button(onClick = onCancelExportClick, modifier = Modifier.fillMaxWidth()) {
                         Text(stringResource(R.string.cancel))
                     }
                 } else {
-
-                    if (uiState.pendingResyncChoicesCount > 0) {
-                        AppAlertDialog(
-                            positiveButtonText = stringResource(R.string.brapi_resync_update_existing),
-                            negativeButtonText = stringResource(R.string.brapi_resync_upload_new),
-                            title = stringResource(R.string.brapi_resync_dialog_title),
-                            content = {
-                                Column {
-                                    Text(
-                                        stringResource(
-                                            R.string.brapi_resync_dialog_message,
-                                            uiState.pendingResyncChoicesCount
-                                        )
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    LazyColumn(modifier = Modifier.height(180.dp)) {
-                                        itemsIndexed(uiState.pendingResyncChoices) { _, c ->
-                                            Text(
-                                                text = c.localFieldBookId ?: c.key,
-                                                style = MaterialTheme.typography.bodySmall,
-                                                fontWeight = FontWeight.Bold,
-                                                modifier = Modifier.padding(vertical = 4.dp)
-                                            )
-                                            Text(
-                                                text = stringResource(
-                                                    R.string.brapi_resync_dialog_values,
-                                                    c.localValue,
-                                                    c.serverValue
-                                                ),
-                                                style = MaterialTheme.typography.bodySmall,
-                                                modifier = Modifier.padding(bottom = 6.dp)
-                                            )
-                                        }
-                                    }
-                                }
-                            },
-                            onPositive = {
-                                onApplyPendingResyncChoice(true)
-                            },
-                            onNegative = {
-                                onApplyPendingResyncChoice(false)
-                            }
-                        )
-                    }
 
                     if (uiState.uploadError != null) {
                         ResultRow(
@@ -403,20 +490,55 @@ fun BrapiSyncScreen(
                             )
                         }
 
+                        // Each kind of data waiting to upload is a count, or when the server does
+                        // not accept it, a sentence saying so and how much is left unsynced.
                         if (uiState.newObservationCount + uiState.editedObservationCount + uiState.newImageCount + uiState.editedImageCount > 0) {
-                            CountRow(
-                                stringResource(R.string.new_observations),
-                                uiState.newObservationCount
-                            )
-                            CountRow(
-                                stringResource(R.string.edited_observations),
-                                uiState.editedObservationCount
-                            )
-                            CountRow(stringResource(R.string.new_images), uiState.newImageCount)
-                            CountRow(
-                                stringResource(R.string.edited_images),
-                                uiState.editedImageCount
-                            )
+
+                            val server = uiState.brapiServerDisplayName
+
+                            if (support.newObservations) {
+                                CountRow(stringResource(R.string.new_observations), uiState.newObservationCount)
+                            } else if (uiState.newObservationCount > 0) {
+                                UnsupportedUploadRow(
+                                    template = R.string.brapi_upload_unsupported_new,
+                                    count = pluralStringResource(
+                                        R.plurals.brapi_upload_count_observations,
+                                        uiState.newObservationCount,
+                                        uiState.newObservationCount
+                                    ),
+                                    server = server
+                                )
+                            }
+
+                            if (support.editedObservations) {
+                                CountRow(stringResource(R.string.edited_observations), uiState.editedObservationCount)
+                            } else if (uiState.editedObservationCount > 0) {
+                                UnsupportedUploadRow(
+                                    template = R.string.brapi_upload_unsupported_edited,
+                                    count = pluralStringResource(
+                                        R.plurals.brapi_upload_count_edited_observations,
+                                        uiState.editedObservationCount,
+                                        uiState.editedObservationCount
+                                    ),
+                                    server = server
+                                )
+                            }
+
+                            if (support.images) {
+                                CountRow(stringResource(R.string.new_images), uiState.newImageCount)
+                                CountRow(stringResource(R.string.edited_images), uiState.editedImageCount)
+                            } else if (totalImages > 0) {
+                                // one sentence for new and edited images, the reason is the same
+                                UnsupportedUploadRow(
+                                    template = R.string.brapi_upload_unsupported_images,
+                                    count = pluralStringResource(
+                                        R.plurals.brapi_upload_count_images,
+                                        totalImages,
+                                        totalImages
+                                    ),
+                                    server = server
+                                )
+                            }
                         }
 
                     }
@@ -449,8 +571,9 @@ fun BrapiSyncScreen(
                     if (totalImages > 0 && uiState.viewMode == ViewMode.IDLE) {
                         Row {
                             Switch(
-                                checked = uiState.uploadImages,
-                                onCheckedChange = onImageUploadToggle
+                                checked = uiState.uploadImages && support.images,
+                                onCheckedChange = onImageUploadToggle,
+                                enabled = support.images
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(stringResource(R.string.include_images),
@@ -461,10 +584,21 @@ fun BrapiSyncScreen(
 
                 // Show upload button only when there are observations/images to upload
                 if (hasObservationsToUpload) {
+
+                    // The review items above wait for a decision, everything else uploads
+                    if (needsReview && uiState.viewMode == ViewMode.IDLE) {
+                        val heldBack = uiState.pendingConflictsCount + uiState.pendingResyncChoicesCount
+                        ResultRow(
+                            pluralStringResource(R.plurals.brapi_review_held_back, heldBack, heldBack),
+                            painterResource(R.drawable.ic_alert_rhombus),
+                            MaterialTheme.colorScheme.error
+                        )
+                    }
+
                     Button(
                         onClick = onExportClick,
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = uiState.isInitialized && uiState.viewMode == ViewMode.IDLE
+                        enabled = uiState.isInitialized && uiState.viewMode == ViewMode.IDLE && canUpload
                     ) {
                         Text(stringResource(R.string.brapi_upload_button))
                     }
@@ -614,6 +748,32 @@ private fun ResultRow(text: String, icon: Painter, tint: Color) {
         Spacer(modifier = Modifier.width(12.dp))
         Text(text = text, style = AppTheme.typography.bodyStyle)
     }
+}
+
+/**
+ * Data that cannot be uploaded because the server does not accept it, as one sentence such as
+ * "**12 observations** cannot be sent to [server] because it does not accept new observations".
+ *
+ * @param template a string with the count as %1$s and the server as %2$s
+ */
+@Composable
+private fun UnsupportedUploadRow(@StringRes template: Int, count: String, server: String) {
+
+    // The template is split around the count, wherever a translation places it, so only the
+    // count is bold.
+    val marker = "\u0000"
+    val sentence = stringResource(template, marker, server)
+    val (before, after) = sentence.split(marker, limit = 2).let { it[0] to it.getOrElse(1) { "" } }
+
+    Text(
+        text = buildAnnotatedString {
+            append(before)
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(count) }
+            append(after)
+        },
+        style = AppTheme.typography.bodyStyle,
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
 }
 
 @Composable

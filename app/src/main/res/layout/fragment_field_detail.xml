@@ -377,7 +377,9 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
 
+                    <!-- Spins while an automatic sync of this field is running -->
                     <ImageView
+                        android:id="@+id/syncIconImageView"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_margin="8dp"
@@ -396,6 +398,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/brapi_obs_sync_menu_name"/>
 
+                        <!-- Last sync date, unsynced count and automatic sync status -->
                         <TextView
                             style="@style/TextViewStyle.Sub"
                             android:id="@+id/lastSyncTextView"

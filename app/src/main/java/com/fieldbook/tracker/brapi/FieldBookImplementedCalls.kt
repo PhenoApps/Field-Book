@@ -1,31 +1,34 @@
 package com.fieldbook.tracker.brapi
 
-import com.fieldbook.tracker.brapi.model.BrapiServerCall
+import com.fieldbook.tracker.brapi.model.BrapiCallPurpose.UPLOAD
+import com.fieldbook.tracker.brapi.model.FieldBookCall
 
 /**
- * Add BrAPI endpoints that Field Book implements here
+ * Add BrAPI endpoints that Field Book implements here, one entry per method.
+ * Mark calls that send data to the server as [UPLOAD].
  */
 val fieldBookImplementedCalls = listOf(
     // core calls
-    BrapiServerCall("commoncropnames", listOf("GET")),
-    BrapiServerCall("programs", listOf("GET")),
-    BrapiServerCall("seasons", listOf("GET")),
-    BrapiServerCall("serverinfo", listOf("GET")),
-    BrapiServerCall("studies", listOf("GET")),
-    BrapiServerCall("studies/{studyDbId}", listOf("GET")),
-    BrapiServerCall("trials", listOf("GET")),
+    FieldBookCall("programs", "GET"), // older import screens only
+    FieldBookCall("serverinfo", "GET"),
+    FieldBookCall("studies", "GET"),
+    FieldBookCall("studies/{studyDbId}", "GET"), // older import screens only
+    FieldBookCall("trials", "GET"),
 
     // germplasm calls
-    BrapiServerCall("germplasm", listOf("GET")),
-    BrapiServerCall("search/germplasm", listOf("POST")),
-    BrapiServerCall("search/germplasm/{searchResultsDbId}", listOf("GET")),
+    FieldBookCall("germplasm", "GET"),
+    // a POST, but a search that only reads, used by the older import screens
+    FieldBookCall("search/germplasm", "POST"),
+    FieldBookCall("search/germplasm/{searchResultsDbId}", "GET"),
 
     // phenotyping calls
-    BrapiServerCall("variables", listOf("GET")),
-    BrapiServerCall("observations", listOf("GET", "POST", "PUT")),
-    BrapiServerCall("observationlevels", listOf("GET")),
-    BrapiServerCall("observationunits", listOf("GET")),
-    BrapiServerCall("images", listOf("POST")),
-    BrapiServerCall("images/{imageDbId}", listOf("PUT")),
-    BrapiServerCall("images/{imageDbId}/imagecontent", listOf("PUT")),
+    FieldBookCall("variables", "GET"),
+    FieldBookCall("observationlevels", "GET"),
+    FieldBookCall("observationunits", "GET"),
+    FieldBookCall("observations", "GET"),
+    FieldBookCall("observations", "POST", UPLOAD), // new observations
+    FieldBookCall("observations", "PUT", UPLOAD), // edited observations, in bulk
+    FieldBookCall("images", "POST", UPLOAD), // new image metadata
+    FieldBookCall("images/{imageDbId}", "PUT", UPLOAD), // edited or unfinished image metadata
+    FieldBookCall("images/{imageDbId}/imagecontent", "PUT", UPLOAD), // the image file
 )

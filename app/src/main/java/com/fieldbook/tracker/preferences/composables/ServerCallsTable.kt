@@ -27,17 +27,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.ui.theme.AppTheme
-import com.fieldbook.tracker.utilities.CallImplementedBy
+import com.fieldbook.tracker.utilities.CallComparison
 import com.fieldbook.tracker.utilities.LazyTableTextHeightCalc
-import com.fieldbook.tracker.utilities.ServiceComparison
 import eu.wewox.lazytable.LazyTable
 import eu.wewox.lazytable.LazyTableItem
 import eu.wewox.lazytable.LazyTableScrollDirection
 import eu.wewox.lazytable.lazyTableDimensions
 import eu.wewox.lazytable.lazyTablePinConfiguration
 
+/**
+ * One row per method of each call, with whether the server and Field Book support it.
+ */
 @Composable
-fun ServerCallsTable(calls: List<ServiceComparison>) {
+fun ServerCallsTable(calls: List<CallComparison>) {
     val headerBackgroundColor = AppTheme.colors.primary
     val cellBorderColor = AppTheme.colors.dataVisualization.dataGrid.tableBorder
     val cellTextStyle = AppTheme.typography.bodyStyle
@@ -69,16 +71,9 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                         val callIndex = rowIndex - 1
                         if (callIndex < calls.size) {
                             val call = calls[callIndex]
-                            val serviceText = call.service
-                            val methodsText = when (call.source) {
-                                CallImplementedBy.SERVER_AND_APP -> {
-                                    call.implementedMethods.joinToString(", ").ifEmpty { "-" }
-                                }
-                                else -> call.methods.joinToString(", ").ifEmpty { "-" }
-                            }
 
                             LazyTableTextHeightCalc.calculateTextHeight(
-                                textBlocks = listOf(serviceText, methodsText),
+                                textBlocks = listOf(call.method, call.service),
                                 fontSize = cellTextStyle.fontSize.value,
                                 availableWidth = firstColumnWidth.value,
                                 horizontalPadding = 8f,
@@ -135,23 +130,14 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                                 0 -> Column(
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Text( // service resource
-                                        text = call.service,
+                                    Text( // method
+                                        text = call.method,
                                         style = cellTextStyle,
-                                        fontWeight = FontWeight.Medium,
+                                        fontWeight = FontWeight.Bold,
                                         modifier = Modifier.fillMaxWidth()
                                     )
-                                    Text( // service methods
-                                        text = when (call.source) {
-                                            CallImplementedBy.SERVER_AND_APP -> {
-                                                call.implementedMethods.joinToString(
-                                                    ", "
-                                                ).ifEmpty { "-" }
-                                            }
-
-                                            else -> call.methods.joinToString(", ")
-                                                .ifEmpty { "-" }
-                                        },
+                                    Text( // service resource
+                                        text = call.service,
                                         style = cellTextStyle,
                                         modifier = Modifier
                                             .padding(top = 2.dp)
@@ -159,47 +145,17 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                                     )
                                 }
 
-                                1 -> { // server column
-                                    val isServerImplemented =
-                                        call.source != CallImplementedBy.APP
+                                1 -> SupportIcon(
+                                    supported = call.supportedByServer,
+                                    supportedDescription = stringResource(R.string.brapi_compatibility_server_support),
+                                    unsupportedDescription = stringResource(R.string.brapi_compatibility_no_server_support)
+                                )
 
-                                    val icon =
-                                        if (isServerImplemented) Icons.Default.Check else Icons.Default.Close
-                                    val contentDescription =
-                                        if (isServerImplemented) stringResource(R.string.brapi_compatibility_server_support) else stringResource(
-                                            R.string.brapi_compatibility_no_server_support
-                                        )
-                                    val iconTint =
-                                        if (isServerImplemented) AppTheme.colors.status.success else AppTheme.colors.status.error
-
-                                    Icon(
-                                        imageVector = icon,
-                                        contentDescription = contentDescription,
-                                        tint = iconTint,
-                                        modifier = Modifier.size(20.dp),
-                                    )
-                                }
-
-                                2 -> { // field book column
-                                    val isFBImplemented =
-                                        call.source != CallImplementedBy.SERVER
-
-                                    val icon =
-                                        if (isFBImplemented) Icons.Default.Check else Icons.Default.Close
-                                    val contentDescription =
-                                        if (isFBImplemented) stringResource(R.string.brapi_compatibility_fieldbook_support) else stringResource(
-                                            R.string.brapi_compatibility_no_fieldbook_support
-                                        )
-                                    val iconTint =
-                                        if (isFBImplemented) AppTheme.colors.status.success else AppTheme.colors.status.error
-
-                                    Icon(
-                                        imageVector = icon,
-                                        contentDescription = contentDescription,
-                                        tint = iconTint,
-                                        modifier = Modifier.size(20.dp),
-                                    )
-                                }
+                                2 -> SupportIcon(
+                                    supported = call.supportedByApp,
+                                    supportedDescription = stringResource(R.string.brapi_compatibility_fieldbook_support),
+                                    unsupportedDescription = stringResource(R.string.brapi_compatibility_no_fieldbook_support)
+                                )
                             }
                         }
                     }
@@ -209,17 +165,27 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
     }
 }
 
+@Composable
+private fun SupportIcon(
+    supported: Boolean,
+    supportedDescription: String,
+    unsupportedDescription: String
+) {
+    Icon(
+        imageVector = if (supported) Icons.Default.Check else Icons.Default.Close,
+        contentDescription = if (supported) supportedDescription else unsupportedDescription,
+        tint = if (supported) AppTheme.colors.status.success else AppTheme.colors.status.error,
+        modifier = Modifier.size(20.dp),
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun ServerCallsTablePreview() {
-    val calls = listOf<ServiceComparison>(
-        ServiceComparison(
-            service = "Service",
-            methods = listOf("GET", "PUT"),
-            isAppImplemented = true,
-            implementedMethods = listOf("GET"),
-            source = CallImplementedBy.APP,
-        )
+    val calls = listOf(
+        CallComparison("observations", "GET", supportedByServer = true, supportedByApp = true),
+        CallComparison("observations", "POST", supportedByServer = false, supportedByApp = true),
+        CallComparison("observations", "PUT", supportedByServer = false, supportedByApp = true),
     )
     AppTheme {
         ServerCallsTable(calls)
