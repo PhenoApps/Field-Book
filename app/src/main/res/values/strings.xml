@@ -613,6 +613,9 @@
     <!-- ID/Barcode Search -->
     <string name="act_collect_barcode_search_exists_in_other_field">This ID is in %s</string>
     <string name="main_toolbar_moveto_no_match">No matching value</string>
+    <string name="barcode_suggestions_title">No exact match for %s. Did you mean:</string>
+    <string name="barcode_suggestion_in_field">%1$s (%2$s)</string>
+    <string name="barcode_suggestion_field">Field: %s</string>
     <string name="main_toolbar_moveto">Go to ID</string>
     <string name="main_toolbar_barcode_scan">Scan barcode</string>
     <string name="main_toolbar_moveto_scan">Scan</string>
@@ -1067,6 +1070,9 @@
     <string name="preferences_behavior_title">Behavior</string>
     <string name="preferences_behavior_movement_title">Movement</string>
     <string name="preferences_behavior_hardware_title">Hardware</string>
+    <string name="preferences_behavior_barcodes_title">Barcodes</string>
+    <string name="preferences_behavior_barcode_suggest_similar">Suggest similar IDs</string>
+    <string name="preferences_behavior_barcode_suggest_similar_description">When a scanned or entered ID has no exact match, suggest close matches</string>
     <string name="preferences_behavior_data_title">Data</string>
 
     <string name="preferences_behavior_cycle_traits">Auto-Advance Entry</string>

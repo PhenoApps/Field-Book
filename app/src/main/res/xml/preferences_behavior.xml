@@ -46,6 +46,13 @@
             android:summary="@string/preferences_general_swap_navigation_description"
             android:title="@string/preferences_general_swap_navigation" />
 
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="preferences_behavior_barcodes"
+        android:title="@string/preferences_behavior_barcodes_title"
+        app:iconSpaceReserved="false">
+
         <ListPreference
             android:icon="@drawable/star_four_points_circle_outline"
             android:key="com.fieldbook.tracker.BARCODE_SCANNING_OPTIONS"
@@ -61,6 +68,13 @@
             android:key="ATTACH_MEDIA_BARCODE_PRIORITIZE"
             android:summary="@string/preferences_behavior_attach_media_barcode_prioritize_description"
             android:title="@string/preferences_behavior_attach_media_barcode_prioritize" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:icon="@drawable/database_search"
+            android:key="com.fieldbook.tracker.BARCODE_SUGGEST_SIMILAR"
+            android:summary="@string/preferences_behavior_barcode_suggest_similar_description"
+            android:title="@string/preferences_behavior_barcode_suggest_similar" />
 
     </PreferenceCategory>
 

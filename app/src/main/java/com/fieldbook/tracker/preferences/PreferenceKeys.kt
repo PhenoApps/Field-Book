@@ -58,10 +58,11 @@ class PreferenceKeys {
         const val VOLUME_NAVIGATION = "VOLUME_NAVIGATION"
         const val RETURN_CHARACTER = "RETURN_CHARACTER"
         const val BARCODE_SCANNING_OPTIONS = "com.fieldbook.tracker.BARCODE_SCANNING_OPTIONS"
+        const val BARCODE_SUGGEST_SIMILAR = "com.fieldbook.tracker.BARCODE_SUGGEST_SIMILAR"
         const val MEDIA_KEYCODE_NAVIGATION = "com.tracker.fieldbook.preferences.keys.enable_media_keycode_events"
 
         private val behaviorPreferenceKeys = setOf(CYCLING_TRAITS_ADVANCES, RETURN_FIRST_TRAIT, DISABLE_ENTRY_ARROW_NO_DATA,
-            FLIP_FLOP_ARROWS, VOLUME_NAVIGATION, RETURN_CHARACTER, BARCODE_SCANNING_OPTIONS, MEDIA_KEYCODE_NAVIGATION)
+            FLIP_FLOP_ARROWS, VOLUME_NAVIGATION, RETURN_CHARACTER, BARCODE_SCANNING_OPTIONS, BARCODE_SUGGEST_SIMILAR, MEDIA_KEYCODE_NAVIGATION)
 
         // LOCATION
         private const val GEONAV_PREFIX = "com.fieldbook.tracker.geonav."
