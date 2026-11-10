@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.fieldbook.tracker.traits.MultispeqTraitLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/multispeqLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:visibility="gone">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="8dp">
+
+        <!-- Connect button (shown when disconnected) -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/multispeq_connect_button"
+            style="@style/FloatingActionButtonStyle.TraitButtons"
+            android:layout_width="@dimen/fb_trait_fab_size"
+            android:layout_height="@dimen/fb_trait_fab_size"
+            android:layout_margin="16dp"
+            android:src="@drawable/connection"
+            android:contentDescription="@string/multispeq_connect_button_description"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Connected device name — "Connected: MultispeQ Beta (ABC123)" -->
+        <TextView
+            android:id="@+id/multispeq_device_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Device info row — "Battery: 85% · FW: 2.0058" -->
+        <TextView
+            android:id="@+id/multispeq_device_info"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="8dp"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/multispeq_device_name" />
+
+        <!-- Progress bar (shown while measuring) -->
+        <ProgressBar
+            android:id="@+id/multispeq_progress"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/multispeq_device_info" />
+
+        <!-- Round Measure button with leaf icon (shown when connected) -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/multispeq_measure_button"
+            style="@style/FloatingActionButtonStyle.TraitButtons"
+            android:layout_width="@dimen/fb_trait_fab_size"
+            android:layout_height="@dimen/fb_trait_fab_size"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_trait_multispeq"
+            android:contentDescription="@string/multispeq_measure_button"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/multispeq_progress" />
+
+        <!-- Disconnect + Power Off on the same row (shown when connected) -->
+        <Button
+            android:id="@+id/multispeq_disconnect_button"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:text="@string/multispeq_disconnect_button"
+            android:visibility="gone"
+            app:layout_constraintEnd_toStartOf="@id/multispeq_power_off_button"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/multispeq_measure_button" />
+
+        <Button
+            android:id="@+id/multispeq_power_off_button"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/multispeq_power_off_button"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintStart_toEndOf="@id/multispeq_disconnect_button"
+            app:layout_constraintTop_toBottomOf="@id/multispeq_measure_button" />
+
+        <!-- Calculated parameter result display -->
+        <ScrollView
+            android:id="@+id/multispeq_result_scroll"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/multispeq_disconnect_button">
+
+            <LinearLayout
+                android:id="@+id/multispeq_result_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp" />
+
+        </ScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.fieldbook.tracker.traits.MultispeqTraitLayout>
