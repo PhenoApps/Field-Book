@@ -105,6 +105,10 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.INVALID_VALUES)
         set(value) = attributeValues.setValue(TraitAttributes.INVALID_VALUES, value.toString())
 
+    var outlierDetection: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.OUTLIER_DETECTION)
+        set(value) = attributeValues.setValue(TraitAttributes.OUTLIER_DETECTION, value.toString())
+
     var allowOther: Boolean
         get() = attributeValues.getBoolean(TraitAttributes.ALLOW_OTHER)
         set(value) = attributeValues.setValue(TraitAttributes.ALLOW_OTHER, value.toString())
@@ -199,6 +203,7 @@ class TraitObject {
                 autoSwitchPlot == that.autoSwitchPlot &&
                 unit == that.unit &&
                 invalidValues == that.invalidValues &&
+                outlierDetection == that.outlierDetection &&
                 attachAudio == that.attachAudio &&
                 attachPhoto == that.attachPhoto &&
                 attachVideo == that.attachVideo &&
@@ -215,7 +220,7 @@ class TraitObject {
             saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms,
             maxDecimalPlaces, mathSymbolsEnabled, allowMulticat, repeatedMeasures,
             autoSwitchPlot, unit, invalidValues, attachAudio, attachPhoto, attachVideo,
-            allowOther, duration, sensitivity
+            allowOther, duration, sensitivity, outlierDetection
         )
     }
 
@@ -250,6 +255,7 @@ class TraitObject {
         t.autoSwitchPlot = this.autoSwitchPlot
         t.unit = this.unit
         t.invalidValues = this.invalidValues
+        t.outlierDetection = this.outlierDetection
         t.attachAudio = this.attachAudio
         t.attachPhoto = this.attachPhoto
         t.attachVideo = this.attachVideo

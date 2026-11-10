@@ -84,4 +84,5 @@ object ObservationVariableAttributeDetailsView {
     const val ALLOW_OTHER = "allowOther"
     const val CANOPY_SENSITIVITY = "canopySensitivity"
     const val DURATION = "duration"
+    const val OUTLIER_DETECTION = "outlierDetection"
 }
