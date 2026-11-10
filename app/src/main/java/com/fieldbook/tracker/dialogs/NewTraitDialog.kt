@@ -27,6 +27,9 @@ import com.fieldbook.tracker.traits.formats.TraitFormatParametersAdapter
 import com.fieldbook.tracker.traits.formats.ValidationResult
 import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
 import com.fieldbook.tracker.traits.formats.parameters.CanopySensitivityParameter
+import com.fieldbook.tracker.traits.formats.parameters.CaptureVideoParameter
+import com.fieldbook.tracker.traits.formats.parameters.DefaultToggleParameter
+import com.fieldbook.tracker.traits.formats.parameters.Parameters
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.traits.formats.ui.ParameterScrollView
 import com.fieldbook.tracker.utilities.SoundHelperImpl
@@ -339,6 +342,10 @@ class NewTraitDialog(
 
         parametersSv.clear()
 
+        val holders = mutableMapOf<Parameters, BaseFormatParameter.ViewHolder>()
+
+        var captureVideo: CaptureVideoParameter? = null
+
         format.getTraitFormatDefinition().parameters.forEach { parameter ->
 
             val isBrapiTrait = initialTraitObject?.traitDataSource?.let {
@@ -371,8 +378,64 @@ class NewTraitDialog(
                 (holder as? CanopySensitivityParameter.ViewHolder)?.setTestCaptureLauncher(canopyTestCaptureLauncher)
 
                 lockCanopySensitivityIfCollected(holder)
+
+                holders[parameter.parameter] = holder
+
+                if (parameter is CaptureVideoParameter) {
+
+                    captureVideo = parameter
+
+                    lockCaptureVideoIfCollected(holder)
+                }
             }
         }
+
+        captureVideo?.let { hideParametersInVideo(it, holders) }
+    }
+
+    /**
+     * Photo or video can't be switched once the trait has observations, otherwise photos and
+     * videos would be mixed under one trait.
+     */
+    private fun lockCaptureVideoIfCollected(holder: BaseFormatParameter.ViewHolder) {
+
+        val toggle = (holder as? DefaultToggleParameter.ViewHolder)?.toggleButton ?: return
+
+        val traitId = initialTraitObject?.id
+
+        if (traitId.isNullOrEmpty()) return
+
+        lifecycleScope.launch {
+
+            if (traitRepo.getTraitObservations(traitId).isNotEmpty()) {
+
+                toggle.isEnabled = false
+
+            }
+        }
+    }
+
+    /**
+     * Hides the options the format says stop applying in video mode, following the toggle as the
+     * user flips it.
+     */
+    private fun hideParametersInVideo(
+        captureVideo: CaptureVideoParameter,
+        holders: Map<Parameters, BaseFormatParameter.ViewHolder>
+    ) {
+
+        val toggle = (holders[Parameters.CAPTURE_VIDEO] as? DefaultToggleParameter.ViewHolder)
+            ?.toggleButton ?: return
+
+        val apply = { isVideo: Boolean ->
+            captureVideo.hiddenInVideo.forEach { hidden ->
+                holders[hidden]?.itemView?.visibility = if (isVideo) View.GONE else View.VISIBLE
+            }
+        }
+
+        apply(toggle.isChecked)
+
+        toggle.setOnCheckedChangeListener { _, isChecked -> apply(isChecked) }
     }
 
 

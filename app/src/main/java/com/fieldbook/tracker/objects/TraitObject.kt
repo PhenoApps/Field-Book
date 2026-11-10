@@ -117,6 +117,11 @@ class TraitObject {
         get() = attributeValues.getString(TraitAttributes.DURATION)
         set(value) = attributeValues.setValue(TraitAttributes.DURATION, value)
 
+    //camera traits that support it record video instead of taking photos
+    var captureVideo: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.CAPTURE_VIDEO)
+        set(value) = attributeValues.setValue(TraitAttributes.CAPTURE_VIDEO, value.toString())
+
     companion object {
 
         fun fromJson(json: TraitJson, maxPosition: Int, originalFileName: String) = TraitObject().apply {
@@ -204,7 +209,8 @@ class TraitObject {
                 attachVideo == that.attachVideo &&
                 allowOther == that.allowOther &&
                 sensitivity == that.sensitivity &&
-                duration == that.duration
+                duration == that.duration &&
+                captureVideo == that.captureVideo
     }
 
     override fun hashCode(): Int {
@@ -215,7 +221,7 @@ class TraitObject {
             saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms,
             maxDecimalPlaces, mathSymbolsEnabled, allowMulticat, repeatedMeasures,
             autoSwitchPlot, unit, invalidValues, attachAudio, attachPhoto, attachVideo,
-            allowOther, duration, sensitivity
+            allowOther, duration, sensitivity, captureVideo
         )
     }
 
@@ -256,6 +262,7 @@ class TraitObject {
         t.allowOther = this.allowOther
         t.sensitivity = this.sensitivity
         t.duration = this.duration
+        t.captureVideo = this.captureVideo
 
         return t
     }

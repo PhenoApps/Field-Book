@@ -132,11 +132,17 @@ object TraitAttributes {
         valueType = ValueType.STRING
     )
 
+    val CAPTURE_VIDEO = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.CAPTURE_VIDEO,
+        valueType = ValueType.BOOLEAN,
+        defaultValue = "false"
+    )
+
     val ALL = listOf(MIN_VALUE, MAX_VALUE, CATEGORIES, CLOSE_KEYBOARD, CROP_IMAGE, SAVE_IMAGE,
         USE_DAY_OF_YEAR, CATEGORY_DISPLAY_VALUE, RESOURCE_FILE,
         DECIMAL_PLACES_REQUIRED, MATH_SYMBOLS_ENABLED, ALLOW_MULTICAT, REPEATED_MEASURES,
         AUTO_SWITCH_PLOT, UNIT, INVALID_VALUES, MULTI_MEDIA_AUDIO, MULTI_MEDIA_VIDEO, MULTI_MEDIA_PHOTO,
-        ALLOW_OTHER, CANOPY_SENSITIVITY, DURATION
+        ALLOW_OTHER, CANOPY_SENSITIVITY, DURATION, CAPTURE_VIDEO
     )
 
     fun byKey(key: String): AttributeDefinition? = ALL.find { it.key == key }

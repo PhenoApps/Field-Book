@@ -54,6 +54,9 @@ class RangeBoxView : ConstraintLayout {
     private var rangeLeft: ImageView
     private var rangeRight: ImageView
 
+    private var navigationEnabled = true
+    private var navigationLockedToast: Toast? = null
+
     private var plotsProgressBar: ThumbOnlySeekBar
 
     private var repeatHandler: Handler? = null
@@ -122,9 +125,34 @@ class RangeBoxView : ConstraintLayout {
         return controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
     }
 
+    /**
+     * Enables or blocks plot navigation, e.g. while a camera is capturing for the current plot.
+     * The arrows are only one way to move, so every other route checks [allowNavigation] too.
+     */
     fun toggleNavigation(toggle: Boolean) {
+        navigationEnabled = toggle
         rangeLeft.isEnabled = toggle
         rangeRight.isEnabled = toggle
+    }
+
+    fun isNavigationEnabled() = navigationEnabled
+
+    /**
+     * Returns whether the plot may change, telling the user why when it may not.
+     */
+    fun allowNavigation(): Boolean {
+
+        if (navigationEnabled) return true
+
+        controller.getSoundHelper().playError()
+
+        //replace rather than queue, a held volume key asks many times a second
+        navigationLockedToast?.cancel()
+        navigationLockedToast =
+            Toast.makeText(context, R.string.range_navigation_locked, Toast.LENGTH_SHORT)
+                .also { it.show() }
+
+        return false
     }
 
     fun getRangeID(): IntArray {
@@ -168,6 +196,11 @@ class RangeBoxView : ConstraintLayout {
         // Allow dragging the progress bar thumb to seek to any entry
         plotsProgressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                if (fromUser && !navigationEnabled) {
+                    //snap the thumb back to the plot it is locked on
+                    seekBar.progress = paging - 1
+                    return
+                }
                 if (fromUser && rangeID.isNotEmpty() && progress in rangeID.indices) {
                     paging = progress + 1
                     updateCurrentRange(rangeID[progress])
@@ -178,7 +211,10 @@ class RangeBoxView : ConstraintLayout {
                 }
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+                //tells the user why the thumb will not move
+                allowNavigation()
+            }
             override fun onStopTrackingTouch(seekBar: SeekBar) {
                 controller.initWidgets(true)
             }
@@ -258,6 +294,8 @@ class RangeBoxView : ConstraintLayout {
     }
 
     private fun quickGoToNavigateFromDialog(primaryId: String, secondaryId: String) {
+
+        if (!allowNavigation()) return
 
         try {
 
@@ -344,6 +382,8 @@ class RangeBoxView : ConstraintLayout {
         return OnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    //performClick below ignores isEnabled, and holding would repeat the refusal
+                    if (!allowNavigation()) return@OnTouchListener true
                     control.setImageResource(imageID)
                     control.performClick()
                     if (repeatHandler != null) {
@@ -566,6 +606,7 @@ class RangeBoxView : ConstraintLayout {
 
     ///// paging /////
     fun moveEntryLeft() {
+        if (!allowNavigation()) return
         controller.navigateIfDataIsValid(controller.getCurrentObservation()?.value) {
 
             if (controller.getPreferences().getBoolean(PreferenceKeys.ENTRY_NAVIGATION_SOUND, false)
@@ -594,6 +635,7 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun moveEntryRight() {
+        if (!allowNavigation()) return
         controller.navigateIfDataIsValid(controller.getCurrentObservation()?.value) {
             val traitBox = controller.getTraitBox()
             if (controller.getPreferences().getBoolean(PreferenceKeys.ENTRY_NAVIGATION_SOUND, false)

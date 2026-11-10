@@ -45,6 +45,49 @@
                 android:layout_height="match_parent"
                 android:contentDescription="@string/list_item_image_content_description"/>
 
+            <!-- Shown instead of a thumbnail when the value names a file kept on the camera -->
+            <LinearLayout
+                android:id="@+id/list_item_image_name_ll"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="8dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/list_item_image_name_icon_iv"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:importantForAccessibility="no"
+                    app:tint="?attr/colorOnSurface"
+                    tools:src="@drawable/video" />
+
+                <TextView
+                    android:id="@+id/list_item_image_name_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:ellipsize="middle"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="12sp"
+                    tools:text="GX010001.MP4" />
+
+                <TextView
+                    android:id="@+id/list_item_image_name_serial_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="middle"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:textColor="?attr/fb_color_text_secondary"
+                    android:textSize="10sp"
+                    tools:text="C3501324500711" />
+
+            </LinearLayout>
+
             <VideoView
                 android:id="@+id/list_item_video_vv"
                 android:layout_width="match_parent"
