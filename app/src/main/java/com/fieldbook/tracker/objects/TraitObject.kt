@@ -333,4 +333,8 @@ class TraitObject {
     fun isLocalTrait(): Boolean {
         return traitDataSource.isEmpty() || traitDataSource == "local"
     }
+
+    fun isBrapiTrait(): Boolean {
+        return externalDbId?.isNotEmpty() == true || traitDataSource.contains("brapi", ignoreCase = true)
+    }
 }

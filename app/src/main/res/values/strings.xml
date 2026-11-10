@@ -536,6 +536,7 @@
     <string name="trait_brapi_display_dialog_title">Select Button Text</string>
     <string name="trait_brapi_label_display">Show Labels (e.g. %s)</string>
     <string name="trait_brapi_value_display">Show Values (e.g. %s)</string>
+    <string name="trait_brapi_indicator">Imported via BrAPI</string>
     <string name="error_loading_trait_detail">Error loading trait info</string>
     <string name="error_deleting_trait">Error: Could not delete the trait</string>
     <string name="error_updating_trait_resource_file">Error updating trait resource file</string>
