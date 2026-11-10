@@ -35,7 +35,7 @@ class ManufacturerUtil {
          */
         fun transferHighContrastIcon(res: Resources) {
 
-            val bmp = BitmapFactory.decodeResource(res, R.mipmap.ic_launcher_monochrome)
+            val bmp = BitmapFactory.decodeResource(res, R.mipmap.ic_launcher_high_contrast)
             val dir = Environment.getExternalStorageDirectory().toString()
 
             var iconFile: File? = null
