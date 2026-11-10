@@ -244,17 +244,17 @@ abstract class AbstractCameraTrait :
      * in Field Book's storage. Used when a camera trait has its copy-image setting turned off, and
      * for videos that stay on the camera.
      *
-     * Written against [obsUnit] rather than the plot on screen: a recording can finish after the
-     * user has left the trait, so the screen is not a reliable guide to which entry it belongs to.
+     * Written against [studyId] and [obsUnit] rather than the field and plot on screen: a recording
+     * can finish after the user has left the trait, so the screen cannot identify its entry.
      */
     protected fun saveFileNameObservation(
+        studyId: String,
         obsUnit: RangeObject,
         traitObj: TraitObject,
         fileName: String
     ) {
 
         val plot = obsUnit.uniqueId
-        val studyId = collectActivity.studyId
         val person = (activity as? CollectActivity)?.person
         val location = (activity as? CollectActivity)?.locationByPreferences
         val rep = database.getNextRep(studyId, plot, traitObj.id)
@@ -267,7 +267,9 @@ abstract class AbstractCameraTrait :
 
         ui.launch {
 
-            if (isOnScreen(obsUnit, traitObj)) notifyItemInserted(fileName.toUri())
+            if (collectActivity.studyId == studyId && isOnScreen(obsUnit, traitObj)) {
+                notifyItemInserted(fileName.toUri())
+            }
 
             (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
         }

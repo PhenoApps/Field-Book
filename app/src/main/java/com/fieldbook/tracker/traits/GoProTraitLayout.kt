@@ -688,7 +688,7 @@ class GoProTraitLayout :
         data: GoProApi.ImageRequestData,
         model: GoProApi.GoProImage
     ) {
-        saveFileNameObservation(data.range, data.trait, model.observationName)
+        saveFileNameObservation(data.studyId, data.range, data.trait, model.observationName)
     }
 
     override fun onBusyStateChanged(isBusy: Int, isEncoding: Int) {
