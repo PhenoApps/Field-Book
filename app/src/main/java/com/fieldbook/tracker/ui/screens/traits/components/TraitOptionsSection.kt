@@ -20,6 +20,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.FieldFileObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.Formats
+import com.fieldbook.tracker.traits.formats.parameters.AutoAdvanceDigitsParameter
 import com.fieldbook.tracker.traits.formats.parameters.AutoSwitchPlotParameter
 import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
 import com.fieldbook.tracker.traits.formats.parameters.CategoriesParameter
@@ -238,6 +239,7 @@ private fun getParamIcon(param: BaseFormatParameter, trait: TraitObject): Int {
         }
 
         is CategoriesParameter -> R.drawable.ic_trait_categorical
+        is AutoAdvanceDigitsParameter -> if (trait.autoAdvanceDigits.isNotBlank()) R.drawable.ic_auto_switch else R.drawable.ic_auto_switch_off
         is DurationParameter -> R.drawable.timer
         is SeveritiesParameter -> R.drawable.ic_order_numeric_ascending
         is DecimalPlacesParameter -> R.drawable.ic_decimal
@@ -252,6 +254,9 @@ private fun getParamIcon(param: BaseFormatParameter, trait: TraitObject): Int {
 private fun getParamText(context: Context, param: BaseFormatParameter, trait: TraitObject): String {
     return when (param) {
         is AutoSwitchPlotParameter -> context.getString(R.string.trait_detail_chip_automatic_switch)
+        is AutoAdvanceDigitsParameter -> trait.autoAdvanceDigits.toIntOrNull()?.let {
+            context.getString(R.string.trait_detail_chip_auto_advance_digits, it)
+        } ?: context.getString(R.string.trait_detail_chip_auto_advance_digits_off)
         is InvalidValueParameter -> context.getString(R.string.trait_detail_chip_invalid_value)
         is MathSymbolsParameter -> context.getString(R.string.trait_detail_chip_math_symbols)
         is MultipleCategoriesParameter -> {

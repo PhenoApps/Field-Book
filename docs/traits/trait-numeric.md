@@ -13,6 +13,9 @@ The numeric trait format is used for quantitative traits like height.
 `Integers only` will only allow integer values, 
 `Allow decimal input` will limit input to a user-defined number of values after the decimal (between 1-10).
 - `Mathematical Symbols` toggles visibility of the mathematical symbol buttons ( **;** , **+** , **-** and **\*** ) in the trait layout.
+- `Auto Advance After Digits` automatically moves to the next entry once the specified number of digits has been entered in the Collect screen.
+Decimal points and mathematical symbols are not counted toward this number.
+Leave it blank to disable auto advance.
 - `Allow Invalid Value` will prompt users with an option to save data that violate any set restrictions when collecting data.
 - `Details` text is displayed under the trait name on the Collect screen.
 - `Unit` text can be set to denote the unit for the observation.
