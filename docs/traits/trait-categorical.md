@@ -8,6 +8,7 @@ The categorical trait format is used when trait values fall into a set of discre
 - `Name` assign a value for trait name.
 - `Details` text is displayed under the trait name on the Collect screen.
 - `Categories` allows users to create unqiue categories for data collection.
+Categories can be reordered by dragging the handle next to each category.
 - `Multiple Category Selection` allows single or multiple category selection for each entry. 
 - `Unit` text denotes the unit for the observation.
 - `Automatically Switch to Next Plot` toggles immediately moving to next entry when the user records an observation for an entry in the Collect screen.

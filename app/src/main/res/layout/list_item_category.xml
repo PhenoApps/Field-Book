@@ -5,6 +5,18 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <ImageView
+        android:id="@+id/list_item_category_drag_iv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_drag_handle"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/list_item_category_delete_btn"
+        android:contentDescription="@string/list_item_field_sort_drag_content_description"/>
+
     <TextView
         android:layout_margin="4dp"
         tools:text="Value"
@@ -15,7 +27,7 @@
         android:ellipsize="end"
         app:layout_constraintBottom_toBottomOf="@id/list_item_category_delete_btn"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/list_item_category_drag_iv"
         app:layout_constraintEnd_toStartOf="@id/list_item_category_delete_btn"/>
 
     <ImageButton

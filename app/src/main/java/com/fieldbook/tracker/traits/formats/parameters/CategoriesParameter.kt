@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageButton
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.CategoryAdapter
@@ -52,9 +53,64 @@ class CategoriesParameter(private val isRequired: Boolean = false) : BaseFormatP
         fun hasCategories(): Boolean =
             catList.isNotEmpty() || valueEt.text?.isNotBlank() == true
 
+        private val itemTouchHelper by lazy {
+
+            val itemTouchCallback =
+                object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
+
+                    override fun isLongPressDragEnabled(): Boolean {
+                        return false
+                    }
+
+                    override fun onMove(
+                        recyclerView: RecyclerView,
+                        viewHolder: RecyclerView.ViewHolder,
+                        target: RecyclerView.ViewHolder
+                    ): Boolean {
+
+                        val from = viewHolder.bindingAdapterPosition
+                        val to = target.bindingAdapterPosition
+
+                        if (from !in catList.indices || to !in catList.indices) return false
+
+                        //the adapter's current list is backed by catList, see updateCatAdapter
+                        catList.add(to, catList.removeAt(from))
+                        recyclerView.adapter?.notifyItemMoved(from, to)
+
+                        return true
+                    }
+
+                    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+
+                    }
+
+                    override fun onSelectedChanged(
+                        viewHolder: RecyclerView.ViewHolder?, actionState: Int
+                    ) {
+                        super.onSelectedChanged(viewHolder, actionState)
+
+                        if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+                            viewHolder?.itemView?.alpha = 0.5f
+                        }
+                    }
+
+                    override fun clearView(
+                        recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder
+                    ) {
+                        super.clearView(recyclerView, viewHolder)
+
+                        viewHolder.itemView.alpha = 1.0f
+                    }
+                }
+
+            ItemTouchHelper(itemTouchCallback)
+        }
+
         private fun setupCategoriesRecyclerView() {
 
-            categoriesRv.adapter = CategoryAdapter(this)
+            categoriesRv.adapter = CategoryAdapter(this, isSortable = true)
+
+            itemTouchHelper.attachToRecyclerView(categoriesRv)
 
         }
 
@@ -188,6 +244,10 @@ class CategoriesParameter(private val isRequired: Boolean = false) : BaseFormatP
                 catList.remove(scale)
                 updateCatAdapter()
             }
+        }
+
+        override fun onCategoryDrag(viewHolder: RecyclerView.ViewHolder) {
+            itemTouchHelper.startDrag(viewHolder)
         }
     }
 }
