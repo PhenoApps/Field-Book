@@ -33,6 +33,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -192,6 +193,10 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             try {
 
                 fetchObservationLevels(programDbId).join()
+
+            } catch (e: CancellationException) {
+
+                throw e // activity scope was cancelled (e.g. onDestroy), not an error
 
             } catch (e: Exception) {
 
