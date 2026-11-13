@@ -9,6 +9,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
@@ -16,14 +17,23 @@ import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
 
 public class BrapiAuthDialogFragment extends DialogFragment {
 
-    public BrapiAuthDialogFragment newInstance() {
-        return this;
+    public static final String TAG = "BrapiAuthDialogFragment";
+
+    /**
+     * Shows the auth dialog unless one is already in the fragment manager.
+     * Several failed BrAPI calls can request the dialog back to back; show() commits
+     * asynchronously, so showNow() is used to make the tag check see the previous request.
+     */
+    public static void showIfNotShowing(@NonNull FragmentManager fragmentManager) {
+        if (fragmentManager.isStateSaved() || fragmentManager.findFragmentByTag(TAG) != null) {
+            return;
+        }
+        new BrapiAuthDialogFragment().showNow(fragmentManager, TAG);
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext(), R.style.AppAlertDialog);
 

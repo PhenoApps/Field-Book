@@ -40,7 +40,6 @@ public class BrapiTraitActivity extends ThemedActivity {
     private List<TraitObject> selectedTraits;
     private BrapiPaginationManager paginationManager;
     private TraitSaveResult saveResult;
-    private final BrapiAuthDialogFragment brapiAuth = new BrapiAuthDialogFragment().newInstance();
 
     @Inject
     TraitRepository traitRepo;
@@ -196,15 +195,7 @@ public class BrapiTraitActivity extends ThemedActivity {
     }
 
     private void showBrapiAuthDialog() {
-        try {
-            runOnUiThread(() -> {
-                if (!brapiAuth.isVisible()) {
-                    brapiAuth.show(getSupportFragmentManager(), "BrapiAuthDialogFragment");
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        runOnUiThread(() -> BrapiAuthDialogFragment.showIfNotShowing(getSupportFragmentManager()));
     }
 
     // Transforms the trait data to display it on the screen.

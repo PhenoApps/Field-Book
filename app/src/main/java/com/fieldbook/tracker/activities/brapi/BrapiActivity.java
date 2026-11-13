@@ -53,8 +53,6 @@ public class BrapiActivity extends ThemedActivity {
     private List<BrapiObservationLevel> observationLevels;
     private BrapiObservationLevel selectedObservationLevel;
 
-    private final BrapiAuthDialogFragment brapiAuth = new BrapiAuthDialogFragment().newInstance();
-
     public static Intent getIntent(Context context) {
         return new Intent(context, BrapiActivity.class);
     }
@@ -193,15 +191,7 @@ public class BrapiActivity extends ThemedActivity {
     }
 
     private void showBrapiAuthDialog() {
-        try {
-            runOnUiThread(() -> {
-                if (!brapiAuth.isVisible()) {
-                    brapiAuth.show(getSupportFragmentManager(), "BrapiAuthDialogFragment");
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        runOnUiThread(() -> BrapiAuthDialogFragment.showIfNotShowing(getSupportFragmentManager()));
     }
 
     private void loadObservationLevels() {
