@@ -633,14 +633,14 @@ class StudyDao {
         /**
          * Returns study by its study_db_id
          */
-        fun getStudyByDbId(studyDbId: String) = withDatabase { db ->
-            StudyModel(
-                db.query(
-                    Study.tableName,
-                    where = "study_db_id = ?",
-                    whereArgs = arrayOf(studyDbId)
-                ).toFirst()
-            )
+        fun getStudyByDbId(studyDbId: String): StudyModel? = withDatabase { db ->
+            db.query(
+                Study.tableName,
+                where = "study_db_id = ?",
+                whereArgs = arrayOf(studyDbId)
+            ).toFirst()
+                .takeIf { it.isNotEmpty() } // no matching study, avoid a StudyModel with no columns
+                ?.let { StudyModel(it) }
         }
 
         /**
