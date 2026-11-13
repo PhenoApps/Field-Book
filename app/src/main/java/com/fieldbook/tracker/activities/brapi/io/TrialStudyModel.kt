@@ -25,11 +25,13 @@ data class TrialStudyModel(
 /**
  * A server list of studies, used as a study filter, see BrapiStudyListsFilterActivity.
  * studyDbIds is null until the list's items are fetched, which happens when it's chosen as a filter.
+ * totalItems is how many items the server has, only set if it cut the list short and sent fewer.
  */
 data class StudyListModel(
     val listDbId: String,
     val listName: String?,
     val listOwnerName: String?,
     val listSize: Int?,
-    val studyDbIds: List<String>? = null
+    val studyDbIds: List<String>? = null,
+    val totalItems: Int? = null
 )

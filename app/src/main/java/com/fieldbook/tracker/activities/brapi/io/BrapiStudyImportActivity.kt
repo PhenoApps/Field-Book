@@ -50,6 +50,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.brapi.client.v2.JSON
@@ -1280,6 +1282,24 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
     private suspend fun fetchObservationUnits(studyDbId: String, levelName: String?): HashSet<BrAPIObservationUnit>? {
 
+        val withObservations = includeObservations()
+
+        val units = fetchObservationUnits(studyDbId, levelName, withObservations)
+
+        if (units != null || !withObservations) return units
+
+        //a server that doesn't take includeObservations rejects the request, so try again without it
+        Log.w(TAG, "Fetching units with observations failed for $studyDbId, retrying without them")
+
+        return fetchObservationUnits(studyDbId, levelName, false)
+    }
+
+    private suspend fun fetchObservationUnits(
+        studyDbId: String,
+        levelName: String?,
+        withObservations: Boolean
+    ): HashSet<BrAPIObservationUnit>? {
+
         val service = brapiService as BrAPIServiceV2
 
         return fetchAllPages<BrAPIObservationUnit>(
@@ -1290,18 +1310,68 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 it.studyDbId(studyDbId)
                 it.pageSize(pageSize())
                 levelName?.let { level -> it.observationUnitLevelName(level) }
-                if (includeObservations()) it.includeObservations(true)
+                if (withObservations) it.includeObservations(true)
             })
         }
     }
 
     /**
-     * Units are fetched with their observations unless observations are never downloaded at import.
+     * Units are fetched with their observations when observations are always downloaded at import,
+     * or when asking and the server is BrAPI 2.1, see serverIsBrapi21. A server that isn't known to support
+     * includeObservations isn't sent it, and if the user chooses to download observations they come from
+     * the server's observations at import, see includedObservations. Never when observations are never downloaded.
      * BrAPI 2.1 servers that support it then give exact counts per level without counting requests,
      * see embeddedObservationCounts. The observations stay with the units until the screen closes.
      */
-    private fun includeObservations() =
-        prefs.getString(PreferenceKeys.BRAPI_IMPORT_OBSERVATIONS, IMPORT_OBSERVATIONS_ASK) != IMPORT_OBSERVATIONS_NEVER
+    private suspend fun includeObservations() =
+        when (prefs.getString(PreferenceKeys.BRAPI_IMPORT_OBSERVATIONS, IMPORT_OBSERVATIONS_ASK)) {
+            IMPORT_OBSERVATIONS_ALWAYS -> true
+            IMPORT_OBSERVATIONS_NEVER -> false
+            else -> serverIsBrapi21()
+        }
+
+    //null until the server info is fetched, one request however many studies load at once
+    private var brapi21: Boolean? = null
+    private val brapi21Lock = Mutex()
+
+    /**
+     * Whether the server lists BrAPI 2.1 for its observation units call, from its server info.
+     * False if the server info can't be fetched.
+     */
+    private suspend fun serverIsBrapi21(): Boolean = brapi21Lock.withLock {
+
+        brapi21 ?: run {
+
+            val service = brapiService as? BrAPIServiceV2
+
+            val is21 = service != null && try {
+
+                suspendCancellableCoroutine { continuation ->
+                    service.serverInfoService.fetchServerInfo(
+                        onSuccess = { response ->
+                            val calls = response?.result?.calls.orEmpty()
+                            val unitCalls = calls.filter { it.service.equals("observationunits", ignoreCase = true) }
+                            if (continuation.isActive) {
+                                continuation.resume(unitCalls.any { call -> call.versions.orEmpty().any { it.startsWith("2.1") } })
+                            }
+                            null
+                        },
+                        onFail = {
+                            if (continuation.isActive) continuation.resume(false)
+                            null
+                        }
+                    )
+                }
+
+            } catch (e: Exception) {
+                currentCoroutineContext().ensureActive()
+                Log.e(TAG, "Failed to fetch server info", e)
+                false
+            }
+
+            is21.also { brapi21 = it }
+        }
+    }
 
     /**
      * Counts from the observations sent with the units, exact for each level,

@@ -16,6 +16,12 @@ import org.brapi.v2.model.core.response.BrAPIListsSingleResponse
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+/**
+ * A list with its items, total is the number of items the server has, or null if it didn't say.
+ * More than the details hold when the server cut the list short.
+ */
+data class FetchedList(val details: BrAPIListDetails, val total: Int?)
+
 interface ListService {
 
     /**
@@ -27,7 +33,7 @@ interface ListService {
      * The list with its items, the ids of whatever the list holds, such as the studyDbIds of a studies list.
      * The client can't page a list's items, so a list longer than the server's default page size is cut short.
      */
-    suspend fun fetchListDetails(listDbId: String): BrAPIListDetails
+    suspend fun fetchListDetails(listDbId: String): FetchedList
 
     class Default(private val api: ListsApi) : ListService {
 
@@ -41,7 +47,7 @@ interface ListService {
                 api::listsGetAsync
             )
 
-        override suspend fun fetchListDetails(listDbId: String): BrAPIListDetails =
+        override suspend fun fetchListDetails(listDbId: String): FetchedList =
             suspendCancellableCoroutine { continuation ->
 
                 try {
@@ -68,7 +74,7 @@ interface ListService {
                                     Log.w(TAG, "List $listDbId has $total items, only $received were sent")
                                 }
 
-                                continuation.resume(details)
+                                continuation.resume(FetchedList(details, total))
                             }
 
                             override fun onFailure(

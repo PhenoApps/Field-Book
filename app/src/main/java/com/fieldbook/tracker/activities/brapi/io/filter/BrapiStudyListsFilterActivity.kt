@@ -54,9 +54,19 @@ class BrapiStudyListsFilterActivity(override val titleResId: Int = R.string.brap
             label = list.listName ?: list.listDbId,
             subLabel = listOfNotNull(
                 list.listSize?.let { resources.getQuantityString(R.plurals.brapi_filter_list_study_count, it, it) },
+                truncatedLabel(list),
                 list.listOwnerName
             ).joinToString(" · ")
         )
+    }
+
+    /**
+     * "N of M loaded" for a list whose items were fetched but cut short by the server, so its filter hides some studies
+     */
+    private fun truncatedLabel(list: StudyListModel): String? {
+        val loaded = list.studyDbIds?.size ?: return null
+        val total = list.totalItems ?: return null
+        return getString(R.string.brapi_filter_list_truncated, loaded, total)
     }
 
     override fun onFinishButtonClicked() = applyFilter()
@@ -92,15 +102,26 @@ class BrapiStudyListsFilterActivity(override val titleResId: Int = R.string.brap
                 return@launch
             }
 
-            withContext(Dispatchers.IO) {
+            val lists = withContext(Dispatchers.IO) {
 
                 val context = this@BrapiStudyListsFilterActivity
 
-                val lists = BrapiFilterCache.getStoredModels(context).studyLists.orEmpty()
+                val stored = BrapiFilterCache.getStoredModels(context).studyLists.orEmpty()
 
-                BrapiFilterCache.saveStudyLists(context, lists.map { list ->
-                    items[list.listDbId]?.let { list.copy(studyDbIds = it) } ?: list
-                })
+                stored.map { list ->
+                    items[list.listDbId]?.let { list.copy(studyDbIds = it.first, totalItems = it.second) } ?: list
+                }.also { BrapiFilterCache.saveStudyLists(context, it) }
+            }
+
+            //the filter hides the studies a cut short list didn't send, say so
+            val truncated = lists.filter { it.listDbId in items && truncatedLabel(it) != null }
+
+            if (truncated.isNotEmpty()) {
+                Toast.makeText(
+                    this@BrapiStudyListsFilterActivity,
+                    truncated.joinToString("\n") { "${it.listName ?: it.listDbId}: ${truncatedLabel(it)}" },
+                    Toast.LENGTH_LONG
+                ).show()
             }
 
             saveFilter()
@@ -109,9 +130,10 @@ class BrapiStudyListsFilterActivity(override val titleResId: Int = R.string.brap
     }
 
     /**
-     * @return the studyDbIds of each list, or null if any list couldn't be fetched
+     * @return the studyDbIds of each list and the total the server has if it cut the list short,
+     * or null if any list couldn't be fetched
      */
-    private suspend fun fetchItems(listDbIds: List<String>): Map<String, List<String>>? {
+    private suspend fun fetchItems(listDbIds: List<String>): Map<String, Pair<List<String>, Int?>>? {
 
         val service = brapiService as? BrAPIServiceV2 ?: return null
 
@@ -119,7 +141,10 @@ class BrapiStudyListsFilterActivity(override val titleResId: Int = R.string.brap
             coroutineScope {
                 listDbIds.map { id ->
                     async {
-                        id to service.listService.fetchListDetails(id).data.orEmpty().filterNotNull().distinct()
+                        val list = service.listService.fetchListDetails(id)
+                        val sent = list.details.data.orEmpty().filterNotNull()
+                        //the total is only kept when the server sent fewer items than it has
+                        id to (sent.distinct() to list.total?.takeIf { it > sent.size })
                     }
                 }.awaitAll().toMap()
             }
