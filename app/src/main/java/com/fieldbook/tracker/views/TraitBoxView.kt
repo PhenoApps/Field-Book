@@ -114,6 +114,9 @@ class TraitBoxView : ConstraintLayout {
         if (controller.getPreferences().getBoolean(PreferenceKeys.TRAITS_PROGRESS_BAR, true)) {
             traitsStatusBarRv?.adapter = TraitsStatusAdapter(this)
             traitsStatusBarRv?.layoutManager = getCenteredLayoutManager()
+            // overlapping notifyItemChanged/submitList calls during change animations
+            // crash with "Tmp detached view should be removed"; the status dots don't need animating
+            traitsStatusBarRv?.itemAnimator = null
             traitsStatusBarRv?.visibility = VISIBLE
         } else {
             traitsStatusBarRv?.visibility = GONE
