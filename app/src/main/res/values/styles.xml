@@ -65,6 +65,12 @@
         <item name="fb_preferences_horizontal_break_color">@color/TRANSPARENT</item>
         <item name="fb_trait_button_background_tint">@color/light_gray</item>
 
+        <!-- default text sizes, overridden by the *TextTheme variants in styles_size.xml -->
+        <!-- needed for activities not themed by ThemedActivity (e.g. AppIntroActivity) -->
+        <item name="fb_title_text_size">@dimen/title_text_size_medium</item>
+        <item name="fb_body_text_size">@dimen/text_size_medium</item>
+        <item name="fb_subheading_text_size">@dimen/sub_text_size_medium</item>
+
         <item name="fb_categorical_button_selected_color">?attr/fb_color_primary</item>
 
         <!-- these are used in material design components -->

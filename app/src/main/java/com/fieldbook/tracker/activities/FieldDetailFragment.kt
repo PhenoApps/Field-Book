@@ -676,11 +676,16 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                 setActiveField(id)
                 queryAndLoadFields()
             }
-            (activity as? FieldArchivedActivity)?.finish()
-
-            Handler(Looper.getMainLooper()).postDelayed({
+            val archivedActivity = activity as? FieldArchivedActivity
+            if (archivedActivity != null) {
+                // start collect while still attached, finishing first detaches this fragment
                 startCollectActivity()
-            }, 100)
+                archivedActivity.finish()
+            } else {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    if (isAdded) startCollectActivity()
+                }, 100)
+            }
         }
     }
 }

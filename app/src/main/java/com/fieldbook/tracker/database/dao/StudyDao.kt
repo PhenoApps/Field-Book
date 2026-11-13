@@ -242,18 +242,31 @@ class StudyDao {
             val studies = ArrayList<FieldObject>()
             val isDateSort = sortOrder.startsWith("date_")
 
+            // counts are aggregated once per table and joined, rather than as correlated
+            // subqueries per study; study_id is unindexed so those scanned whole tables per study (ANR)
+            // LEFT JOIN on observation_variables keeps observation_count including unmatched variables
             val query = """
-                SELECT 
+                SELECT
                     Studies.*,
-                    (SELECT COUNT(DISTINCT observation_unit_attribute_name) FROM observation_units_attributes AS A
-                        JOIN observation_units_values as V ON V.${ObservationUnitValue.OBSERVATION_UNIT_ATTRIBUTE_DB_ID} = A.${ObservationUnitAttribute.INTERNAL_ID_OBSERVATION_UNIT_ATTRIBUTE}
-                        WHERE V.study_id = Studies.${Study.PK}) AS attribute_count,
-                    (SELECT COUNT(DISTINCT ov.observation_variable_name) 
-                        FROM observations 
-                        JOIN observation_variables AS ov ON ov.${ObservationVariable.PK} = observations.${ObservationVariable.FK}
-                        WHERE study_id = Studies.${Study.PK} AND observations.observation_variable_db_id > 0) AS trait_count,
-                    (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observations.observation_variable_db_id > 0) AS observation_count
+                    COALESCE(AttributeCounts.attribute_count, 0) AS attribute_count,
+                    COALESCE(ObservationCounts.trait_count, 0) AS trait_count,
+                    COALESCE(ObservationCounts.observation_count, 0) AS observation_count
                 FROM ${Study.tableName} AS Studies
+                LEFT JOIN (
+                    SELECT V.study_id AS study_id, COUNT(DISTINCT A.observation_unit_attribute_name) AS attribute_count
+                    FROM observation_units_attributes AS A
+                    JOIN observation_units_values AS V ON V.${ObservationUnitValue.OBSERVATION_UNIT_ATTRIBUTE_DB_ID} = A.${ObservationUnitAttribute.INTERNAL_ID_OBSERVATION_UNIT_ATTRIBUTE}
+                    GROUP BY V.study_id
+                ) AS AttributeCounts ON AttributeCounts.study_id = Studies.${Study.PK}
+                LEFT JOIN (
+                    SELECT observations.study_id AS study_id,
+                        COUNT(DISTINCT ov.observation_variable_name) AS trait_count,
+                        COUNT(*) AS observation_count
+                    FROM observations
+                    LEFT JOIN observation_variables AS ov ON ov.${ObservationVariable.PK} = observations.${ObservationVariable.FK}
+                    WHERE observations.observation_variable_db_id > 0
+                    GROUP BY observations.study_id
+                ) AS ObservationCounts ON ObservationCounts.study_id = Studies.${Study.PK}
                 ORDER BY ${if (sortOrder == "visible") "position" else sortOrder} COLLATE NOCASE ${if (isDateSort) "DESC" else "ASC"}
             """
             db.rawQuery(query, null).use { cursor ->
@@ -366,13 +379,15 @@ class StudyDao {
                         val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
                         val observationsString = cursor.getString(cursor.getColumnIndexOrThrow("observations"))
                         val rawObservations = observationsString?.split("|") ?: emptyList()
+                        // processValue returns null when a categorical entry has no label/value,
+                        // fall back to the stored value so TraitDetail.observations has no nulls
                         val observations = rawObservations.map { obs ->
                             CategoryJsonUtil.processValue(
                                 buildMap {
                                     put("observation_variable_field_book_format", format)
                                     put("value", obs)
                                 }
-                            )
+                            ) ?: obs
                         }
                         val distinctObsUnits = cursor.getInt(cursor.getColumnIndexOrThrow("distinct_obs_units"))
                         val totalObsUnits = cursor.getInt(cursor.getColumnIndexOrThrow("total_obs_units"))
@@ -633,14 +648,14 @@ class StudyDao {
         /**
          * Returns study by its study_db_id
          */
-        fun getStudyByDbId(studyDbId: String) = withDatabase { db ->
-            StudyModel(
-                db.query(
-                    Study.tableName,
-                    where = "study_db_id = ?",
-                    whereArgs = arrayOf(studyDbId)
-                ).toFirst()
-            )
+        fun getStudyByDbId(studyDbId: String): StudyModel? = withDatabase { db ->
+            db.query(
+                Study.tableName,
+                where = "study_db_id = ?",
+                whereArgs = arrayOf(studyDbId)
+            ).toFirst()
+                .takeIf { it.isNotEmpty() } // no matching study, avoid a StudyModel with no columns
+                ?.let { StudyModel(it) }
         }
 
         /**

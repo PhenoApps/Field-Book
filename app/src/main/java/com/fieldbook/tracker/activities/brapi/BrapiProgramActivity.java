@@ -37,8 +37,6 @@ public class BrapiProgramActivity extends ThemedActivity {
     private ListView programsView;
     private final ArrayList<BrapiProgram> programsList = new ArrayList<>();
 
-    private final BrapiAuthDialogFragment brapiAuth = new BrapiAuthDialogFragment().newInstance();
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -161,15 +159,7 @@ public class BrapiProgramActivity extends ThemedActivity {
     }
 
     private void showBrapiAuthDialog() {
-        try {
-            runOnUiThread(() -> {
-                if (!brapiAuth.isVisible()) {
-                    brapiAuth.show(getSupportFragmentManager(), "BrapiAuthDialogFragment");
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        runOnUiThread(() -> BrapiAuthDialogFragment.showIfNotShowing(getSupportFragmentManager()));
     }
 
     private ListAdapter buildProgramsArrayAdapter(List<BrapiProgram> programs) {
