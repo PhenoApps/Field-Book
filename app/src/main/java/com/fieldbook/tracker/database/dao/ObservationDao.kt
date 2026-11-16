@@ -198,6 +198,35 @@ class ObservationDao {
             getAllRepeatedValues(studyId, obsUnit, traitDbId).minByOrNull { it.rep.toInt() }?.rep
                 ?: "1"
 
+        /**
+         * Highest rep of each unit and trait in the study, keyed by (observation unit id, trait id),
+         * from the same observations as getNextRepeatedValue, so reps for many inserts can be
+         * worked out from one query rather than a query per observation.
+         */
+        fun getMaxReps(studyId: String): Map<Pair<String, String>, Int> = withDatabase { db ->
+
+            val maxReps = hashMapOf<Pair<String, String>, Int>()
+
+            db.rawQuery(
+                """
+                SELECT observation_unit_id, observation_variable_db_id, MAX(CAST(rep AS INTEGER))
+                FROM observations
+                JOIN observation_variables
+                    ON observations.observation_variable_db_id = observation_variables.internal_id_observation_variable
+                WHERE study_id = ?
+                GROUP BY observation_unit_id, observation_variable_db_id
+                """.trimIndent(),
+                arrayOf(studyId)
+            ).use { cursor ->
+                while (cursor.moveToNext()) {
+                    maxReps[cursor.getString(0) to cursor.getString(1)] = cursor.getInt(2)
+                }
+            }
+
+            maxReps
+
+        } ?: emptyMap()
+
         fun getNextRepeatedValue(studyId: String, obsUnit: String, traitDbId: String) =
             (getAllRepeatedValues(
                 studyId,

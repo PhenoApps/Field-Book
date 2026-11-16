@@ -3,7 +3,6 @@ package com.fieldbook.tracker.brapi.service.core
 import android.util.Log
 import com.fieldbook.tracker.brapi.service.BrapiV2ApiCallBack
 import com.fieldbook.tracker.brapi.service.Fetcher
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
@@ -63,11 +62,10 @@ interface TrialService {
                             return@collect
                         }
 
-                        trySend(models)
+                        send(models)
 
                 }
 
-                awaitClose()
             }
     }
 }

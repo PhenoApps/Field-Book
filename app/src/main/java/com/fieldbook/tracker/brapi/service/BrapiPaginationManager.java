@@ -2,16 +2,13 @@ package com.fieldbook.tracker.brapi.service;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.preferences.PreferenceKeys;
 
 public class BrapiPaginationManager {
 
@@ -53,26 +50,7 @@ public class BrapiPaginationManager {
     }
 
     public Integer getDefaultPageSize(){
-        String pageSizeStr = PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50");
-
-        Integer pageSize = 1000;
-
-        try {
-            if (pageSizeStr != null) {
-                pageSize = Integer.parseInt(pageSizeStr);
-            }
-        } catch (NumberFormatException nfe) {
-            String message = nfe.getLocalizedMessage();
-            if (message != null) {
-                Log.d("FieldBookError", nfe.getLocalizedMessage());
-            } else {
-                Log.d("FieldBookError", "Pagination Preference number format error.");
-            }
-            nfe.printStackTrace();
-        }
-
-        return pageSize;
+        return BrAPIService.getPageSize(context);
     }
 
     public Integer getPage() {

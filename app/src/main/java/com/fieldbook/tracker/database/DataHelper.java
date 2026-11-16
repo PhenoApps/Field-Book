@@ -30,6 +30,7 @@ import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.spectral.UriDao;
 import com.fieldbook.tracker.database.migrators.ObservationMediaMigratorVersion21;
+import com.fieldbook.tracker.database.migrators.StudyDbLevelsMigratorVersion22;
 import com.fieldbook.tracker.database.views.ObservationVariableAttributeDetailViewCreator;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
@@ -79,7 +80,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
  */
 public class DataHelper {
 
-    public static final int DATABASE_VERSION = ObservationMediaMigratorVersion21.VERSION;
+    public static final int DATABASE_VERSION = StudyDbLevelsMigratorVersion22.VERSION;
     private static final String DATABASE_NAME = "fieldbook.db";
     public static SQLiteDatabase db;
     private static final String TAG = "Field Book";
@@ -375,6 +376,16 @@ public class DataHelper {
     }
 
     @NonNull
+    /**
+     * Highest rep of each unit and trait in the study, keyed by (observation unit id, trait id).
+     */
+    public Map<kotlin.Pair<String, String>, Integer> getMaxReps(String studyId) {
+
+        open();
+
+        return ObservationDao.Companion.getMaxReps(studyId);
+    }
+
     public String getNextRep(String studyId, String unit, String traitDbId) {
 
         open();
@@ -1094,6 +1105,13 @@ public class DataHelper {
         StudyDao.Companion.updateImportDate(studyId);
     }
 
+    public void updateStudyDbLevels(String studyDbId, String levels) {
+
+        open();
+
+        StudyDao.Companion.updateStudyDbLevels(studyDbId, levels);
+    }
+
     public void updateEditDate(int studyId) {
         StudyDao.Companion.updateEditDate(studyId);
     }
@@ -1230,6 +1248,13 @@ public class DataHelper {
         open();
 
         StudyDao.Companion.createFieldData(studyId, columns, data);
+    }
+
+    public void createFieldDataRows(int studyId, List<String> columns, List<List<String>> rows) {
+
+        open();
+
+        StudyDao.Companion.createFieldDataRows(studyId, columns, rows);
     }
 
     /**
@@ -1891,6 +1916,11 @@ public class DataHelper {
             if (oldVersion <= 20 && newVersion >= 21) {
 
                 Migrator.Companion.migrateToVersion21(db);
+            }
+
+            if (oldVersion <= 21 && newVersion >= 22) {
+
+                Migrator.Companion.migrateToVersion22(db);
             }
         }
     }

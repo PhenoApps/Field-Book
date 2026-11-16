@@ -16,6 +16,7 @@ public class BrapiStudyDetails {
   private List<TraitObject> traits;
   private List<Observation> observations;
   private String trialName;
+  private List<String> studyDbLevels;
 
   public static void merge(BrapiStudyDetails sd1, BrapiStudyDetails sd2) {
     if (sd2.getStudyDbId() != null)
@@ -40,6 +41,8 @@ public class BrapiStudyDetails {
       sd1.setObservations(sd2.getObservations());
     if (sd2.getTrialName() != null)
         sd1.setTrialName(sd2.getTrialName());
+    if (sd2.getStudyDbLevels() != null)
+      sd1.setStudyDbLevels(sd2.getStudyDbLevels());
   }
 
   public String getCommonCropName() {
@@ -124,5 +127,16 @@ public class BrapiStudyDetails {
 
   public void setTrialName(String trialName) {
     this.trialName = trialName;
+  }
+
+  /**
+   * Observation levels used by the study's units, saved with the field so other levels can still be imported.
+   */
+  public List<String> getStudyDbLevels() {
+    return studyDbLevels;
+  }
+
+  public void setStudyDbLevels(List<String> studyDbLevels) {
+    this.studyDbLevels = studyDbLevels;
   }
 }
