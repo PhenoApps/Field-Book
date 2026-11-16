@@ -1,13 +1,14 @@
 package com.fieldbook.tracker.storage
 
 import android.app.Activity
-import android.content.Context
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.DefineStorageActivity
@@ -16,7 +17,6 @@ import com.fieldbook.tracker.utilities.SharedPreferenceUtils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.runBlocking
 import org.phenoapps.fragments.storage.PhenoLibStorageDefinerFragment
-import org.phenoapps.security.Security
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import javax.inject.Inject
 
@@ -26,10 +26,14 @@ class StorageDefinerFragment: PhenoLibStorageDefinerFragment() {
     @Inject
     lateinit var prefs: SharedPreferences
 
-    private val advisor by Security().secureDocumentTree()
+    // opens the folder picker directly; PhenoLib's secureDocumentTree requests media permissions
+    // Field Book doesn't declare on API 33+, so it always failed there (see StorageTreeUtil)
+    private val treeLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        onStorageTreePicked(uri)
+    }
 
     //default root folder name if user choose an incorrect root on older devices
-    override val defaultAppName: String = "fieldBook"
+    override val defaultAppName: String = StorageTreeUtil.DEFAULT_APP_FOLDER
 
     //if this file exists the migrator will be skipped
     override val migrateChecker: String = ".fieldbook"
@@ -78,31 +82,42 @@ class StorageDefinerFragment: PhenoLibStorageDefinerFragment() {
 
         prefs.edit().putBoolean(GeneralKeys.FROM_INTRO_AUTOMATIC, true).apply()
 
-        advisor.defineDocumentTree({ treeUri ->
+        // on recreation the picker is already open and its result is delivered to treeLauncher
+        if (savedInstanceState == null) {
+            treeLauncher.launch(null)
+        }
+    }
+
+    private fun onStorageTreePicked(uri: Uri?) {
+
+        val ctx = context ?: return
+
+        // null when the user backs out of the picker
+        val treeUri = uri?.let { StorageTreeUtil.resolvePickedTree(ctx, it) }
+
+        if (treeUri != null) {
 
             runBlocking {
 
                 directories?.let { dirs ->
 
-                    BaseDocumentTreeUtil.defineRootStructure(context, treeUri, dirs)?.let { root ->
+                    BaseDocumentTreeUtil.defineRootStructure(ctx, treeUri, dirs)?.let { root ->
 
                         samples.entries.forEach { entry ->
 
                             val sampleAsset = entry.key
                             val dir = entry.value
 
-                            BaseDocumentTreeUtil.copyAsset(context, sampleAsset.name, sampleAsset.dir, dir)
+                            BaseDocumentTreeUtil.copyAsset(ctx, sampleAsset.name, sampleAsset.dir, dir)
                         }
 
                         activity?.setResult(Activity.RESULT_OK)
-                        activity?.finish()
                     }
                 }
-            } },
-            {
-                activity?.finish()
             }
-        )
+        }
+
+        activity?.finish()
     }
 
     //https://stackoverflow.com/questions/9469174/set-theme-for-a-fragment
@@ -111,10 +126,5 @@ class StorageDefinerFragment: PhenoLibStorageDefinerFragment() {
         val contextThemeWrapper =
             ContextThemeWrapper(context, SharedPreferenceUtils.getThemeResource(prefs))
         return inflater.cloneInContext(contextThemeWrapper)
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        advisor.initialize()
     }
 }

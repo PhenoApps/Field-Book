@@ -1,10 +1,7 @@
 package com.fieldbook.tracker.fragments
 
 import android.Manifest
-import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,10 +10,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
-import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.storage.StorageTreeUtil
 import com.fieldbook.tracker.utilities.Constants
 import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.views.RequiredSetupItem
@@ -31,8 +28,6 @@ import kotlinx.coroutines.withContext
 import org.phenoapps.fragments.storage.PhenoLibStorageDefinerFragment.AssetSample
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getRoot
-import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.isVolumeRoot
-import org.phenoapps.utils.KeyUtil
 import pub.devrel.easypermissions.EasyPermissions
 
 
@@ -69,12 +64,8 @@ class RequiredSetupPolicyFragment : Fragment(), SlidePolicy {
 
         uri?.let { nonNullUri ->
 
-            persistSinglePermission(ctx, nonNullUri)
-
-            //older devices can choose the volume root, getRoot expects a default folder to be saved in that case
-            val treeUri = if (nonNullUri.isVolumeRoot()) defineDefaultFolder(ctx, nonNullUri) else nonNullUri
-
-            if (treeUri == null) return@registerForActivityResult
+            val treeUri = StorageTreeUtil.resolvePickedTree(ctx, nonNullUri)
+                ?: return@registerForActivityResult
 
             runBlocking {
 
@@ -95,43 +86,6 @@ class RequiredSetupPolicyFragment : Fragment(), SlidePolicy {
         }
     }
 
-    /**
-     * Persists the chosen uri and releases any previously chosen ones,
-     * getRoot only reads the first persisted permission.
-     */
-    private fun persistSinglePermission(ctx: Context, uri: Uri) {
-
-        val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-
-        with(ctx.contentResolver) {
-
-            takePersistableUriPermission(uri, flags)
-
-            persistedUriPermissions.forEach {
-                if (it.uri != uri) {
-                    releasePersistableUriPermission(it.uri, flags)
-                }
-            }
-        }
-    }
-
-    /**
-     * Finds or creates the default app folder within a volume root and saves it as the default tree uri.
-     */
-    private fun defineDefaultFolder(ctx: Context, volumeRoot: Uri): Uri? {
-
-        val root = DocumentFile.fromTreeUri(ctx, volumeRoot) ?: return null
-
-        val folder = root.findFile(DEFAULT_APP_FOLDER)?.takeIf { it.isDirectory }
-            ?: root.createDirectory(DEFAULT_APP_FOLDER)
-            ?: return null
-
-        PreferenceManager.getDefaultSharedPreferences(ctx).edit()
-            .putString(KeyUtil(ctx).defaultTreeUri, folder.uri.toString())
-            .apply()
-
-        return folder.uri
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -293,9 +247,6 @@ class RequiredSetupPolicyFragment : Fragment(), SlidePolicy {
     }
 
     companion object {
-
-        //matches StorageDefinerFragment.defaultAppName
-        private const val DEFAULT_APP_FOLDER = "fieldBook"
 
         fun newInstance(
             slideTitle: String,
