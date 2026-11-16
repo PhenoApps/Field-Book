@@ -38,23 +38,29 @@ class FieldInsightsDao {
     companion object {
 
         /**
-         * Observations and traits the insights screen will show, counted the way it counts them:
-         * only rows with a value (not blank, not NA), for entries still in the field and traits
-         * that still exist. For the field detail page, which needs the totals without loading
-         * every value.
+         * The observation and trait totals of the insights screen's Summary tab, counted the way
+         * [com.fieldbook.tracker.database.repository.FieldInsightsRepository.load] counts them, so
+         * the field detail page and the Summary tab always agree. For the field detail page, which
+         * needs the totals without loading every value.
+         *
+         * Only entries still in the field and traits that still exist count. Observations are
+         * those with a value: not blank, not NA. Traits are those with anything recorded, NA
+         * included, because the Summary tab lists a trait that is only NA so far and counts it in
+         * its progress. Change either definition in both places.
          */
         fun getCounts(studyId: Int): Pair<Int, Int> = withDatabase { db ->
 
             db.rawQuery(
                 """
-                SELECT COUNT(*), COUNT(DISTINCT o.observation_variable_db_id)
+                SELECT COALESCE(SUM(CASE WHEN o.value != 'NA' THEN 1 ELSE 0 END), 0),
+                    COUNT(DISTINCT o.observation_variable_db_id)
                 FROM ${Observation.tableName} AS o
                 JOIN ${ObservationUnit.tableName} AS u
                     ON u.observation_unit_db_id = o.observation_unit_id AND u.study_id = o.study_id
                 JOIN ${ObservationVariable.tableName} AS v
                     ON v.${ObservationVariable.PK} = o.observation_variable_db_id
                 WHERE o.study_id = ? AND o.observation_variable_db_id > 0
-                    AND o.value IS NOT NULL AND TRIM(o.value) != '' AND o.value != 'NA'
+                    AND o.value IS NOT NULL AND TRIM(o.value, ' ' || char(9) || char(10) || char(13)) != ''
                 """.trimIndent(),
                 arrayOf(studyId.toString())
             ).use { cursor ->
