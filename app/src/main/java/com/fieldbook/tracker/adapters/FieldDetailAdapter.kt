@@ -109,7 +109,7 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
                 holder.barChart.visibility = View.VISIBLE
                 holder.histogram.visibility = View.GONE
                 holder.noChartAvailableTextView.visibility = View.GONE
-                val parsedCategories = parseCategories(item.categories)
+                val parsedCategories = parseCategories(item.categories, item.showCategoryValue)
                 HorizontalBarChartHelper.setupHorizontalBarChart(
                     holder.itemView.context,
                     holder.barChart,
@@ -178,13 +178,19 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
         holder.noChartAvailableTextView.text = message
     }
 
-    private fun parseCategories(categories: String?): List<String> {
+    /**
+     * Category names in trait order, using the same label/value choice as the observations
+     * so the bar chart can match them.
+     */
+    private fun parseCategories(categories: String?, showValue: Boolean): List<String> {
         return try {
             if (categories.isNullOrEmpty()) {
                 emptyList()
             } else if (categories.startsWith("[")) {
                 val parsedCategories = CategoryJsonUtil.decode(categories)
-                parsedCategories.map { it.value }
+                parsedCategories.mapNotNull {
+                    if (showValue) it.value ?: it.label else it.label ?: it.value
+                }
             } else {
                 categories.split("/").map { it.trim() }
             }
@@ -215,5 +221,7 @@ data class FieldDetailItem(
      * has already been flattened to whichever single field the trait is configured to display,
      * which discards the day of year whenever the trait shows a formatted date.
      */
-    val dayOfYearValues: List<Int>? = null
+    val dayOfYearValues: List<Int>? = null,
+    /** Categorical traits only: whether [observations] hold category values rather than labels. */
+    val showCategoryValue: Boolean = false
 )

@@ -21,7 +21,6 @@ import com.fieldbook.tracker.database.toFirst
 import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
-import com.fieldbook.tracker.utilities.CategoryJsonUtil
 
 
 class StudyDao {
@@ -379,16 +378,9 @@ class StudyDao {
                         val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
                         val observationsString = cursor.getString(cursor.getColumnIndexOrThrow("observations"))
                         val rawObservations = observationsString?.split("|") ?: emptyList()
-                        // processValue returns null when a categorical entry has no label/value,
-                        // fall back to the stored value so TraitDetail.observations has no nulls
-                        val observations = rawObservations.map { obs ->
-                            CategoryJsonUtil.processValue(
-                                buildMap {
-                                    put("observation_variable_field_book_format", format)
-                                    put("value", obs)
-                                }
-                            ) ?: obs
-                        }
+                        // stored values are returned as-is (categorical JSON included); the field
+                        // detail screen converts them per trait, which knows whether to show label or value
+                        val observations = rawObservations
                         val distinctObsUnits = cursor.getInt(cursor.getColumnIndexOrThrow("distinct_obs_units"))
                         val totalObsUnits = cursor.getInt(cursor.getColumnIndexOrThrow("total_obs_units"))
                         val completeness = distinctObsUnits.toFloat() / totalObsUnits.toFloat()
