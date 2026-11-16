@@ -243,8 +243,6 @@
     <string name="search_attribute_updated_all">%1$d 田区的搜索属性已更新</string>
     <string name="search_multiple_matches_found">找到 %1$d 匹配的小区，显示第一个。</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
-    <string name="field_data_title">数据</string>
-    <string name="field_trait_observation_total">“%d” 观测值</string>
     <!-- Field Detail Charts -->
     <string name="chart_no_data">没有可用于图表的数据</string>
     <string name="chart_incompatible_format">此格式的性状无法用于图表</string>

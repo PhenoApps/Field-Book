@@ -2,7 +2,6 @@ package com.fieldbook.tracker.activities
 
 import android.Manifest
 import android.app.AlertDialog
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
@@ -21,14 +20,9 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.adapters.FieldDetailAdapter
-import com.fieldbook.tracker.adapters.FieldDetailItem
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.SearchAttributeChooserDialog
@@ -38,9 +32,7 @@ import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
-import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.export.ExportUtil
-import com.fieldbook.tracker.utilities.DateJsonUtil
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.SemanticDateUtil
 import com.google.android.material.chip.Chip
@@ -56,7 +48,6 @@ import androidx.core.view.isGone
 import androidx.core.content.edit
 import com.fieldbook.tracker.activities.brapi.io.sync.BrapiSyncActivity
 import com.fieldbook.tracker.utilities.InsetHandler
-import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 
 @AndroidEntryPoint
 class FieldDetailFragment : Fragment(), FieldSyncController {
@@ -74,9 +65,6 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     @Inject
     lateinit var exportUtil: ExportUtil
 
-    @Inject
-    lateinit var valueProcessor: ValueProcessorFormatAdapter
-
     private var toolbar: Toolbar? = null
     private var fieldId: Int? = null
     private var fieldObject: FieldObject? = null
@@ -90,17 +78,16 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var cardViewCollect: CardView
     private lateinit var cardViewExport: CardView
     private lateinit var cardViewSync: CardView
+    private lateinit var cardViewInsights: CardView
+    private lateinit var insightsSummaryTextView: TextView
     private lateinit var sourceChip: Chip
     private lateinit var originalNameChip: Chip
     private lateinit var entryCountChip: Chip
     private lateinit var attributeCountChip: Chip
     private lateinit var sortOrderChip: Chip
     private lateinit var editUniqueChip: Chip
-    private lateinit var dataSummaryTextView: TextView
     private lateinit var trialNameChip: Chip
     private lateinit var studyGroupNameChip: Chip
-    private lateinit var detailRecyclerView: RecyclerView
-    private var adapter: FieldDetailAdapter? = null
     private var fieldDetailsJob: Job? = null
 
     private val brapiSyncIntentLauncher = registerForActivityResult(
@@ -126,13 +113,11 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         attributeCountChip = rootView.findViewById(R.id.attributeCountChip)
         sortOrderChip = rootView.findViewById(R.id.sortOrderChip)
         editUniqueChip = rootView.findViewById(R.id.editUniqueChip)
-        dataSummaryTextView = rootView.findViewById(R.id.dataSummaryTextView)
-        detailRecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
         trialNameChip = rootView.findViewById(R.id.trialNameChip)
         studyGroupNameChip = rootView.findViewById(R.id.studyGroupName)
 
         // The details are not loaded here. onResume() always follows onCreateView() and loads them
-        // itself, so doing it in both places ran the whole query and chart pipeline twice on open.
+        // itself, so doing it in both places ran the whole query twice on open.
         fieldId = arguments?.getInt(GeneralKeys.FIELD_DETAIL_FIELD_ID)
 
         val overviewExpandCollapseIcon: ImageView = rootView.findViewById(R.id.overview_expand_collapse_icon)
@@ -183,25 +168,12 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot export data")
         }
 
-        val dataExpandCollapseIcon: ImageView = rootView.findViewById(R.id.data_expand_collapse_icon)
-        val dataCollapsibleContent: LinearLayout = rootView.findViewById(R.id.data_collapsible_content)
-        val dataCollapsibleHeader: LinearLayout = rootView.findViewById(R.id.data_collapsible_header)
-
-        // Set collapse state based on saved pref
-        val dataIsCollapsed = preferences.getBoolean(GeneralKeys.FIELD_DETAIL_DATA_COLLAPSED, false)
-        dataCollapsibleContent.visibility = if (dataIsCollapsed) View.GONE else View.VISIBLE
-        dataExpandCollapseIcon.setImageResource(if (dataIsCollapsed) R.drawable.ic_chevron_down else R.drawable.ic_chevron_up)
-
-        dataCollapsibleHeader.setOnClickListener { v: View? ->
-            if (dataCollapsibleContent.isGone) {
-                dataCollapsibleContent.visibility = View.VISIBLE
-                dataExpandCollapseIcon.setImageResource(R.drawable.ic_chevron_up)
-                preferences.edit { putBoolean(GeneralKeys.FIELD_DETAIL_DATA_COLLAPSED, false) }
-            } else {
-                dataCollapsibleContent.visibility = View.GONE
-                dataExpandCollapseIcon.setImageResource(R.drawable.ic_chevron_down)
-                preferences.edit { putBoolean(GeneralKeys.FIELD_DETAIL_DATA_COLLAPSED, true) }
-            }
+        cardViewInsights = rootView.findViewById(R.id.cardViewInsights)
+        insightsSummaryTextView = rootView.findViewById(R.id.insightsSummaryTextView)
+        cardViewInsights.setOnClickListener {
+            fieldId?.let { id ->
+                startActivity(FieldInsightsActivity.getIntent(requireContext(), id))
+            } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot open insights")
         }
 
         originalNameChip.setOnClickListener {
@@ -254,11 +226,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     }
 
     /**
-     * Loads the screen in two stages so the header card does not wait on the trait data.
-     *
-     * The study row and its counts are a cheap read, while the trait details carry every
-     * observation value in the field. Loading both before drawing anything meant the name, dates
-     * and chips appeared only once the expensive half had finished.
+     * Loads the study row and its counts, then the Insights card's totals. Both are cheap reads;
+     * the observation values themselves are only loaded by the Insights screen.
      */
     fun loadFieldDetails() {
         val id = fieldId
@@ -267,42 +236,36 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             return
         }
 
-        // Both are resolved here rather than inside the coroutine: the load can outlive the
-        // fragment's view, and requireContext()/viewLifecycleOwner throw once that happens.
-        val context = context ?: return
+        // Resolved here rather than inside the coroutine: the load can outlive the fragment's
+        // view, and viewLifecycleOwner throws once that happens.
         val lifecycleOwner = viewLifecycleOwnerLiveData.value ?: return
 
         // Overlapping loads must not interleave. onResume and a sync completing can both land
-        // here, and without this the slow stage of the earlier load could arrive last and leave
-        // stale traits on screen.
+        // here, and without this the earlier load could arrive last and leave stale counts on
+        // screen.
         fieldDetailsJob?.cancel()
         fieldDetailsJob = lifecycleOwner.lifecycleScope.launch {
 
             val (field, studyGroupName) = withContext(Dispatchers.IO) {
-                val study = database.getFieldObject(id, false)
+                val study = database.getFieldObject(id)
                 study to study?.let { database.getStudyGroupNameById(it.groupId) }
             }
 
             fieldObject = field  // Store the field object
             if (field == null) return@launch
 
-            // Stage one is on screen here: header, chips and toolbar are populated and the card
-            // actions are usable while the observations are still being read.
+            // The header, chips and toolbar are on screen here, and the card actions usable,
+            // while the Insights card's totals are counted.
             updateFieldData(field, studyGroupName)
             setupToolbar(field)
 
-            // Stage two: the observation values, and the per-trait processing they feed.
-            val items = withContext(Dispatchers.IO) {
-                createTraitDetailItems(database.getTraitDetailsForStudy(id), context)
+            // Insights leaves out NA and blank values, so its card is counted with its own query
+            // rather than from the study's totals, which include them.
+            val (insightObservations, insightTraits) = withContext(Dispatchers.IO) {
+                database.getFieldInsightsCounts(id)
             }
-
-            if (detailRecyclerView.adapter == null) { // initial load
-                detailRecyclerView.layoutManager = LinearLayoutManager(context)
-                adapter = FieldDetailAdapter(items.toMutableList())
-                detailRecyclerView.adapter = adapter
-            } else { // reload after data change
-                adapter?.updateItems(items)
-            }
+            insightsSummaryTextView.text =
+                getString(R.string.field_data_summary, insightObservations, insightTraits)
         }
     }
 
@@ -378,14 +341,6 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             getString(R.string.no_activity)
         }
 
-        // Counts arrive as strings straight off the query, so they are parsed defensively rather
-        // than with toInt(), which threw on a null or empty column.
-        dataSummaryTextView.text = getString(
-            R.string.field_data_summary,
-            field.observationCount?.toIntOrNull() ?: 0,
-            field.traitCount?.toIntOrNull() ?: 0
-        )
-
 
         studyGroupNameChip.visibility = View.GONE
         if (!studyGroupName.isNullOrEmpty() && studyGroupName != field.trialName) {
@@ -393,52 +348,6 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             studyGroupNameChip.text = studyGroupName
         }
     }
-
-    /**
-     * Builds the recycler items for a field's traits. Runs off the main thread, so it takes the
-     * context as a parameter instead of reaching for requireContext().
-     */
-    private fun createTraitDetailItems(
-        traitDetails: List<FieldObject.TraitDetail>,
-        context: Context
-    ): List<FieldDetailItem> {
-        return traitDetails.map { traitDetail ->
-            val iconRes = Formats.entries
-                .find { it.getDatabaseName() == traitDetail.format }?.getIcon()
-
-            // Every observation in this group belongs to the same trait, so the trait is looked
-            // up once instead of once per value. The lookup is not cheap either — it also loads
-            // the trait's attribute values, making it two queries a call — so running it per
-            // observation was what stalled fields with a lot of data.
-            val trait = database.getTraitByName(traitDetail.traitName)
-
-            val processedObservations =
-                traitDetail.observations?.map { observation ->
-                    trait?.let {
-                        valueProcessor.processValue(observation, it)
-                    } ?: observation
-                }
-
-            // Read from the stored values rather than the processed ones: the presenter reduces a
-            // date to whichever single field the trait displays, so the day of year is gone by
-            // then whenever the trait is set to show a formatted date.
-            val dayOfYearValues = if (traitDetail.format == Formats.DATE.getDatabaseName()) {
-                traitDetail.observations?.mapNotNull { DateJsonUtil.extractDayOfYear(it) }
-            } else null
-
-            FieldDetailItem(
-                traitDetail.traitName,
-                traitDetail.format,
-                traitDetail.categories,
-                context.getString(R.string.field_trait_observation_total, traitDetail.count),
-                ContextCompat.getDrawable(context, iconRes ?: R.drawable.ic_trait_categorical),
-                processedObservations,
-                traitDetail.completeness,
-                dayOfYearValues
-            )
-        }
-    }
-
 
     private fun setupToolbar(field: FieldObject) {
 

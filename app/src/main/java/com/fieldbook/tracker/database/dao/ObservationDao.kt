@@ -32,6 +32,16 @@ class ObservationDao {
      */
     data class RepeatSummary(val count: Int, val latestValue: String?)
 
+    /** One row for [replaceAllForStudy]. [traitId] is the trait's internal id. */
+    data class NewObservation(
+        val plotId: String,
+        val traitId: Int,
+        val value: String,
+        val collector: String,
+        val timestamp: OffsetDateTime,
+        val rep: String
+    )
+
     companion object {
 
         const val TAG = "ObservationDao"
@@ -780,6 +790,43 @@ class ObservationDao {
 
         fun deleteAllForStudy(studyId: String) = withDatabase { db ->
             db.delete(Observation.tableName, "${Study.FK} = ?", arrayOf(studyId))
+        }.also { ObservationChangeTracker.markChanged() }
+
+        /**
+         * Replaces every observation in a study with [observations], in one transaction.
+         *
+         * For bulk writes such as the generated sample field. Inserting through [insertObservation]
+         * looks the trait up and commits once per row, which for a whole field held the database
+         * long enough to stall any screen reading it. Here the trait id is given, and nothing is
+         * visible to readers until all of it is written.
+         */
+        fun replaceAllForStudy(studyId: String, observations: List<NewObservation>) = withDatabase { db ->
+
+            db.beginTransaction()
+            try {
+                db.delete(Observation.tableName, "${Study.FK} = ?", arrayOf(studyId))
+
+                observations.forEach { observation ->
+                    db.insert(Observation.tableName, null, contentValuesOf(
+                        "observation_db_id" to null,
+                        "value" to sanitizeValue(observation.value),
+                        "observation_time_stamp" to observation.timestamp.format(internalTimeFormatter),
+                        "collector" to observation.collector,
+                        "geo_coordinates" to "",
+                        "last_synced_time" to null,
+                        "rep" to observation.rep,
+                        "notes" to "",
+                        Study.FK to studyId.toInt(),
+                        ObservationUnit.FK to observation.plotId,
+                        ObservationVariable.FK to observation.traitId
+                    ))
+                }
+
+                db.setTransactionSuccessful()
+            } finally {
+                db.endTransaction()
+            }
+
         }.also { ObservationChangeTracker.markChanged() }
 
         /**

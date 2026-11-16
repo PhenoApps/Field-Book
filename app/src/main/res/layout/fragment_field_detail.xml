@@ -414,11 +414,19 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Data Card -->
-        <androidx.cardview.widget.CardView
+        <!-- Insights Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardViewInsights"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp">
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_margin="8dp"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardElevation="4dp"
+            app:rippleColor="@color/main_card_color_pressed"
+            app:strokeColor="@android:color/transparent"
+            app:cardBackgroundColor="@color/main_color_background">
 
             <!-- Card Content -->
             <LinearLayout
@@ -428,15 +436,12 @@
                 android:paddingTop="12dp"
                 android:paddingBottom="12dp">
 
-                <!-- Header for collapsible area -->
+                <!-- Insights Item -->
                 <LinearLayout
-                    android:id="@+id/data_collapsible_header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:clickable="true"
-                    android:focusable="true">
+                    android:gravity="center_vertical">
 
                     <ImageView
                         android:layout_width="30dp"
@@ -455,43 +460,24 @@
                             style="@style/TextViewStyle.Bold.Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/field_data_title" />
+                            android:text="@string/field_insights_title" />
 
                         <TextView
                             style="@style/TextViewStyle.Sub"
-                            android:id="@+id/dataSummaryTextView"
+                            android:id="@+id/insightsSummaryTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                     </LinearLayout>
 
-                    <!-- Collapse/Expand Icon -->
                     <ImageView
-                        android:id="@+id/data_expand_collapse_icon"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        android:src="@drawable/ic_chevron_down" />
-                </LinearLayout>
+                        android:src="@drawable/ic_chevron_right" />
 
-                <!-- Collapsible Content -->
-                <LinearLayout
-                    android:id="@+id/data_collapsible_content"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="gone"
-                    android:paddingTop="8dp"
-                    android:paddingLeft="8dp"
-                    android:paddingRight="8dp">
-
-                    <!-- Individual Trait Data Cards -->
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/fieldDetailRecyclerView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
                 </LinearLayout>
 
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

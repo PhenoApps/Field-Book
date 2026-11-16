@@ -3,6 +3,7 @@ package com.fieldbook.tracker.utilities
 import android.content.Context
 import android.util.Log
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.dao.ObservationDao
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.TraitImportFile
@@ -11,11 +12,14 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.json.Json
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories
 import java.io.InputStreamReader
+import kotlin.math.roundToInt
+import kotlin.math.sqrt
 import kotlin.random.Random
 import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneId
 import java.util.Locale
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 /**
@@ -26,6 +30,7 @@ import javax.inject.Inject
  * - Only adds observations for fields whose names match sample CSV file names
  * - Observation timestamps are randomized over the last three months
  * - Keyboard-like traits (numeric, text, disease rating) use random values from their layout options
+ * - Height and lodging are drawn together so they correlate at [HEIGHT_LODGING_CORRELATION]
  * - Media traits (photo, audio) use artificial filenames without creating actual files
  */
 class SampleDataGenerator @Inject constructor(
@@ -57,13 +62,44 @@ class SampleDataGenerator @Inject constructor(
 
         /** Chance of a missing value */
         private const val NA_CHANCE = 0.05
+
+        /**
+         * Correlation between the generated height and lodging values, so the sample field has a
+         * relationship to find. Both are normal draws; values clamped at the ends of their ranges
+         * are rare enough not to move it.
+         */
+        private const val HEIGHT_LODGING_CORRELATION = 0.8
+        private const val HEIGHT_TRAIT = "height"
+        private const val HEIGHT_MEAN = 500.0
+        private const val HEIGHT_SD = 150.0
+        private const val LODGING_TRAIT = "lodging"
+        private const val LODGING_MEAN = 50.0
+        private const val LODGING_SD = 15.0
+
+        /** Returned by [generateSampleField] when a run is already in progress. */
+        const val ALREADY_RUNNING = -2
+
+        /**
+         * One run at a time across the app. A second run started over the first would create the
+         * field twice and interleave its deletes with the other's inserts.
+         */
+        private val running = AtomicBoolean(false)
     }
+
+    private val gaussian = java.util.Random()
 
     /**
      * Creates a sample field with artificial observations.
-     * Returns the study ID on success, or -1 on failure.
+     * Returns the study ID on success, -1 on failure, or [ALREADY_RUNNING] if another run has not
+     * finished. Does its database work on the calling thread, so call it off the main thread.
      */
     suspend fun generateSampleField(): Int {
+
+        if (!running.compareAndSet(false, true)) {
+            Log.w(TAG, "Sample data generation is already running")
+            return ALREADY_RUNNING
+        }
+
         try {
             // Step 1: Ensure sample traits are loaded BEFORE creating observations
             val traits = ensureTraitsLoaded()
@@ -95,20 +131,26 @@ class SampleDataGenerator @Inject constructor(
                 return studyId
             }
 
-            // Step 5: Clear any previously generated sample observations so re-running this
-            // (e.g. from the experimental preference button) replaces rather than duplicates them.
-            database.deleteAllObservationsForStudy(studyId.toString())
-
-            // Step 6: Generate artificial observations with randomized timestamps
+            // Step 5: Generate artificial observations with randomized timestamps. They are built
+            // in memory first, so the database is only held for the single write in step 6.
             val now = OffsetDateTime.now()
             val threeMonthsAgo = now.minusMonths(3)
             val epochNow = now.toEpochSecond()
             val epochThreeMonthsAgo = threeMonthsAgo.toEpochSecond()
+            val observations = ArrayList<ObservationDao.NewObservation>(units.size * traits.size)
 
             for (unit in units) {
+
+                // One shared draw per entry links height and lodging: lodging's standard score
+                // takes the correlation's share of height's and makes up the rest from its own.
+                val heightScore = gaussian.nextGaussian()
+                val lodgingScore = HEIGHT_LODGING_CORRELATION * heightScore +
+                        sqrt(1 - HEIGHT_LODGING_CORRELATION * HEIGHT_LODGING_CORRELATION) * gaussian.nextGaussian()
+
                 for (trait in traits) {
 
-                    val value = if (Random.nextDouble() < NA_CHANCE) "NA" else generateValue(trait) ?: continue
+                    val value = if (Random.nextDouble() < NA_CHANCE) "NA"
+                    else correlatedValue(trait, heightScore, lodgingScore) ?: generateValue(trait) ?: continue
 
                     val randomEpoch = Random.nextLong(epochThreeMonthsAgo, epochNow)
                     val timestamp = OffsetDateTime.ofInstant(
@@ -116,21 +158,23 @@ class SampleDataGenerator @Inject constructor(
                         ZoneId.systemDefault()
                     )
 
-                    database.insertObservation(
-                        unit.observation_unit_db_id,
-                        trait.id,
-                        value,
-                        "sample",
-                        "",
-                        "",
-                        studyId.toString(),
-                        null,
-                        timestamp,
-                        null,
-                        "1"
+                    observations.add(
+                        ObservationDao.NewObservation(
+                            plotId = unit.observation_unit_db_id,
+                            traitId = trait.id.toInt(),
+                            value = value,
+                            collector = "sample",
+                            timestamp = timestamp,
+                            rep = "1"
+                        )
                     )
                 }
             }
+
+            // Step 6: Replace any previously generated sample observations, so re-running this
+            // (e.g. from the experimental preference button) replaces rather than duplicates them.
+            // One transaction: a row at a time held the database long enough to freeze the app.
+            database.replaceAllObservationsForStudy(studyId.toString(), observations)
 
             Log.i(TAG, "Generated observations for ${units.size} entries × ${traits.size} traits")
             return studyId
@@ -138,6 +182,8 @@ class SampleDataGenerator @Inject constructor(
         } catch (e: Exception) {
             Log.e(TAG, "Error generating sample data", e)
             return -1
+        } finally {
+            running.set(false)
         }
     }
 
@@ -215,10 +261,18 @@ class SampleDataGenerator @Inject constructor(
                 return -1
             }
 
-            var row = reader.readNext()
-            while (row != null) {
-                database.createFieldData(studyId, headers, row.toList())
-                row = reader.readNext()
+            // Each row is several inserts and lookups; one transaction for the lot keeps the
+            // database from committing, and being held, once per insert.
+            database.beginTransaction()
+            try {
+                var row = reader.readNext()
+                while (row != null) {
+                    database.createFieldData(studyId, headers, row.toList())
+                    row = reader.readNext()
+                }
+                database.setTransactionSuccessfull()
+            } finally {
+                database.endTransaction()
             }
             reader.close()
 
@@ -228,6 +282,20 @@ class SampleDataGenerator @Inject constructor(
             Log.e(TAG, "Failed to create sample field", e)
             -1
         }
+    }
+
+    /**
+     * The sample height and lodging values, from an entry's shared standard scores. Null for any
+     * other trait, which then gets an independent value from [generateValue].
+     */
+    private fun correlatedValue(trait: TraitObject, heightScore: Double, lodgingScore: Double): String? = when {
+        trait.format == "numeric" && trait.name.equals(HEIGHT_TRAIT, ignoreCase = true) ->
+            (HEIGHT_MEAN + HEIGHT_SD * heightScore).roundToInt().coerceIn(1, 999).toString()
+
+        trait.format == "percent" && trait.name.equals(LODGING_TRAIT, ignoreCase = true) ->
+            (LODGING_MEAN + LODGING_SD * lodgingScore).roundToInt().coerceIn(0, 100).toString()
+
+        else -> null
     }
 
     /**

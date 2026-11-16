@@ -264,9 +264,7 @@
     <string name="search_attribute_updated_all">Procurar atributo atualizado no(s) campo(s) %1$d</string>
     <string name="search_multiple_matches_found">Encontrados %1$d parcelas correspondentes. Mostrando a primeira.</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
-    <string name="field_data_title">Dados</string>
     <string name="field_data_summary">%1$d observações entre %2$d características</string>
-    <string name="field_trait_observation_total">\"%d\"observações</string>
     <!-- Field Detail Charts -->
     <string name="chart_no_data">Sem dados para o gráfico</string>
     <string name="chart_incompatible_format">Este formato de característica não pode ser representado graficamente</string>

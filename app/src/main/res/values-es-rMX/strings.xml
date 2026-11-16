@@ -264,9 +264,7 @@
     <string name="search_attribute_updated_all">Buscar atributo actualizado para %1$d campo(s)</string>
     <string name="search_multiple_matches_found">Se encontraron parcelas coincidentes con %1$d . Mostrando la primera.</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
-    <string name="field_data_title">Datos</string>
     <string name="field_data_summary">%1$d observaciones en %2$d rasgos</string>
-    <string name="field_trait_observation_total">\"%d\" observaciones</string>
     <!-- Field Detail Charts -->
     <string name="chart_no_data">No hay datos para graficar</string>
     <string name="chart_incompatible_format">Este formato de rasgo no puede ser graficado</string>

@@ -87,6 +87,11 @@ val DefaultAppColors = AppColors(
             dataFilled = BaseColors.DataFilled,
             cellText = BaseColors.CellText,
             activeCellText = BaseColors.ActiveCellText,
+        ),
+        correlation = CorrelationColors(
+            negative = BaseColors.CorrelationNegative,
+            neutral = BaseColors.CorrelationNeutral,
+            positive = BaseColors.CorrelationPositive,
         )
     ),
 
