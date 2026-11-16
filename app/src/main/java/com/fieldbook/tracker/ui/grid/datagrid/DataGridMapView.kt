@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -49,6 +50,8 @@ import eu.wewox.lazytable.LazyTableItem
 import eu.wewox.lazytable.lazyTableDimensions
 import eu.wewox.lazytable.lazyTablePinConfiguration
 import eu.wewox.lazytable.rememberSaveableLazyTableState
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 
 @Composable
 fun DataGridMapView(
@@ -146,6 +149,10 @@ fun DataGridMapView(
             val displayRowPos = activeRowIndices.indexOf(gridRow)
             val displayColPos = activeColIndices.indexOf(gridCol)
             if (displayRowPos >= 0 && displayColPos >= 0) {
+                // The LazyTable lives inside BoxWithConstraints (subcomposed during measure), so
+                // this effect can run before the table's first layout initializes its position
+                // provider. `translate` becomes non-null once that layout has happened.
+                snapshotFlow { lazyTableState.minaBoxState.translate }.filterNotNull().first()
                 lazyTableState.animateToCell(column = displayColPos + 1, row = displayRowPos + 1)
                 hasScrolledToActive = true
             }

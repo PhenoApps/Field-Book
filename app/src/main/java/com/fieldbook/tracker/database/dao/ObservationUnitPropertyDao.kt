@@ -2,6 +2,7 @@ package com.fieldbook.tracker.database.dao
 
 import android.content.Context
 import android.database.Cursor
+import android.database.DatabaseUtils
 import android.database.MatrixCursor
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
@@ -469,7 +470,7 @@ class ObservationUnitPropertyDao {
             val headers = ObservationUnitAttributeDao.getAllNames(studyId).filter { it != "geo_coordinates" }
 
             val selectStatement = headers.joinToString(", ") { col ->
-                "MAX(CASE WHEN attr.observation_unit_attribute_name = \"$col\" THEN vals.observation_unit_value_name ELSE NULL END) AS \"$col\""
+                "MAX(CASE WHEN attr.observation_unit_attribute_name = ${DatabaseUtils.sqlEscapeString(col)} THEN vals.observation_unit_value_name ELSE NULL END) AS \"${col.replace("\"", "\"\"")}\""
             }
 
             val orderByClause = getSortOrderClause(context, studyId.toString())

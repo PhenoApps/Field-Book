@@ -1,5 +1,10 @@
 <changelog>
 
+    <release date="2026-11-10" versionCode="70303" versionName="v7.3.3">
+        <bugfix>Bug fixes and enhancements</bugfix>
+        <bugfix>Features requiring FFmpegKit no longer crash on 32-bit devices</bugfix>
+    </release>
+
     <release date="2026-10-06" versionCode="70302" versionName="v7.3.2">
         <info>Improved USB camera integration</info>
         <bugfix>Slashes in trait names no longer stop images from saving</bugfix>

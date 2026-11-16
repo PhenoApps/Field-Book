@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [v7.3.3] - 2026-11-10
+
+### Fixed
+- Bug fixes and enhancements (https://github.com/PhenoApps/Field-Book/pull/1559)
+- Features requiring FFmpegKit no longer crash on 32-bit devices (https://github.com/PhenoApps/Field-Book/pull/1535)
+
 ## [v7.3.2] - 2026-10-06
 
 ### Changed
@@ -1008,3 +1014,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v7.3.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.3.0
 [v7.3.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.3.1
 [v7.3.2]: https://github.com/PhenoApps/Field-Book/releases/tag/7.3.2
+[v7.3.3]: https://github.com/PhenoApps/Field-Book/releases/tag/7.3.3
