@@ -1,9 +1,5 @@
 package com.fieldbook.tracker.objects;
 
-import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_BOOLEAN;
-import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_NUMERIC;
-import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -14,11 +10,10 @@ import androidx.annotation.Nullable;
 import com.fieldbook.tracker.utilities.CSVReader;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -26,15 +21,17 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.UUID;
 
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 
-//TODO when merged with xlsx edit getColumnSet
+/**
+ * Readers for the file types a field can be imported from.
+ * Each reader returns the header from {@link FieldFileBase#getColumns()}, then the header and data rows in order from
+ * {@link FieldFileBase#readNext()} after {@link FieldFileBase#open()}.
+ * Checking the rows is left to {@link FieldImportValidator}.
+ */
 public class FieldFileObject {
     public static FieldFileBase create(final Context ctx, final Uri path,
                                        final InputStream inputStream, @Nullable String cloudName) {
@@ -76,7 +73,6 @@ public class FieldFileObject {
 
     public abstract static class FieldFileBase {
         boolean openFail;
-        boolean specialCharactersFail;
         private final Uri path_;
         private final Context ctx;
 
@@ -86,10 +82,13 @@ public class FieldFileObject {
             this.ctx = ctx;
             path_ = path;
             openFail = false;
-            specialCharactersFail = false;
         }
 
-        public final InputStream getInputStream() {
+        /**
+         * Opens a new stream over the file; callers close it.
+         * Not final so tests can supply file contents without a content resolver.
+         */
+        public InputStream getInputStream() {
             try {
                 return this.ctx.getContentResolver().openInputStream(this.path_);
             } catch (IOException io) {
@@ -155,10 +154,6 @@ public class FieldFileObject {
             }
         }
 
-        public final boolean hasSpecialCharacters() {
-            return specialCharactersFail;
-        }
-
         public FieldObject createFieldObject() {
             FieldObject f = new FieldObject();
             if (name == null) {
@@ -191,13 +186,13 @@ public class FieldFileObject {
 
         abstract public String[] getColumns();
 
-        // return {column name: column name}
-        // if columns are duplicated, return an empty HshMap
-        abstract public HashMap<String, String> getColumnSet(int idColPosition);
-
         // read file
         abstract public void open();
 
+        /**
+         * @return the next row, starting with the header, or null once the rows run out or a read fails
+         * (check {@link #getOpenFailed()} to tell the two apart)
+         */
         abstract public String[] readNext();
 
         abstract public void close();
@@ -223,56 +218,19 @@ public class FieldFileObject {
         }
 
         public String[] getColumns() {
-            try {
-                openFail = false;
-                InputStreamReader isr = new InputStreamReader(super.getInputStream());
-                CSVReader cr = new CSVReader(isr);
-                return cr.readNext();
+            openFail = false;
+            try (CSVReader reader = new CSVReader(new InputStreamReader(getInputStream()))) {
+                return reader.readNext();
             } catch (Exception ignore) {
                 openFail = true;
                 return new String[0];
             }
         }
 
-        public HashMap<String, String> getColumnSet(int idColPosition) {
-            try {
-                openFail = false;
-                HashMap<String, String> check = new HashMap<>();
-                InputStreamReader isr = new InputStreamReader(super.getInputStream());
-                CSVReader cr = new CSVReader(isr);
-                String[] columns = cr.readNext();
-
-                while (columns != null) {
-                    columns = cr.readNext();
-
-                    if (columns != null) {
-                        String unique = columns[idColPosition];
-                        if (!unique.isEmpty()) {
-                            if (check.containsKey(unique)) {
-                                cr.close();
-                                return new HashMap<>();
-                            } else {
-                                check.put(unique, unique);
-                            }
-
-                            if (unique.contains("/") || unique.contains("\\")) {
-                                specialCharactersFail = true;
-                            }
-                        }
-                    }
-                }
-                return check;
-            } catch (Exception n) {
-                openFail = true;
-                n.printStackTrace();
-                return new HashMap<>();
-            }
-        }
-
         public void open() {
             try {
                 openFail = false;
-                InputStreamReader isr = new InputStreamReader(super.getInputStream());
+                InputStreamReader isr = new InputStreamReader(getInputStream());
                 cr = new CSVReader(isr);
             } catch (Exception e) {
                 openFail = true;
@@ -286,15 +244,16 @@ public class FieldFileObject {
             } catch (Exception e) {
                 openFail = true;
                 e.printStackTrace();
-                return new String[0];
+                return null;
             }
         }
 
         public void close() {
             try {
-                cr.close();
+                if (cr != null) {
+                    cr.close();
+                }
             } catch (Exception e) {
-                openFail = true;
                 e.printStackTrace();
             }
         }
@@ -321,14 +280,13 @@ public class FieldFileObject {
         }
 
         public String[] getColumns() {
-            try {
-                openFail = false;
-                WorkbookSettings wbSettings = new WorkbookSettings();
-                wbSettings.setUseTemporaryFileDuringWrite(true);
+            openFail = false;
+            WorkbookSettings wbSettings = new WorkbookSettings();
+            wbSettings.setUseTemporaryFileDuringWrite(true);
 
-                InputStream is = super.getInputStream();
+            try (InputStream is = getInputStream()) {
                 if (is != null) {
-                    wb = Workbook.getWorkbook(super.getInputStream(), wbSettings);
+                    wb = Workbook.getWorkbook(is, wbSettings);
                     String[] importColumns = new String[wb.getSheet(0).getColumns()];
 
                     for (int s = 0; s < wb.getSheet(0).getColumns(); s++) {
@@ -336,34 +294,11 @@ public class FieldFileObject {
                     }
                     return importColumns;
                 }
-
             } catch (Exception ignore) {
                 openFail = true;
-                return new String[0];
             }
 
             return new String[0];
-        }
-
-        public HashMap<String, String> getColumnSet(int idColPosition) {
-            HashMap<String, String> check = new HashMap<>();
-
-            for (int s = 0; s < wb.getSheet(0).getRows(); s++) {
-                String value = wb.getSheet(0).getCell(idColPosition, s).getContents();
-
-                if (!value.isEmpty()) {
-                    if (check.containsKey(value)) {
-                        return new HashMap<>();
-                    } else {
-                        check.put(value, value);
-                    }
-
-                    if (value.contains("/") || value.contains("\\")) {
-                        specialCharactersFail = true;
-                    }
-                }
-            }
-            return check;
         }
 
         public void open() {
@@ -384,21 +319,16 @@ public class FieldFileObject {
         }
 
         public void close() {
-            try {
-                if (wb != null) {
-                    wb.close();
-                }
-                if (super.getInputStream() != null) {
-                    super.getInputStream().close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (wb != null) {
+                wb.close();
             }
         }
     }
 
     public static class FieldFileXlsx extends FieldFileBase {
         private XSSFWorkbook wb;
+        private FormulaEvaluator evaluator;
+        private final DataFormatter formatter = new DataFormatter();
         private int currentRow;
 
         FieldFileXlsx(final Context ctx, final Uri path) {
@@ -422,63 +352,20 @@ public class FieldFileObject {
 
         @Override
         public String[] getColumns() {
-
-            try {
-
-                if (super.getInputStream() != null) {
-
-                    wb = new XSSFWorkbook(super.getInputStream());
-
-                    XSSFSheet sheet = wb.getSheetAt(0);
-
-                    XSSFRow headerRow = sheet.getRow(0);
-
-                    ArrayList<String> columns = new ArrayList<>();
-
-                    for (Iterator<Cell> it = headerRow.cellIterator(); it.hasNext();) {
-                        XSSFCell cell = (XSSFCell) it.next();
-
-                        columns.add(cell.getStringCellValue());
-
-                    }
-
-                    return columns.toArray(new String[] {});
+            openFail = false;
+            try (InputStream is = getInputStream()) {
+                if (is != null) {
+                    wb = new XSSFWorkbook(is);
+                    evaluator = wb.getCreationHelper().createFormulaEvaluator();
+                    String[] header = readRow(wb.getSheetAt(0).getRow(0));
+                    return header == null ? new String[0] : header;
                 }
-
-            } catch (IOException format) {
-
-                format.printStackTrace();
-
+            } catch (Exception e) {
+                openFail = true;
+                e.printStackTrace();
             }
 
             return new String[0];
-        }
-
-        public HashMap<String, String> getColumnSet(int idColPosition) {
-            HashMap<String, String> check = new HashMap<>();
-
-            XSSFSheet sheet = wb.getSheetAt(0);
-
-            for (Iterator<Row> it = sheet.rowIterator(); it.hasNext(); ) {
-                XSSFRow row = (XSSFRow) it.next();
-
-                String value = getCellStringValue(row.getCell(idColPosition));
-
-                if (!value.isEmpty()) {
-                    if (check.containsKey(value)) {
-                        return new HashMap<>();
-                    } else {
-                        check.put(value, value);
-                    }
-
-                    if (value.contains("/") || value.contains("\\")) {
-                        specialCharactersFail = true;
-                    }
-                }
-
-            }
-
-            return check;
         }
 
         public void open() {
@@ -486,47 +373,55 @@ public class FieldFileObject {
         }
 
         public String[] readNext() {
-
-            DataFormatter fmt = new DataFormatter();
             XSSFSheet sheet = wb.getSheetAt(0);
-            XSSFFormulaEvaluator evaluator = wb.getCreationHelper().createFormulaEvaluator();
-
-            if (currentRow >= sheet.getPhysicalNumberOfRows()) {
+            if (currentRow > sheet.getLastRowNum()) {
                 return null;
             }
 
-            XSSFRow row = sheet.getRow(currentRow);
-            ArrayList<String> data = new ArrayList<>();
+            String[] data = readRow(sheet.getRow(currentRow));
+            currentRow++;
+            return data == null ? new String[0] : data;
+        }
 
-            int maxColumns = sheet.getRow(0).getLastCellNum(); // Get total number of columns from header
+        /**
+         * Reads every cell up to the row's last one by position, so a blank cell keeps the
+         * cells after it in the right column.
+         */
+        private String[] readRow(@Nullable XSSFRow row) {
+            if (row == null || row.getLastCellNum() < 0) return null;
 
-            for (int colIdx = 0; colIdx < maxColumns; colIdx++) {
-                XSSFCell cell = (row == null) ? null : row.getCell(colIdx);
+            String[] data = new String[row.getLastCellNum()];
+            for (int i = 0; i < data.length; i++) {
+                data[i] = formatCell(row.getCell(i, Row.RETURN_BLANK_AS_NULL));
+            }
+            return data;
+        }
 
-                if (cell != null) {
-                    if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {//formula
-                        int type = evaluator.evaluateFormulaCell(cell);
-                        switch (type) {
-                            case CELL_TYPE_BOOLEAN:
-                                data.add(String.valueOf(cell.getBooleanCellValue()));
-                                break;
-                            case CELL_TYPE_NUMERIC:
-                                data.add(String.valueOf(cell.getNumericCellValue()));
-                                break;
-                            default:
-                                data.add(cell.getStringCellValue());
-                                break;
-                        }
-                    } else {
-                        data.add(fmt.formatCellValue(cell));
-                    }
-                } else {
-                    data.add(""); // Add empty string for missing/empty cells
+        /**
+         * Formats a cell as it is displayed in a spreadsheet.
+         * Formulas are evaluated, falling back to the result the spreadsheet saved when POI cannot evaluate them
+         * (POI 3.12 does not know newer functions such as CONCAT).
+         */
+        private String formatCell(@Nullable Cell cell) {
+            if (cell == null) return "";
+            if (cell.getCellType() != Cell.CELL_TYPE_FORMULA) return formatter.formatCellValue(cell);
+
+            try {
+                return formatter.formatCellValue(cell, evaluator);
+            } catch (RuntimeException unsupported) {
+                switch (cell.getCachedFormulaResultType()) {
+                    case Cell.CELL_TYPE_NUMERIC:
+                        CellStyle style = cell.getCellStyle();
+                        return formatter.formatRawCellContents(cell.getNumericCellValue(),
+                                style.getDataFormat(), style.getDataFormatString());
+                    case Cell.CELL_TYPE_STRING:
+                        return cell.getRichStringCellValue().getString();
+                    case Cell.CELL_TYPE_BOOLEAN:
+                        return cell.getBooleanCellValue() ? "TRUE" : "FALSE";
+                    default:
+                        return "";
                 }
             }
-
-            currentRow += 1;
-            return data.toArray(new String[] {});
         }
 
         public void close() {
@@ -534,48 +429,9 @@ public class FieldFileObject {
                 if (wb != null) {
                     wb.close();
                 }
-                if (super.getInputStream() != null) {
-                    super.getInputStream().close();
-                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    /**
-     * Helper function that reads the cell value and parses to string from xlsx sheets.
-     * @param cell the xssf cell object
-     * @return attempt to parse the string value of the cell
-     */
-    private static String getCellStringValue(XSSFCell cell) {
-
-        if (cell == null) return "";
-
-        FormulaEvaluator evaluator = cell.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
-
-        switch (cell.getCellType()) {
-            case 0: { //numeric
-                return String.valueOf(cell.getNumericCellValue());
-            }
-            case 1: { //text
-                return cell.getStringCellValue();
-            }
-            case Cell.CELL_TYPE_FORMULA: { //formula
-                switch (evaluator.evaluateFormulaCell(cell)) {
-                    case CELL_TYPE_BOOLEAN:
-                        return String.valueOf(cell.getBooleanCellValue());
-                    case CELL_TYPE_NUMERIC:
-                        return String.valueOf(cell.getNumericCellValue());
-                    case CELL_TYPE_STRING:
-                        return cell.getStringCellValue();
-                }
-            }
-            case 3: { //boolean
-                return String.valueOf(cell.getBooleanCellValue());
-            }
-            default:
-                return "";
         }
     }
 
@@ -600,15 +456,11 @@ public class FieldFileObject {
             return new String[0];
         }
 
-        public HashMap<String, String> getColumnSet(int idColPosition) {
-            return new HashMap<>();
-        }
-
         public void open() {
         }
 
         public String[] readNext() {
-            return new String[0];
+            return null;
         }
 
         public void close() {

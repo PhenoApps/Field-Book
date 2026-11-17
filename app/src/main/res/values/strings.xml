@@ -196,6 +196,27 @@
     <string name="import_runnable_db_failed_to_switch">Database failed to switch fields.</string>
     <string name="import_runnable_create_field_data_failed">Failed to create field data for line %d in file.</string>
     <string name="import_runnable_duplicates_skipped">Duplicate columns found, only first instance will be used.</string>
+
+    <string name="import_error_title">Unable to import field</string>
+    <string name="import_warning_title">Field imported with warnings</string>
+    <string name="import_error_fix_file">Correct the file and import it again.</string>
+    <string name="import_error_unique_column_not_found">Unique identifier column %1$s was not found in the file.</string>
+    <string name="import_error_no_data">The file has no rows to import.</string>
+    <string name="import_error_unique_id_illegal_character">Unique identifier %1$s on row %2$d contains %3$s, which is not allowed in unique identifiers.</string>
+    <string name="import_error_unique_id_duplicated">Unique identifier %1$s appears more than once, on rows %2$s.</string>
+    <plurals name="import_error_unique_id_missing">
+        <item quantity="one">Row %2$s has no value in unique identifier column %1$s.</item>
+        <item quantity="other">Rows %2$s have no value in unique identifier column %1$s.</item>
+    </plurals>
+    <plurals name="import_error_unique_id_exists">
+        <item quantity="one">Unique identifier %1$s is already used in field %2$s.</item>
+        <item quantity="other">%3$d unique identifiers, including %1$s, are already used in field %2$s.</item>
+    </plurals>
+    <plurals name="import_error_more">
+        <item quantity="one">…and %d more problem.</item>
+        <item quantity="other">…and %d more problems.</item>
+    </plurals>
+
     <string name="fields_study_exists_message">This field already exists.</string>
     <string name="fields_study_and_obs_exists_message">This field is already imported at this observation level.</string>
     <string name="act_field_editor_failed_to_read_columns">Field Book could not load the file.</string>

@@ -62,6 +62,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -1088,6 +1089,16 @@ public class DataHelper {
         open();
 
         return ObservationUnitDao.Companion.checkUnique(values);
+    }
+
+    /**
+     * @return each of the given unique identifiers that is already in use, mapped to the alias of its field
+     */
+    public Map<String, String> getFieldAliasesForIds(Collection<String> ids) {
+
+        open();
+
+        return ObservationUnitDao.Companion.getFieldAliasesForIds(ids);
     }
 
     public void updateImportDate(int studyId) {
