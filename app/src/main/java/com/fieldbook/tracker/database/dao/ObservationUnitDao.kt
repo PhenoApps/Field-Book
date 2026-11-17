@@ -30,6 +30,32 @@ class ObservationUnitDao {
 
         } ?: false
 
+        /**
+         * Finds which of [ids] are already used as unique identifiers.
+         * @return each id in use mapped to the alias of the field that holds it
+         */
+        fun getFieldAliasesForIds(ids: Collection<String>): Map<String, String> = withDatabase { db ->
+
+            val wanted = ids.toHashSet()
+            val found = LinkedHashMap<String, String>()
+
+            db.rawQuery("""
+                SELECT unit.observation_unit_db_id, study.study_alias
+                FROM ${ObservationUnit.tableName} AS unit
+                JOIN ${Study.tableName} AS study ON unit.${Study.FK} = study.${Study.PK}
+            """.trimIndent(), null).use { cursor ->
+                while (cursor.moveToNext()) {
+                    val id = cursor.getString(0) ?: continue
+                    if (id in wanted && id !in found) {
+                        found[id] = cursor.getString(1) ?: ""
+                    }
+                }
+            }
+
+            found
+
+        } ?: emptyMap()
+
         fun getAll(): Array<ObservationUnitModel> = withDatabase { db ->
 
             arrayOf(*db.query(ObservationUnit.tableName)

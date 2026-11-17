@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.text.Html;
 import android.util.Log;
 
+import androidx.annotation.StringRes;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
@@ -15,35 +16,41 @@ import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.interfaces.FieldAdapterController;
 import com.fieldbook.tracker.objects.FieldFileObject;
+import com.fieldbook.tracker.objects.FieldImportError;
+import com.fieldbook.tracker.objects.FieldImportErrorMessages;
+import com.fieldbook.tracker.objects.FieldImportValidator;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.utilities.StringUtil;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
+
+    private static final String TAG = "ImportRunnableTask";
+
     ProgressDialog dialog;
 
     WeakReference<Context> mContext;
     FieldAdapterController controller;
     FieldFileObject.FieldFileBase mFieldFile;
     String unique;
-    int idColPosition;
     SharedPreferences preferences;
 
-    int lineFail = -1;
+    /** Problems in the file, or ids another field already uses; any of these stops the import. */
+    private List<FieldImportError> errors = Collections.emptyList();
+    /** Row being inserted when an unexpected error stopped the import, or -1. */
+    private int failedRow = -1;
     boolean fail;
-    private CharSequence failMessage;
-    boolean uniqueFail;
     boolean containsDuplicates = false;
     boolean fieldNameExists = false;
-    private static final String TAG = "ImportRunnableTask";
 
-    public ImportRunnableTask(Context context, FieldFileObject.FieldFileBase fieldFile,
-                              int idColPosition, String unique) {
+    public ImportRunnableTask(Context context, FieldFileObject.FieldFileBase fieldFile, String unique) {
 
         mFieldFile = fieldFile;
 
@@ -55,7 +62,6 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-        this.idColPosition = idColPosition;
         this.unique = unique;
     }
 
@@ -80,150 +86,78 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
         int studyId = -1;
 
         try {
-            if (!verifyUniqueColumn(mFieldFile)) {
-                uniqueFail = true;
-                return 0;
+            FieldImportValidator.Result file = FieldImportValidator.read(mFieldFile, unique);
+            containsDuplicates = file.getHasDuplicateColumns();
+
+            errors = file.getErrors();
+            if (errors.isEmpty()) {
+                errors = findIdsInUse(file.getUniqueIds());
             }
-
-            if (mFieldFile.hasSpecialCharacters()) {
-                Log.d(TAG, "doInBackground: Special characters found in file column names");
-                return 0;
-            }
-
-
-            mFieldFile.open();
-            String[] data;
-            String[] columns = mFieldFile.readNext();
-            ArrayList<String> nonEmptyColumns = new ArrayList<>();
-            ArrayList<Integer> nonEmptyIndices = new ArrayList<>();
-
-            int uniqueIndex = -1;
-
-            //match and delete special characters from header line
-            for (int i = 0; i < columns.length; i++) {
-
-                String header = columns[i];
-
-                if (DataHelper.hasSpecialChars(header)) {
-                    columns[i] = DataHelper.replaceSpecialChars(header);
-                }
-
-                //populate an array of indices that have a non empty column
-                //later we will only add data rows with the non empty columns
-                //also find the unique index
-                //later we will return an error if it is not present
-                if (!columns[i].isEmpty()) {
-
-                    if (!nonEmptyColumns.contains(columns[i])) {
-                        nonEmptyColumns.add(columns[i]);
-                        nonEmptyIndices.add(i);
-
-                        if (columns[i].equals(unique)) {
-                            uniqueIndex = i;
-                        }
-
-                    } else containsDuplicates = true;
-                }
+            if (!errors.isEmpty()) {
+                return studyId;
             }
 
             FieldObject f = mFieldFile.createFieldObject();
             f.setUniqueId(unique);
 
-            controller.getDatabase().beginTransaction();
+            DataHelper database = controller.getDatabase();
+            database.beginTransaction();
 
-            studyId = controller.getDatabase().createField(f, nonEmptyColumns, false);
+            try {
+                studyId = database.createField(f, file.getColumns(), false);
 
-            if (studyId == -1) {
-                fieldNameExists = true;
-                throw new RuntimeException();
-            }
-
-            //start iterating over all the rows of the csv file only if we found the unique index
-            if (uniqueIndex > -1) {
-                int line = 0;
-                try {
-                    while (true) {
-                        data = mFieldFile.readNext();
-                        if (data == null)
-                            break;
-
-                        //only load the row if it contains unique data
-                        int rowSize = data.length;
-
-                        //ensure next check won't cause an AIOB
-                        if (rowSize > uniqueIndex) {
-
-                            //check that all unique string is not empty
-                            if (!data[uniqueIndex].isEmpty()) {
-
-                                ArrayList<String> nonEmptyData = new ArrayList<>();
-                                for (int j = 0; j < data.length; j++) {
-                                    if (nonEmptyIndices.contains(j)) {
-                                        nonEmptyData.add(data[j]);
-                                    }
-                                }
-
-                                controller.getDatabase().createFieldData(studyId, nonEmptyColumns, nonEmptyData);
-
-                            } else {
-                                fail = true;
-
-                                String fixFileMessage = mContext.get().getString(R.string.import_runnable_create_field_fix_file);
-                                String missingIdMessageTemplate = mContext.get().getString(R.string.import_runnable_create_field_missing_identifier);
-
-                                String missingField = mContext.get().getString(R.string.import_dialog_unique).toLowerCase();
-
-                                String missingIdMessage = String.format(missingIdMessageTemplate, missingField, unique, line + 1);
-                                failMessage = StringUtil.INSTANCE.applyBoldStyleToString(
-                                        String.format("%s\n\n%s", missingIdMessage, fixFileMessage),
-                                        unique,
-                                        String.valueOf(line + 1)
-                                );
-                            }
-                        }
-
-                        line++;
-                    }
-
-                    controller.getDatabase().setTransactionSuccessfull();
-                    Log.d(TAG, "doInBackground: Field data created successfully for study ID: " + studyId);
-
-                } catch (Exception e) {
-                    Log.e(TAG, "doInBackground: Exception at line " + line + ", Error: " + e.getMessage(), e);
-
-                    lineFail = line;
-
-                    e.printStackTrace();
-
-                    throw e;
-
-                } finally {
-
-                    controller.getDatabase().endTransaction();
-
+                if (studyId == -1) {
+                    fieldNameExists = true;
+                    return studyId;
                 }
-            } else {
-                Log.d(TAG, "doInBackground: Required indices not found. UniqueIndex: " + uniqueIndex);
+
+                for (FieldImportValidator.Row row : file.getRows()) {
+                    failedRow = row.getNumber();
+                    database.createFieldData(studyId, file.getColumns(), row.getValues());
+                }
+                failedRow = -1;
+
+                database.setTransactionSuccessfull();
+
+            } finally {
+                database.endTransaction();
             }
 
+            database.close();
+            database.open();
 
-            mFieldFile.close();
-
-            controller.getDatabase().close();
-            controller.getDatabase().open();
-
-            controller.getDatabase().updateImportDate(studyId);
+            database.updateImportDate(studyId);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Field import failed at row " + failedRow, e);
             fail = true;
-            failMessage = mContext.get().getString(R.string.import_runnable_create_field_data_failed);
             controller.getDatabase().close();
             controller.getDatabase().open();
         }
 
-
         return studyId;
+    }
+
+    /**
+     * @return one error per existing field that already uses some of {@code ids}, listing them in file order
+     */
+    private List<FieldImportError> findIdsInUse(List<String> ids) {
+        Map<String, String> fieldById = controller.getDatabase().getFieldAliasesForIds(ids);
+        if (fieldById.isEmpty()) return Collections.emptyList();
+
+        Map<String, List<String>> idsByField = new LinkedHashMap<>();
+        for (String id : ids) {
+            String field = fieldById.get(id);
+            if (field != null) {
+                idsByField.computeIfAbsent(field, k -> new ArrayList<>()).add(id);
+            }
+        }
+
+        List<FieldImportError> inUse = new ArrayList<>();
+        for (Map.Entry<String, List<String>> entry : idsByField.entrySet()) {
+            inUse.add(new FieldImportError.UniqueIdsExist(entry.getKey(), entry.getValue()));
+        }
+        return inUse;
     }
 
     @Override
@@ -231,37 +165,26 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
         Context context = mContext.get();
 
-        if (dialog.isShowing())
+        if (dialog != null && dialog.isShowing())
             dialog.dismiss();
 
-        // Display user feedback in an alert dialog
-        if (context != null){
-            if (fieldNameExists) {
-                showAlertDialog(context, "Unable to Import", context.getString(R.string.import_runnable_field_name_exists));
-            } else if (uniqueFail || mFieldFile.hasSpecialCharacters()) {
-                CharSequence errorMessage = mFieldFile.getLastError();
-                if (errorMessage.length() == 0) { // import failed in verifyUniqueColumn
-                    errorMessage = context.getString(R.string.import_error_unique_exists_db);
-                }
-                showAlertDialog(context, "Unable to Import", errorMessage);
-            } else if (fail) {
-                showAlertDialog(context, "Unable to Import", failMessage);
-            } else if (containsDuplicates) {
-                showAlertDialog(context, "Import Warning", context.getString(R.string.import_runnable_duplicates_skipped));
+        if (fail || fieldNameExists || !errors.isEmpty()) {
+            if (result != -1) {
+                controller.getDatabase().deleteField(result);
             }
-        }
-
-        if (fail || uniqueFail || mFieldFile.hasSpecialCharacters() || fieldNameExists) {
-            controller.getDatabase().deleteField(result);
             SharedPreferences.Editor ed = preferences.edit();
             ed.putString(GeneralKeys.FIELD_FILE, null);
             ed.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
             ed.apply();
-        } else {
-            Log.d(TAG, "onPostExecute: Import successful. Field setup for ID: " + result);
 
+            if (context != null) {
+                showAlertDialog(context, R.string.import_error_title, failureMessage(context));
+            }
+        } else {
             SharedPreferences.Editor ed = preferences.edit();
+
             CollectActivity.reloadData = true;
+
             controller.queryAndLoadFields();
 
             try {
@@ -283,19 +206,27 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                 e.printStackTrace();
 
             }
+
+            if (containsDuplicates && context != null) {
+                showAlertDialog(context, R.string.import_warning_title,
+                        context.getString(R.string.import_runnable_duplicates_skipped));
+            }
         }
     }
 
-    private boolean verifyUniqueColumn(FieldFileObject.FieldFileBase fieldFile) {
-        HashMap<String, String> result = fieldFile.getColumnSet(unique, idColPosition);
-        if (result == null) {
-            return false;
+    private CharSequence failureMessage(Context context) {
+        if (fieldNameExists) {
+            return context.getString(R.string.import_runnable_field_name_exists);
+        } else if (!errors.isEmpty()) {
+            return FieldImportErrorMessages.format(context, errors);
+        } else if (failedRow > 0) {
+            return context.getString(R.string.import_runnable_create_field_data_failed, failedRow);
         } else {
-            return controller.getDatabase().checkUnique(result);
+            return context.getString(R.string.act_field_editor_load_file_failed);
         }
     }
 
-    private void showAlertDialog(Context context, String title, CharSequence message) {
+    private void showAlertDialog(Context context, @StringRes int title, CharSequence message) {
         new AlertDialog.Builder(context, R.style.AppAlertDialog)
                 .setTitle(title)
                 .setMessage(message)
@@ -303,5 +234,4 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                 .setCancelable(false)
                 .show();
     }
-
 }

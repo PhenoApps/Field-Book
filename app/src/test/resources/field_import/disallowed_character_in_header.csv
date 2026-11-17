@@ -1,4 +1,4 @@
-plot_id,plot,replicate#
+plot_id,plot,[replicate]
 25TEST010_0101,101,1
 25TEST010_0102,102,1
 25TEST010_0103,103,1

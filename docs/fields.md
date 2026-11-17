@@ -25,6 +25,8 @@ When importing a file, each row of the file reprents an `entry`.
 
 Each entry within a field must have a `unique identifier`.
 The `unique identifier` is used to associate data with the specific entry and must be unique across all of your fields.
+Every row with data must have a `unique identifier`, and `unique identifiers` cannot contain `/` or `\`.
+If a file breaks any of these rules, Field Book does not import it and lists each problem with the row it is on so the file can be corrected.
 The sample field import file shown below contains a unique identifier called **plot_id** (highlighted in red).
 
 Additional data columns can be included to provide contextual information on the Collect screen.

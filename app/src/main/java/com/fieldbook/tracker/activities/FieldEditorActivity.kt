@@ -79,7 +79,6 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         ImportRunnableTask(
             this@FieldEditorActivity,
             fieldFile,
-            unique.selectedItemPosition,
             unique.selectedItem.toString()
         ).execute(0)
     }
