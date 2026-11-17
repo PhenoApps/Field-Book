@@ -1,8 +1,11 @@
 package com.fieldbook.tracker.database.dao
 
+import android.database.sqlite.SQLiteDatabase
+import android.util.Log
 import androidx.core.content.contentValuesOf
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.ObservationVariableAttribute
+import androidx.core.database.sqlite.transaction
 
 class ObservationVariableAttributeDao {
 
@@ -17,42 +20,54 @@ class ObservationVariableAttributeDao {
         }
 
         fun getAttributeIdByName(name: String): Int = withDatabase { db ->
+            db.transaction {
 
-            db.beginTransaction()
+                try {
 
+                    val result = getAttributeIdByName(this, name)
+
+                    result
+
+                } catch (e: Exception) {
+
+                    e.printStackTrace()
+
+                    -1
+                }
+            }
+        } ?: -1
+
+        fun getAttributeIdByName(db: SQLiteDatabase, name: String): Int {
             var id = -1
 
             try {
 
-                id = db.query(ObservationVariableAttribute.tableName,
+                db.query(ObservationVariableAttribute.tableName,
                     where = "observation_variable_attribute_name LIKE ?",
-                    whereArgs = arrayOf(name)).toFirst().getOrDefault(ObservationVariableAttribute.PK, -1) as Int
+                    whereArgs = arrayOf(name)).use { cursor ->
 
-                if (id == -1) {
+                    if (cursor.moveToFirst()) { // attribute exists
 
-                    db.insert(ObservationVariableAttribute.tableName, null, contentValuesOf(
-                        "observation_variable_attribute_name" to name
-                    ))
+                        id = cursor.getInt(cursor.getColumnIndexOrThrow(ObservationVariableAttribute.PK))
 
-                    id = db.query(ObservationVariableAttribute.tableName,
-                        where = "observation_variable_attribute_name LIKE ?",
-                        whereArgs = arrayOf(name)).toFirst().getOrDefault(ObservationVariableAttribute.PK, -1) as Int
+                    } else { // insert attribute
+
+                        val insertedId = db.insert(
+                            ObservationVariableAttribute.tableName, null,
+                            contentValuesOf("observation_variable_attribute_name" to name)
+                        )
+
+                        id = insertedId.toInt()
+                    }
                 }
-
-                db.setTransactionSuccessful()
 
             } catch (e: Exception) {
 
                 e.printStackTrace()
 
-            } finally {
-
-                db.endTransaction()
-
             }
 
-            id
-
-        } ?: -1
+            return id
+        }
     }
 }

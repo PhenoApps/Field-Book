@@ -30,8 +30,9 @@ class StopWatchTraitLayout : BaseTraitLayout {
     private val elapsedMillis = mutableLongStateOf(0L)
     private val isRunning = mutableStateOf(false)
 
-    //stops the timer and resets the time
+    //removes the saved observation, stops the timer and resets the time
     override fun deleteTraitListener() {
+        collectActivity.removeTrait()
         isRunning.value = false
         elapsedMillis.longValue = 0L
         super.deleteTraitListener()

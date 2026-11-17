@@ -15,7 +15,8 @@ The large black arrows are used to navigate between **entries**.
 The progress bar above the arrows indicates current positional progress through the list of entries.
 
 Data is entered in the bottom area of the screen using a trait-specific layout.
-Values turn from black to red once they have been saved to the internal database.
+Newly entered or edited values are displayed in italics text.
+Previously collected values are displayed as red and bold text.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/collect/collect_framed.png" width="350px"> 
@@ -44,7 +45,7 @@ The search dialog can be populated by pressing the <img class="icon" src="_stati
 Once a column is added, you can enter a search string on the text entry line.
 The <img class="icon" src="_static/icons/collect/equal-box.png"> icon allows you to select the search operator including `is equals to`, `is not equal to`, `contains`, `is more than`, and `is less than`.
 The <img class="icon" src="_static/icons/settings/sounds/delete.png"> icon will remove the selected column from the search.
-Multiple columns can be added when searching for specific entries.
+Multiple columns can be added when searching.
 The search will return a table of matching entries that match the search criteria.
 Pressing any line in the results table will navigate to the corresponding entry.
 
@@ -124,16 +125,18 @@ Pressing "Edit" will navigate to the [Traits](traits.md) screen where you can mo
 The large, black arrows navigate between different entries.
 The bar at the top of the section shows progress through all entries in the field.
 Pressing and holding the an arrow will continuously scroll through the entries.
-The longer the arrows are pressed, the faster the scrolling becomes.
+The longer the arrows are pressed, the faster the scrolling speed.
 
-Primary and secondary IDs are displayed between the entry arrows. Different attributes can be selected to be displayed by pressing the labels.
+Primary and secondary IDs are displayed between the entry arrows.
+Different attributes can be displayed in this area by pressing the labels.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/collect/collect_choose_id_framed.png" width="325px"> 
   <figcaption class="screenshot-caption"><i>Modifying which attribute is used as primary id</i></figcaption> 
 </figure>
 
-The values can be pressed to open the new Quick GoTo dialog (The legacy Quick GoTo setting has been removed now that the feature is available by default). Enter a new value to jump to the first matching entry.
+The values in this area can be pressed to open the Quick GoTo dialog.
+Enter a new value to jump to the first matching entry.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/collect/collect_quick_go_to.png" width="325px"> 
@@ -146,7 +149,8 @@ The bottom half of the screen is used to input data.
 The elements and layout of this area change based on the trait that is currently active.
 Information for each specific trait format can be found in the Trait Formats pages.
 
-Newly input or edited values are colored black and displayed with italic font. Saved values are colored red and displayed in normal font. The font difference can be used to distinguish between the two even on black and white screens.
+Newly input or edited values are colored black and displayed with italic font.
+Saved values are colored red and displayed in normal font.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/collect/collect_framed.png" width="350px"> 
@@ -155,8 +159,63 @@ Newly input or edited values are colored black and displayed with italic font. S
 
 #### Bottom toolbar
 
-The bottom toolbar contains three buttons for data input:
+The bottom toolbar contains three buttons:
 
-- <img class="icon" src="_static/icons/collect/barcode-scan.png"> enters data by scanning a barcode.
-- <img class="icon" src="_static/icons/collect/not-applicable.png"> enters NA for when a phenotype is not available.
-- <img class="icon" src="_static/icons/collect/delete-outline.png"> deletes the entered data.
+- <img class="icon" src="_static/icons/collect/star-four-points-circle-outline.png"> navigates to entries via barcode, records data values from barcodes, or attaches media.
+- <img class="icon" src="_static/icons/collect/not-applicable.png"> enters NA if a phenotype is not available.
+- <img class="icon" src="_static/icons/collect/delete-outline.png"> deletes the observation.
+
+##### Barcode scanning
+
+When a barcode is first scanned, users will be presented with different options for how the barcode should be interpreted.
+Barcodes can be used to 1) move to a specific entry, 2) record the value as a phenotype, 3) record the value as a phenotype if the barcode is not an entry ID, or 4) be presented with an option every time for how to interpret the barcode.
+The selected option can be changed in the Behavior settings.
+
+<figure class="image">
+  <div style="display:flex;gap:8px;align-items:flex-start;">
+    <img class="screenshot" src="_static/images/collect/bottom_toolbar/scanning_barcode_example.png" alt="Camera scanning a barcode" width="350px;height:auto;">
+    <img class="screenshot" src="_static/images/collect/bottom_toolbar/barcode_scanning_options_dialog.png" alt="Barcode scanning options dialog" width="350px;height:auto;">
+  </div>
+  <figcaption class="screenshot-caption"><i>Scanning a barcode and setting an option.</i></figcaption>
+</figure>
+
+By default, a detected barcode will automatically be processed which can limit how a user might interact with it.
+To disable automatic processing, disable the `Always use detected barcode` setting in the Behavior settings.
+When this option is disabled, users must click the detection box to use the barcode for data input or navigation.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/collect/bottom_toolbar/prioritize_barcode_setting.png" alt="Setting to prioritise barcode input" width="350px">
+  <figcaption class="screenshot-caption"><i>Setting to prioritize barcode input when scanning</i></figcaption>
+</figure>
+
+##### Attaching media
+
+Each trait can optionally attach a photo, video, or audio file to an individual phenotypic observation.
+Each observation can have a single attached media for each type.
+
+<figure class="image">
+  <div style="display:flex;gap:8px;align-items:flex-start;">
+    <img class="screenshot" src="_static/images/collect/bottom_toolbar/height_trait_details.png" alt="Height trait example" style="width:350px;height:auto;">
+    <img class="screenshot" src="_static/images/collect/bottom_toolbar/attach_media_example_parameters.png" alt="Attach media parameters dialog showing optional metadata fields" style="width:350px;height:auto;">
+  </div>
+  <figcaption class="screenshot-caption"><i>Setting attached media types for individual traits</i></figcaption>
+</figure>
+
+To attach media, tap the <img class="icon" src="_static/icons/collect/star-four-points-circle-outline.png"> icon to open the media capture screen.
+Media files are linked to a specific observation, so an observation must exist before attaching media.
+If multiple attach media types have been selected, a toggle at the bottom of the media capture screen can be used to navigate between them.
+
+<figure class="image">
+  <div style="display:flex;gap:8px;align-items:flex-start;">
+    <img class="screenshot" src="_static/images/collect/bottom_toolbar/attach_media_carrots_example.png" alt="Attach carrot photo" width="350px;height:auto;">
+    <img class="screenshot" src="_static/images/collect/bottom_toolbar/main_collect_screen.png" alt="Collect screen" style="width:350px;height:auto;">
+  </div>
+  <figcaption class="screenshot-caption"><i>Attach media</i></figcaption>
+</figure>
+
+Long-pressing the <img class="icon" src="_static/icons/collect/star-four-points-circle-outline.png"> icon in Collect, or pressing the <img class="icon" src="_static/icons/collect/multimedia.png"> button on the attached media screen will open the media viewer where attached media can be viewed or deleted.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/collect/bottom_toolbar/attach_media_view_carrots.png" alt="Media viewer showing attached media" width="350px">
+  <figcaption class="screenshot-caption"><i>Media viewer with delete options and media controls</i></figcaption>
+</figure>

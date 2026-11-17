@@ -9,7 +9,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.widget.ImageView
-import android.widget.ProgressBar
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -22,6 +22,8 @@ import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.preferences.enums.DisableEntryArrowMode
+import com.fieldbook.tracker.preferences.enums.SkipEntriesMode
 import com.fieldbook.tracker.utilities.Utils
 import java.util.*
 import androidx.core.content.edit
@@ -52,7 +54,7 @@ class RangeBoxView : ConstraintLayout {
     private var rangeLeft: ImageView
     private var rangeRight: ImageView
 
-    private var plotsProgressBar: ProgressBar
+    private var plotsProgressBar: ThumbOnlySeekBar
 
     private var repeatHandler: Handler? = null
 
@@ -66,8 +68,6 @@ class RangeBoxView : ConstraintLayout {
     private var count = 1
 
     private var exportDataCursor: Cursor? = null
-
-    private val studyId: Int
 
     init {
 
@@ -83,7 +83,7 @@ class RangeBoxView : ConstraintLayout {
 
         this.controller = context as CollectRangeController
 
-        studyId = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+        val studyId: Int = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
 
         rangeID = this.controller.getDatabase().getAllRangeID(studyId)
         cRange = RangeObject()
@@ -164,6 +164,25 @@ class RangeBoxView : ConstraintLayout {
 
         // Go to next range
         rangeRight.setOnClickListener { moveEntryRight() }
+
+        // Allow dragging the progress bar thumb to seek to any entry
+        plotsProgressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                if (fromUser && rangeID.isNotEmpty() && progress in rangeID.indices) {
+                    paging = progress + 1
+                    updateCurrentRange(rangeID[progress])
+                    saveLastPlotAndTrait()
+                    display()
+                    // Update the top info toolbar to reflect the new plot
+                    (controller.getContext() as CollectActivity).refreshInfoBarAdapter()
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                controller.initWidgets(true)
+            }
+        })
 
         setName()
 
@@ -360,27 +379,27 @@ class RangeBoxView : ConstraintLayout {
     // Simulate range right key press
     fun repeatKeyPress(directionStr: String) {
         val left = directionStr.equals("left", ignoreCase = true)
-        if (!controller.validateData(controller.getCurrentObservation()?.value)) {
-            return
-        }
-        if (rangeID.isNotEmpty()) {
-            val step = if (left) -1 else 1
-            paging = movePaging(paging, step, false)
 
-            // Refresh onscreen controls
-            updateCurrentRange(rangeID[paging - 1])
-            saveLastPlotAndTrait()
-            if (cRange.uniqueId.isEmpty()) return
-            if (controller.getPreferences().getBoolean(PreferenceKeys.PRIMARY_SOUND, false)) {
-                if (cRange.primaryId != lastRange && lastRange != "") {
-                    lastRange = cRange.primaryId
-                    controller.getSoundHelper().playPlonk()
+        controller.navigateIfDataIsValid(controller.getCurrentObservation()?.value) {
+            if (rangeID.isNotEmpty()) {
+                val step = if (left) -1 else 1
+                paging = movePaging(paging, step, false)
+
+                // Refresh onscreen controls
+                updateCurrentRange(rangeID[paging - 1])
+                saveLastPlotAndTrait()
+                if (cRange.uniqueId.isEmpty()) return@navigateIfDataIsValid
+                if (controller.getPreferences().getBoolean(PreferenceKeys.PRIMARY_SOUND, false)) {
+                    if (cRange.primaryId != lastRange && lastRange != "") {
+                        lastRange = cRange.primaryId
+                        controller.getSoundHelper().playPlonk()
+                    }
                 }
-            }
-            display()
-            controller.initWidgets(true)
+                display()
+                controller.initWidgets(true)
 
-            Log.d("Field Book", "refresh widgets range box repeate key press")
+                Log.d("Field Book", "refresh widgets range box repeat key press")
+            }
         }
     }
 
@@ -431,6 +450,17 @@ class RangeBoxView : ConstraintLayout {
         }
     }
 
+    /**
+     * Hides the whole range box when the appearance preference is enabled.
+     * The box is only hidden, so navigating with the toolbar, volume keys or
+     * the trait box still works while it is not shown.
+     */
+    fun updateRangeBoxVisibility() {
+        val hidden =
+            controller.getPreferences().getBoolean(PreferenceKeys.HIDE_ENTRY_NAVIGATION, false)
+        visibility = if (hidden) GONE else VISIBLE
+    }
+
     private fun updateProgressBarVisibility() {
         if (controller.getPreferences().getBoolean(PreferenceKeys.RANGE_PROGRESS_BAR, true)) {
             plotsProgressBar.visibility = VISIBLE
@@ -476,6 +506,12 @@ class RangeBoxView : ConstraintLayout {
         rangeRight.performClick()
     }
 
+    fun saveLastPlot() {
+        controller.getPreferences().edit {
+            putString(GeneralKeys.LAST_PLOT, cRange.uniqueId)
+        }
+    }
+
     fun saveLastPlotAndTrait() {
         controller.getPreferences().edit {
             putString(GeneralKeys.LAST_PLOT, cRange.uniqueId)
@@ -510,6 +546,7 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun setAllRangeID() {
+        val studyId: Int = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         rangeID = controller.getDatabase().getAllRangeID(studyId)
     }
 
@@ -529,54 +566,61 @@ class RangeBoxView : ConstraintLayout {
 
     ///// paging /////
     fun moveEntryLeft() {
-        if (!controller.validateData(controller.getCurrentObservation()?.value)) {
-            return
-        }
-        if (controller.getPreferences().getBoolean(PreferenceKeys.ENTRY_NAVIGATION_SOUND, false)
-        ) {
-            controller.getSoundHelper().playAdvance()
-        }
-        val entryArrow =
-            controller.getPreferences().getString(PreferenceKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
-        if ((entryArrow == "1" || entryArrow == "3") && !controller.getTraitBox().existsTrait()) {
-            controller.getSoundHelper().playError()
-        } else {
-            if (rangeID.isNotEmpty()) {
-                //index.setEnabled(true);
-                paging = decrementPaging(paging)
-                controller.refreshMain()
+        controller.navigateIfDataIsValid(controller.getCurrentObservation()?.value) {
+
+            if (controller.getPreferences().getBoolean(PreferenceKeys.ENTRY_NAVIGATION_SOUND, false)
+            ) {
+                controller.getSoundHelper().playAdvance()
             }
+            val entryArrow =
+                DisableEntryArrowMode.fromValue(
+                    controller.getPreferences()
+                        .getString(PreferenceKeys.DISABLE_ENTRY_ARROW_NO_DATA, DisableEntryArrowMode.DEFAULT.value)
+                )
+            if (entryArrow.disablesLeft() && !controller.getTraitBox()
+                    .existsTrait()
+            ) {
+                controller.getSoundHelper().playError()
+            } else {
+                if (rangeID.isNotEmpty()) {
+                    //index.setEnabled(true);
+                    paging = decrementPaging(paging)
+                    controller.refreshMain()
+                }
+            }
+            controller.resetGeoNavMessages()
+            controller.getCollectInputView().resetInitialIndex()
         }
-        controller.resetGeoNavMessages()
-        controller.getCollectInputView().resetInitialIndex()
     }
 
     fun moveEntryRight() {
-        val traitBox = controller.getTraitBox()
-        if (!controller.validateData(controller.getCurrentObservation()?.value)) {
-            return
-        }
-        if (controller.getPreferences().getBoolean(PreferenceKeys.ENTRY_NAVIGATION_SOUND, false)
-        ) {
-            controller.getSoundHelper().playAdvance()
-        }
-        val entryArrow =
-            controller.getPreferences().getString(PreferenceKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
-        if ((entryArrow == "2" || entryArrow == "3") && !traitBox.existsTrait()) {
-            controller.getSoundHelper().playError()
-        } else {
-            if (rangeID.isNotEmpty()) {
-                //index.setEnabled(true);
-                // In addition to advancing the entry, return to the first trait in the trait order if the preference is enabled
-                if (controller.isReturnFirstTrait()) {
-                    traitBox.returnFirst()
-                }
-                paging = incrementPaging(paging)
-                controller.refreshMain()
+        controller.navigateIfDataIsValid(controller.getCurrentObservation()?.value) {
+            val traitBox = controller.getTraitBox()
+            if (controller.getPreferences().getBoolean(PreferenceKeys.ENTRY_NAVIGATION_SOUND, false)
+            ) {
+                controller.getSoundHelper().playAdvance()
             }
+            val entryArrow =
+                DisableEntryArrowMode.fromValue(
+                    controller.getPreferences()
+                        .getString(PreferenceKeys.DISABLE_ENTRY_ARROW_NO_DATA, DisableEntryArrowMode.DEFAULT.value)
+                )
+            if (entryArrow.disablesRight() && !traitBox.existsTrait()) {
+                controller.getSoundHelper().playError()
+            } else {
+                if (rangeID.isNotEmpty()) {
+                    //index.setEnabled(true);
+                    // In addition to advancing the entry, return to the first trait in the trait order if the preference is enabled
+                    if (controller.isReturnFirstTrait()) {
+                        traitBox.returnFirst()
+                    }
+                    paging = incrementPaging(paging)
+                    controller.refreshMain()
+                }
+            }
+            controller.resetGeoNavMessages()
+            controller.getCollectInputView().resetInitialIndex()
         }
-        controller.resetGeoNavMessages()
-        controller.getCollectInputView().resetInitialIndex()
     }
 
     private fun decrementPaging(pos: Int): Int {
@@ -588,25 +632,33 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun movePaging(pos: Int, step: Int, fromToolbar: Boolean): Int {
-        //three skipMode options: 0. disabled 1. skip active trait 2. skip but check all traits
-
         val skipMode = if (fromToolbar) {
-            controller.getPreferences().getString(PreferenceKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0")?.toIntOrNull() ?: 0
+            SkipEntriesMode.fromValue(
+                controller.getPreferences().getString(
+                    PreferenceKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR,
+                    SkipEntriesMode.DEFAULT.value
+                )
+            )
         } else {
-            controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "0")?.toIntOrNull() ?: 0
+            SkipEntriesMode.fromValue(
+                controller.getPreferences().getString(
+                    GeneralKeys.HIDE_ENTRIES_WITH_DATA,
+                    SkipEntriesMode.DEFAULT.value
+                )
+            )
         }
 
         return when (skipMode) {
-            1 -> {
+            SkipEntriesMode.CURRENT_TRAIT -> {
                 val traits = ArrayList<TraitObject>()
                 controller.getTraitBox().currentTrait.let { traits.add(it!!) }
                 moveToNextUncollectedObs(pos, step, traits)
             }
-            2 -> {
+            SkipEntriesMode.ALL_TRAITS -> {
                 val visibleTraits = ArrayList(controller.getDatabase().getVisibleTraits().filterNotNull())
                 moveToNextUncollectedObs(pos, step, visibleTraits)
             }
-            else -> moveSimply(pos, step)
+            SkipEntriesMode.DISABLED -> moveSimply(pos, step)
         }
     }
 
@@ -625,6 +677,7 @@ class RangeBoxView : ConstraintLayout {
 
     private fun moveToNextUncollectedObs(currentPos: Int, direction: Int, traits: ArrayList<TraitObject>): Int {
 
+        val studyId: Int = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         val uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
         val exportDataCursor = controller.getDatabase().getExportTableDataShort(studyId, uniqueName, traits)
         val traitNames = traits.map { it.name }

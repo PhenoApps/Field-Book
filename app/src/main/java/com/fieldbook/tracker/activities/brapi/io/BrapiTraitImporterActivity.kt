@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.ProgressBar
-import androidx.activity.OnBackPressedDispatcher
 import androidx.appcompat.widget.Toolbar
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
@@ -15,7 +14,6 @@ import com.fieldbook.tracker.activities.brapi.io.mapper.DataTypes
 import com.fieldbook.tracker.activities.brapi.io.mapper.toTraitObject
 import com.fieldbook.tracker.adapters.BrapiTraitImportAdapter
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
-import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.NewTraitDialog
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.TextTraitLayout
@@ -27,7 +25,9 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import javax.inject.Inject
 import androidx.core.content.edit
+import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.utilities.InsetHandler
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedActivity(),
@@ -44,7 +44,7 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
     }
 
     @Inject
-    lateinit var database: DataHelper
+    lateinit var traitRepo: TraitRepository
 
     private var toolbar: Toolbar? = null
     private var recyclerView: androidx.recyclerview.widget.RecyclerView? = null
@@ -89,11 +89,16 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
                 CheckboxListAdapter.Model(
                     checked = false,
                     id = model.observationVariableDbId,
-                    label = model.synonyms?.firstOrNull() ?: model.observationVariableName ?: model.observationVariableDbId,
+                    label = model.synonyms?.firstOrNull() ?: model.observationVariableName
+                    ?: model.observationVariableDbId,
                     subLabel = "${model.commonCropName ?: ""} ${model.observationVariableDbId ?: ""}"
                 ).also {
                     model.scale?.dataType?.name?.let { dataType ->
-                        Formats.findTrait(DataTypes.convertBrAPIDataType(dataType))?.iconDrawableResourceId?.let { icon ->
+                        val convertedType = DataTypes.convertBrAPIDataType(dataType)
+                        val finalTraitFormat =
+                            if (convertedType == "multicat") "categorical" else convertedType
+
+                        Formats.findTrait(finalTraitFormat)?.iconDrawableResourceId?.let { icon ->
                             it.iconResId = icon
                         }
                     }
@@ -104,7 +109,6 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
             it.submitList(cache)
         }
 
-        var nextPosition = database.maxPositionFromTraits + 1
 
         finishButton?.setOnClickListener {
 
@@ -112,24 +116,21 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
             finishButton?.visibility = View.GONE
             progressBar?.visibility = View.VISIBLE
 
-            BrapiFilterCache.getStoredModels(this).variables.values.forEach { trait ->
-                if (varUpdates[trait.observationVariableDbId] == null) {
-                    varUpdates[trait.observationVariableDbId] = trait.toTraitObject(this)
+            launch {
+                BrapiFilterCache.getStoredModels(this@BrapiTraitImporterActivity).variables.values.forEach { trait ->
+                    if (varUpdates[trait.observationVariableDbId] == null) {
+                        varUpdates[trait.observationVariableDbId] =
+                            trait.toTraitObject(this@BrapiTraitImporterActivity)
+                    }
                 }
+
+                traitRepo.saveTraitsFromHashmap(varUpdates, dbIds)
+
+                prefs.edit { remove(BrapiTraitFilterActivity.FILTER_NAME) }
+
+                setResult(RESULT_OK)
+                finish()
             }
-
-            varUpdates.forEach { (t, u) ->
-                if (t in dbIds!!) {
-                    database.insertTraits(u.apply {
-                        realPosition = nextPosition++
-                    })
-                }
-            }
-
-            prefs.edit { remove(BrapiTraitFilterActivity.FILTER_NAME) }
-
-            setResult(RESULT_OK)
-            finish()
         }
     }
 
@@ -171,7 +172,7 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
 
             val traitDialog = NewTraitDialog(this)
 
-            //traitDialog.isSelectingFormat = true
+            // traitDialog.isSelectingFormat = true
 
             traitDialog.isBrapiTraitImport = true
 

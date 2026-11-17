@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.fragments
 
 import android.Manifest
-import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
@@ -14,6 +13,7 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.storage.StorageTreeUtil
 import com.fieldbook.tracker.utilities.Constants
 import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.views.RequiredSetupItem
@@ -54,21 +54,24 @@ class RequiredSetupPolicyFragment : Fragment(), SlidePolicy {
         AssetSample("resources", "feekes_sample.jpg") to R.string.dir_resources,
         AssetSample("resources", "stem_rust_sample.jpg") to R.string.dir_resources,
         AssetSample("trait", "trait_sample.trt") to R.string.dir_trait,
+        AssetSample("trait", "trait_sample_json.trt") to R.string.dir_trait,
         AssetSample("trait", "severity.txt") to R.string.dir_trait,
         AssetSample("database", "sample_db.zip") to R.string.dir_database)
 
     private val launcher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
 
+        val ctx = context ?: return@registerForActivityResult
+
         uri?.let { nonNullUri ->
 
-            val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            val treeUri = StorageTreeUtil.resolvePickedTree(ctx, nonNullUri)
+                ?: return@registerForActivityResult
 
-            context?.contentResolver?.takePersistableUriPermission(nonNullUri, flags)
             runBlocking {
 
                 directories?.let { dirs ->
 
-                    BaseDocumentTreeUtil.defineRootStructure(context, nonNullUri, dirs)?.let { _ ->
+                    BaseDocumentTreeUtil.defineRootStructure(ctx, treeUri, dirs)?.let { _ ->
 
                         samples.entries.forEach { entry ->
 
@@ -82,6 +85,7 @@ class RequiredSetupPolicyFragment : Fragment(), SlidePolicy {
             }
         }
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -212,8 +216,14 @@ class RequiredSetupPolicyFragment : Fragment(), SlidePolicy {
     }
 
     private fun validateStorage(): Boolean {
-        val root = getRoot(context)
-        return (root != null && root.exists())
+        return try {
+            val root = getRoot(context)
+            root != null && root.exists()
+        } catch (e: Exception) {
+            //e.g a volume root was persisted without a default folder, user must choose storage again
+            e.printStackTrace()
+            false
+        }
     }
 
     override val isPolicyRespected: Boolean
@@ -237,6 +247,7 @@ class RequiredSetupPolicyFragment : Fragment(), SlidePolicy {
     }
 
     companion object {
+
         fun newInstance(
             slideTitle: String,
             slideSummary: String,

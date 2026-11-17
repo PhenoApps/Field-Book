@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pheno_brapi_add_account">Add Account</string>
+    <string name="pheno_brapi_account_label">BrAPI</string>
+    <string name="pheno_brapi_shared_servers">Shared Servers</string>
+    <string name="pheno_brapi_section_shared_accounts">Shared Accounts</string>
+    <string name="pheno_brapi_shared_account_from">Created in %s</string>
+    <string name="pheno_brapi_add_account_in_app_only">Use the in-app Add Account option to add BrAPI accounts.</string>
+    <string name="pheno_brapi_auth_token_label">BrAPI Access Token</string>
+    <string name="pheno_brapi_auth_permission_deny">ERROR: You do not have the permissions necessary to perform this action</string>
+    <string name="pheno_brapi_account_not_found">Account not found</string>
+    <string name="pheno_brapi_invalid_url">Please enter a valid server URL (e.g. https://server.example.org)</string>
+    <string name="pheno_brapi_auth_failed_keep_title">Authorization Failed</string>
+    <string name="pheno_brapi_auth_failed_keep_message">Keep \"%1$s\" in the server list?</string>
+    <string name="pheno_brapi_auth_failed_keep">Keep</string>
+    <string name="pheno_brapi_access_confirm_title">BrAPI Account Access</string>
+    <string name="pheno_brapi_access_confirm_message">%1$s would like to access your \"%2$s\" BrAPI account.</string>
+    <string name="pheno_brapi_access_confirm_allow">Allow</string>
+    <string name="pheno_brapi_access_confirm_deny">Deny</string>
+    <string name="pheno_brapi_add_account_title">Add Account</string>
+    <string name="pheno_brapi_edit_account_title">Edit Account</string>
+    <string name="pheno_brapi_add_account_guided_setup">Manual Input</string>
+    <string name="pheno_brapi_add_account_scan_config">Scan Configuration Code</string>
+    <string name="pheno_brapi_base_url">Base URL</string>
+    <string name="pheno_brapi_display_name">Display Name</string>
+    <string name="pheno_brapi_version">BrAPI Version</string>
+    <string name="pheno_brapi_version_v1" translatable="false">V1</string>
+    <string name="pheno_brapi_version_v2" translatable="false">V2</string>
+    <string name="pheno_brapi_oidc_flow">OIDC Flow</string>
+    <string name="pheno_brapi_oidc_flow_oauth_code">OAuth2 Authorization Code</string>
+    <string name="pheno_brapi_oidc_flow_oauth_implicit">OAuth2 Implicit Grant</string>
+    <string name="pheno_brapi_oidc_url">OIDC Discovery URL</string>
+    <string name="pheno_brapi_oidc_client_id">OIDC Client ID</string>
+    <string name="pheno_brapi_oidc_scope">OIDC Scope</string>
+    <string name="pheno_brapi_optional">Optional</string>
+    <string name="pheno_brapi_save_authorize">Authorize</string>
+    <string name="pheno_brapi_switch_server_title">Switch Server</string>
+    <string name="pheno_brapi_chip_compatibility">Compatibility</string>
+    <string name="pheno_brapi_chip_share">Share</string>
+    <string name="pheno_brapi_chip_edit">Edit</string>
+    <string name="pheno_brapi_chip_logout">Log out</string>
+    <string name="pheno_brapi_chip_authorize">Authorize</string>
+    <string name="pheno_brapi_chip_remove">Remove</string>
+    <string name="pheno_brapi_dialog_cancel">Cancel</string>
+    <string name="pheno_brapi_dialog_back">Back</string>
+    <string name="pheno_brapi_dialog_next">Next</string>
+    <string name="pheno_brapi_dialog_save">Save</string>
+    <string name="pheno_brapi_dialog_scan">Scan</string>
+</resources>

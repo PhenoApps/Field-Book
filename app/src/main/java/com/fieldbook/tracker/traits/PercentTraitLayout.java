@@ -5,7 +5,6 @@ import static com.fieldbook.tracker.traits.NumericTraitLayout.isUnder;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -17,9 +16,6 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.traits.formats.Formats;
-import com.fieldbook.tracker.traits.formats.Scannable;
-import com.fieldbook.tracker.traits.formats.TraitFormat;
 
 public class PercentTraitLayout extends BaseTraitLayout {
     private SeekBar seekBar;
@@ -141,6 +137,13 @@ public class PercentTraitLayout extends BaseTraitLayout {
 
         ObservationModel model = getCurrentObservation();
         if (model != null) {
+            // When frozen with repeated measures, update isLocked per-observation
+            // so existing rep values stay read-only while new empty reps remain editable.
+            CollectActivity act = (CollectActivity) getContext();
+            if (act.isFrozen() && getCollectInputView().isRepeatEnabled()) {
+                isLocked = !model.getValue().isEmpty();
+                seekBar.setEnabled(!isLocked);
+            }
             if (model.getValue().equals("NA")) {
                 getCollectInputView().setText("NA");
                 getSeekBar().setProgress(0);

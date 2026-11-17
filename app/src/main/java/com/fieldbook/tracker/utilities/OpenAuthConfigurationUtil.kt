@@ -58,8 +58,10 @@ class OpenAuthConfigurationUtil @Inject constructor(
         }
     }
 
+    @JvmOverloads
     fun getAuthServiceConfiguration(
         onRetrieveConfiguration: (AuthorizationServiceConfiguration?, Exception?) -> Unit,
+        oidcUrl: String? = null,
     ) {
         preferences.edit {
             putString(PreferenceKeys.BRAPI_TOKEN, null)
@@ -67,8 +69,13 @@ class OpenAuthConfigurationUtil @Inject constructor(
 
         try {
 
-            val oidcConfigURI =
-                (preferences.getString(PreferenceKeys.BRAPI_OIDC_URL, "") ?: "").toUri()
+            val rawOidcUrl = oidcUrl?.takeIf { it.isNotEmpty() }
+                ?: (preferences.getString(PreferenceKeys.BRAPI_OIDC_URL, "") ?: "")
+            val oidcConfigUrl = rawOidcUrl.let { url ->
+                    if (url.startsWith(HTTP) || url.startsWith(HTTPS)) url
+                    else "$HTTPS://$url"
+                }
+            val oidcConfigURI = oidcConfigUrl.toUri()
 
             val builder = getConnectionBuilder()
 

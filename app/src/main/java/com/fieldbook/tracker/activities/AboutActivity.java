@@ -12,12 +12,11 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -34,11 +33,9 @@ import com.danielstone.materialaboutlibrary.model.MaterialAboutList;
 import com.fieldbook.tracker.BuildConfig;
 import com.fieldbook.tracker.dialogs.CitationDialog;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.InsetHandler;
 import com.google.android.material.appbar.AppBarLayout;
-import com.mikepenz.aboutlibraries.LibsBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,6 +58,8 @@ public class AboutActivity extends MaterialAboutActivity {
     protected void onCreate(Bundle savedInstanceState) {
         ThemedActivity.Companion.applyTheme(this);
         super.onCreate(savedInstanceState);
+        //this activity cannot extend ThemedActivity, match what it does so the system bars agree
+        EdgeToEdge.enable(this);
         checkForUpdate();
         circularProgressDrawable = new CircularProgressDrawable(this);
         circularProgressDrawable.setStyle(CircularProgressDrawable.DEFAULT);
@@ -112,7 +111,8 @@ public class AboutActivity extends MaterialAboutActivity {
         MaterialAboutCard.Builder appCardBuilder = new MaterialAboutCard.Builder();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getString(PreferenceKeys.THEME, "0").equals(String.valueOf(ThemedActivity.HIGH_CONTRAST))) {
+        if (prefs.getString(PreferenceKeys.THEME, String.valueOf(ThemedActivity.DEFAULT))
+                .equals(String.valueOf(ThemedActivity.HIGH_CONTRAST))) {
             appCardBuilder.addItem(new MaterialAboutTitleItem.Builder()
                     .text(getString(R.string.field_book))
                     .icon(R.mipmap.ic_launcher_monochrome)
@@ -203,15 +203,19 @@ public class AboutActivity extends MaterialAboutActivity {
                 .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://github.com/PhenoApps/Field-Book")))
                 .build());
 
-        String theme = PreferenceManager.getDefaultSharedPreferences(this)
-                .getString(PreferenceKeys.THEME, "0");
+        int theme = ThemedActivity.DEFAULT;
+        try {
+            theme = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this)
+                    .getString(PreferenceKeys.THEME, String.valueOf(ThemedActivity.DEFAULT)));
+        } catch (NumberFormatException ignored) {
+        }
 
         int styleId = R.style.AboutLibrariesCustom;
         switch (theme) {
-            case "2":
+            case ThemedActivity.BLUE:
                 styleId = R.style.AboutLibrariesCustom_Blue;
                 break;
-            case "1":
+            case ThemedActivity.HIGH_CONTRAST:
                 styleId = R.style.AboutLibrariesCustom_HighContrast;
                 break;
         }
@@ -223,13 +227,8 @@ public class AboutActivity extends MaterialAboutActivity {
                 .setOnClickAction(new MaterialAboutItemOnClickAction() {
                     @Override
                     public void onClick() {
-                        new LibsBuilder()
-                                .withActivityTheme(libStyleId)
-                                .withAutoDetect(true)
-                                .withActivityTitle(getString(R.string.about_libraries_title))
-                                .withLicenseShown(true)
-                                .withVersionShown(true)
-                                .start(getApplicationContext());
+                        //started from the activity so it stays in this task
+                        startActivity(new Intent(AboutActivity.this, LibrariesActivity.class));
                     }
                 })
                 .build());

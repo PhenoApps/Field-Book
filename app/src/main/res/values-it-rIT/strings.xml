@@ -17,6 +17,7 @@
     <string name="dialog_go">Vai</string>
     <string name="dialog_save_error_title">Errore Di Salvataggio</string>
     <string name="dialog_back">Indietro</string>
+    <string name="dialog_next">Successivo</string>
     <string name="dialog_scan">Scansiona</string>
     <string name="dialog_sort_by">Ordina Per</string>
     <string name="dialog_enable">Abilita</string>
@@ -24,6 +25,9 @@
     <string name="dialog_accept">Accetta</string>
     <string name="dialog_exit">Esci</string>
     <string name="barcode_scanner_text">Scansiona un codice a barre</string>
+    <!-- Toolbar -->
+    <string name="appbar_more_options">Altre Opzioni</string>
+    <string name="appbar_back">Indietro</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dati di Esempio</string>
     <string name="startup_sample_data_message">Caricare i dati di esempio?</string>
@@ -31,10 +35,10 @@
     <string name="app_intro_intro_title_slide1">Benvenuto su Field Book!</string>
     <string name="app_intro_intro_summary_slide1">Tradizionalmente la raccolta dei dati in campo si basa sull\'utilizzo e sulla trascrizione da carta e matita. Field Book è stato creato come soluzione digitale per la raccolta dei dati, permettendo una maggiore velocità e una migliore integrità dei dati.</string>
     <string name="app_intro_intro_title_slide2">Funzionalità e Personalizzazione</string>
-    <string name="app_intro_intro_summary_slide2">I dati vengono inseriti su Field Book con disposizione dei caratteri che sono progettate per semplificare l\'inserimento dei dati e minimizzare gli errori. \n\n Per impostazione predefinita, i dati raccolti vengono archiviati localmente, ma Field Book supporta la Breeding-API che permette l\'invio di dati a sistemi compatibili con BrAPI.</string>
+    <string name="app_intro_intro_summary_slide2">I dati vengono inseriti su Field Book con disposizione dei caratteri che sono progettate per semplificare l\'input dei dati e minimizzare gli errori. \n\n Per impostazione predefinita, i dati raccolti vengono archiviati localmente, ma Field Book supporta la Breeding-API che permette l\'invio di dati a sistemi compatibili con BrAPI.</string>
     <string name="app_intro_required_setup_title">Impostazione Richiesta</string>
     <string name="app_intro_required_setup_summary">Per iniziare a usare Field Book, concedi i permessi necessari all\'applicazione e scegli una cartella in cui salvare i tuoi dati.</string>
-    <string name="app_intro_permissions_title">Permessi</string>
+    <string name="app_intro_permissions_title">Autorizzazioni</string>
     <string name="app_intro_permissions_warning">Si prega di concedere le autorizzazioni necessarie</string>
     <string name="app_intro_storage_title">Definisci Archiviazione</string>
     <string name="app_intro_storage_summary">Definisci una cartella in cui verranno archiviati i tuoi dati.</string>
@@ -52,6 +56,7 @@
     <string name="storage_definer_summary">Seleziona o crea una cartella che Field Book può utilizzare per archiviare i dati dell\'app.</string>
     <string name="define_button_text">Scegli Cartella</string>
     <!-- Permissions  -->
+    <string name="permission_rationale_storage">È richiesto l\'accesso ai file del dispositivo.</string>
     <string name="permission_rationale_storage_import">Per importare i file è necessario accedere ai file del dispositivo.</string>
     <string name="permission_rationale_storage_export">Per esportare i dati è necessario accedere ai file del dispositivo.</string>
     <string name="permission_rationale_trait_features">La raccolta dei dati richiede l\'accesso ai file, al microfono e alla camera del dispositivo.</string>
@@ -93,8 +98,8 @@
     <string name="dialog_group_name_warning">Campo non può essere vuoto</string>
     <string name="menu_group">Raggruppa</string>
     <string name="menu_archive">Archivio</string>
-    <string name="menu_groups_toggle">Commuta Visibilità Gruppi</string>
-    <string name="group_toggle_icon">Commuta Gruppo</string>
+    <string name="menu_groups_toggle">Attiva Visibilità Gruppi</string>
+    <string name="group_toggle_icon">Attiva/Disattiva Gruppo</string>
     <string name="archived_fields">Campi Archiviati</string>
     <string name="menu_unarchive">Rimuovi dall\'archivio</string>
     <string name="menu_collapse_all">Comprimi Tutto</string>
@@ -123,7 +128,7 @@
     <string name="field_sort_entries">Ordina</string>
     <string name="sort_dialog_saved">Ordinamento aggiornato</string>
     <string name="sort_dialog_error_saving">Errore durante l\'aggiornamento dell\'ordinamento</string>
-    <string name="list_item_field_sort_delete_content_description">Cancella criterio di ordinamento.</string>
+    <string name="list_item_field_sort_delete_content_description">Elimina l\'attributo di ordinamento.</string>
     <string name="dialog_field_sort_title">Ordina le Entrate</string>
     <string name="list_item_field_sort_drag_content_description">Trascina per spostare l\'elemento.</string>
     <string name="dialog_field_sort_no_attributes_found">Nessun attributo trovato.</string>
@@ -139,6 +144,8 @@
     <string name="fields_delete">Elimina</string>
     <string name="fields_delete_study">Elimina campo</string>
     <string name="fields_delete_study_confirmation">Sei sicuro di voler eliminare questo campo? Questo eliminerà tutti i dati da questo campo.</string>
+    <string name="fields_delete_archive_instead">Archivia invece</string>
+    <string name="fields_delete_permanent_warning">L\'eliminazione di un campo è permanente e non può essere annullata. Archiviarlo invece?</string>
     <plurals name="fields_delete_confirmation">
         <item quantity="one">Sei sicuro di voler eliminare il campo \"%s\"?</item>
         <item quantity="other">Sei sicuro di voler eliminare questi campi: %s?</item>
@@ -166,7 +173,7 @@
     <string name="fields_study_and_obs_exists_message">Questo campo è già importato a questo livello di osservazione.</string>
     <string name="act_field_editor_failed_to_read_columns">Field Book non può caricare il file.</string>
     <string name="act_field_editor_load_file_failed">Errore durante il caricamento del file.</string>
-    <string name="act_field_editor_file_open_failed">Impossibile aprire il file.</string>
+    <string name="act_field_editor_file_open_failed">Apertura del file fallita.</string>
     <!-- Field Creator  -->
     <string name="field_creator_activity_toolbar_title">Crea Nuovo Campo</string>
     <string name="field_creator_size_title">Dettagli del Campo</string>
@@ -180,13 +187,13 @@
     <string name="field_creator_size_field_name_hint">Nome del Campo</string>
     <string name="field_creator_size_rows_hint">Righe</string>
     <string name="field_creator_size_columns_hint">Colonne</string>
-    <string name="field_name_required_error">Nome del campo obbligatorio</string>
+    <string name="field_name_required_error">Nome del campo è richiesto</string>
     <string name="field_name_exists_error">Nome del campo già esistente</string>
     <string name="field_creator_positive_number_error">Deve essere un numero positivo</string>
     <string name="field_creator_rows_exceeded_error">Impossibile superare %s</string>
     <string name="field_creator_cols_exceeded_error">Impossibile superare %s</string>
     <string name="field_creator_total_plots_exceeded_error">Il totale di parcelle non può superare %1$s. Totale attuale: %2$s</string>
-    <string name="field_creation_failed_error">Impossibile creare il campo</string>
+    <string name="field_creation_failed_error">Creazione del campo fallita</string>
     <string name="field_creator_start_point_instruction">Tocca un angolo per selezionare il punto di partenza</string>
     <string name="field_dimensions_format">Campo: %d × %d</string>
     <string name="field_creator_pattern_linear">Lineare</string>
@@ -214,6 +221,12 @@
     <string name="dialog_field_creator_insert_field">Creazione di campo, righe: %1$s per colonne: %2$s</string>
     <string name="dialog_field_creator_insert_field_complete">Creazione di campo, righe: %1$s per colonne: %2$s …completa.</string>
     <string name="dialog_field_creator_insert_plot">Inserimento della parcella %1$s nella riga %2$s colonna %3$s</string>
+    <string name="brapi_resync_choice_required">Ri-Sincronizzazione ha trovato osservazioni server esistenti senza ID BrAPI locali. Scegli come gestirle prima di caricare.</string>
+    <string name="brapi_resync_dialog_title">Ri-Sincronizzazione Corrispondenza Trovata</string>
+    <string name="brapi_resync_dialog_message">%1$d osservazioni corrispondono a dati già memorizzati sul server ma non hanno un ID BrAPI locale. Scegli un\'azione per queste corrispondenze.</string>
+    <string name="brapi_resync_dialog_values">Locale: %1$s | Server: %2$s</string>
+    <string name="brapi_resync_update_existing">Aggiorna Esistente</string>
+    <string name="brapi_resync_upload_new">Carica come Nuovo</string>
     <string name="dialog_field_creator_review_title">Rivedere</string>
     <string name="dialog_field_creator_size_group_error">Inserisci un nome e un formato validi.</string>
     <string name="dialog_field_creator_field_name_not_unique">Nome del campo già in uso.</string>
@@ -237,12 +250,12 @@
     <string name="activity_field_editor_switch_field_same">Campo più vicino già selezionato.</string>
     <!-- Field Details -->
     <string name="field_detail_title">Dettagli del Campo</string>
-    <string name="field_edit_display_name">Modifica Visualizzazione Nome Del Campo</string>
+    <string name="field_edit_display_name">Modifica Nome del Campo Visualizzato</string>
     <string name="name_cannot_be_empty">Il nome non può essere vuoto.</string>
     <string name="illegal_characters_message">Trovati caratteri di testo non validi: %1$s</string>
     <string name="name_conflict_message">\"%1$s\" è già utilizzato come %2$s per un altro campo.</string>
     <string name="name_conflict_import_name">nome di importazione</string>
-    <string name="name_conflict_display_name">visualizza nome</string>
+    <string name="name_conflict_display_name">mostra nome</string>
     <string name="dialog_att_chooser_title_default">Scegliere un attributo</string>
     <string name="search_attribute_dialog_title">Imposta ID di Ricerca</string>
     <string name="dialog_att_chooser_unique_attributes">Attributi Unici</string>
@@ -252,11 +265,12 @@
     <string name="search_multiple_matches_found">Trovati %1$d appezzamenti corrispondenti. Visualizzazione del primo.</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
     <string name="field_data_title">Dato</string>
+    <string name="field_data_summary">%1$d osservazioni su %2$d caratteri</string>
     <string name="field_trait_observation_total">\"%d\" osservazioni</string>
     <!-- Field Detail Charts -->
-    <string name="field_trait_chart_no_data">Nessun dato da visualizzare</string>
-    <string name="field_trait_chart_incompatible_format">Il formato di questo carattere non può essere tracciato nel grafico</string>
-    <string name="field_trait_chart_excess_data">Troppi valori diversi da tracciare nel grafico</string>
+    <string name="chart_no_data">Nessun dato da rappresentare graficamente</string>
+    <string name="chart_incompatible_format">Questo formato di carattere non può essere grafitato</string>
+    <string name="chart_excess_data">Troppi valori distinti da rappresentare graficamente</string>
     <!-- Semantic dates -->
     <string name="today">Oggi</string>
     <string name="yesterday">Ieri</string>
@@ -269,22 +283,38 @@
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">Ordina Caratteri</string>
-    <string name="traits_sort_name">Nome del carattere</string>
+    <string name="traits_sort_name">Nome</string>
     <string name="traits_sort_import_order">Ordine d\'importazione</string>
     <string name="traits_sort_visibility">Visibilità</string>
     <string name="traits_sort_format">Formato</string>
-    <string name="warning_traits_missing_modify">Crea un carattere prima di poterlo modificare.</string>
+    <string name="warning_traits_missing_modify">Crea caratteri prima di modificarli.</string>
     <!-- Trait import/export -->
     <string name="traits_new_dialog_title">Nuovo/i Carattere/i</string>
     <string name="traits_dialog_create">Crea un nuovo carattere</string>
     <string name="traits_dialog_import_from_file">Importa da file</string>
     <string name="traits_dialog_import">Importa</string>
     <string name="import_error_format_trait">Solo i file TRT possono essere importati come una lista di caratteri</string>
-    <string name="traits_export_check">Esporta la lista de caratteri corrente?</string>
+    <string name="import_error_format_trait_json">Formato JSON non valido: %s</string>
+    <string name="import_error_no_traits">Nessun caratteri trovato</string>
+    <string name="trait_import_successful">Caratteri importati con successo</string>
+    <string name="traits_export_check">Esporta la lista di caratteri corrente?</string>
     <string name="traits_dialog_export">Esporta</string>
     <string name="dialog_delete_traits_message">Vuoi eliminare tutti i caratteri correnti? Eliminare un carattere elimina anche i dati che sono stati raccolti per quel carattere.</string>
     <string name="traits_toolbar_delete_all">Elimina tutti i caratteri</string>
     <string name="act_trait_editor_no_traits_exist">Non esistono caratteri.</string>
+    <string name="export_dialog_traits_exporting">Esportazione dei caratteri…</string>
+    <string name="export_error_unknown">Errore di esportazione sconosciuto</string>
+    <string name="export_error_directory_access">Accesso alla directory di esportazione fallito</string>
+    <string name="export_error_directory_not_found">Directory di esportazione non trovato</string>
+    <string name="export_error_file_creation">Creazione file di esportazione fallita</string>
+    <string name="export_error_file_stream">Apertura del flusso file fallita</string>
+    <string name="error_trait_directory_not_available">Directory di caratteri non disponibile</string>
+    <string name="error_trait_directory_missing">Directory di caratteri mancante</string>
+    <string name="error_failed_to_create_file">Creazione del file fallita</string>
+    <string name="error_output_stream_failed">Flusso di output fallito</string>
+    <string name="error_export_failed">Esportazione fallita</string>
+    <string name="error_unable_to_copy_trait_file">Impossibile copiare il file di caratteri</string>
+    <string name="error_cannot_open_file">Impossibile aprire il file</string>
     <!-- Trait item menu -->
     <string name="list_item_trait_popup_content_description">Apri un menu specifico per questo carattere.</string>
     <string name="traits_options_copy">Copia</string>
@@ -302,6 +332,8 @@
     <string name="traits_format_boolean">booleano</string>
     <string name="traits_format_text">Testo</string>
     <string name="traits_format_photo">Foto</string>
+    <string name="traits_format_camera">Fotocamera</string>
+    <string name="traits_format_video">Video</string>
     <string name="traits_format_audio">Audio</string>
     <string name="traits_format_multicategorical">Multi cat</string>
     <string name="traits_format_location">Posizione</string>
@@ -317,8 +349,15 @@
     <string name="traits_format_green_seeker">GreenSeeker</string>
     <string name="traits_format_scale">Scala</string>
     <string name="traits_format_stop_watch">Cronometro</string>
+    <string name="traits_format_custom">Personalizzato</string>
+    <string name="traits_format_hardware">Hardware</string>
+    <string name="traits_format_pollinator">Impollinatore</string>
+    <string name="trait_pollinator_duration_label">Durata (secondi)</string>
+    <string name="trait_pollinator_summary">%1$d visite / %2$d:%3$02d</string>
+    <string name="trait_pollinator_no_categories">Aggiungi categorie a questa caratteristica per registrare i conteggi impollinatori.</string>
+    <string name="trait_pollinator_data_loss_warning">I conteggi e il tempo trascorso registrati per questa entrata verranno eliminati definitivamente.</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">Formati del Carattere</string>
+    <string name="traits_toolbar_add_trait">Formati di Carattere</string>
     <string name="trait_creator_title_layout">Disposizione dei Caratteri</string>
     <string name="trait_creator_parameters_title">Parametri %s</string>
     <string name="activity_traits_new_button_content_description">Aggiungi un nuovo carattere.</string>
@@ -328,23 +367,35 @@
     <string name="traits_create_value_minimum">Minimo</string>
     <string name="traits_create_value_maximum">Massimo</string>
     <string name="traits_create_details">Dettagli</string>
+    <string name="traits_create_unit">Unità</string>
     <string name="traits_create_optional">Opzionale</string>
     <string name="traits_create_categories_title">Categorie</string>
+    <string name="traits_create_severities_title">Severità</string>
     <string name="traits_create_photo_maximum">Numero massimo di foto</string>
     <string name="traits_create_true">Vero</string>
     <string name="traits_create_false">Falso</string>
     <string name="traits_create_unset">Non Settato</string>
+    <string name="traits_create_enabled">Abilitato</string>
+    <string name="traits_create_disabled">Disabilitato</string>
     <string name="traits_create_categories_text">Separa categorie con /</string>
     <string name="traits_create_camera">Fotocamera</string>
     <string name="traits_create_close_keyboard">Chiudi la Tastiera</string>
+    <string name="trait_parameter_decimal_places">Posizioni Decimali</string>
+    <string name="trait_parameter_decimal_places_hint">Numero di decimali (-1 per illimitati, 0 per interi)</string>
+    <string name="trait_parameter_decimal_places_error">Il valore deve essere compreso tra -1 e 10</string>
+    <string name="traits_attach_media_title">Allega Media</string>
+    <string name="traits_attach_media_photo_label">Foto</string>
+    <string name="traits_attach_media_audio_label">Audio</string>
+    <string name="traits_attach_media_video_label">Video</string>
     <string name="traits_create_warning_name_blank">Il nome del carattere non può essere vuoto</string>
     <string name="traits_create_warning_duplicate">Il carattere esiste già</string>
-    <string name="traits_create_warning_numeric_required">Default, minimo e massimo devono essere numerici</string>
+    <string name="traits_create_warning_numeric_required">Predefinito, minimo e massimo sono richiesti e deve essere numerico</string>
+    <string name="traits_create_warning_categories_required">Almeno una categoria è richiesta</string>
     <string name="dialog_new_trait_add_cat_button_text">Aggiungi</string>
     <string name="traits_create_categories_value_text">Inserisci il valore della categoria qui</string>
     <string name="list_item_category_delete_content_description">Elimina la categoria.</string>
     <string name="dialog_new_trait_add_category_content_description">Aggiungi una nuova categoria.</string>
-    <string name="list_item_traits_grid_content_description">Commuta selezione</string>
+    <string name="list_item_traits_grid_content_description">Inverti selezione</string>
     <string name="dialog_trait_parameters_title">Parametri di Caratteri</string>
     <string name="traits_create_warning_percent_magnitude_relation">Errore di relazione di magnitudine</string>
     <string name="trait_parameter_default_value_number_format_error">Deve essere un numero</string>
@@ -360,19 +411,114 @@
     <string name="dialog_new_trait_error_must_select_a_layout">Devi selezionare una disposizione.</string>
     <string name="trait_creator_parameter_warning_integer_required">Intero richiesto.</string>
     <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">I caratteri non possono essere aggiornati ai caratteri BrAPI.</string>
-    <string name="required">Obbligatorio</string>
-    <string name="traits_create_warning_percent_value_required">Valore obbligatorio</string>
+    <string name="required">Richiesto</string>
+    <string name="traits_create_warning_percent_value_required">Valore richiesto</string>
+    <!-- Decimal Places Radio Options -->
+    <string name="trait_parameter_decimal_places_no_restriction">Nessuna restrizione</string>
+    <string name="trait_parameter_decimal_places_integer_only">Solo interi</string>
+    <string name="trait_parameter_decimal_places_allowed">Consenti input decimale</string>
+    <string name="trait_parameter_decimal_places_custom">Numero massimo di decimali:</string>
+    <string name="trait_parameter_decimal_places_custom_hint">1–10</string>
+    <string name="trait_parameter_decimal_places_custom_required">Inserisci il numero di cifre decimali (1–10)</string>
+    <string name="trait_parameter_decimal_places_custom_error">Il valore deve essere compreso tra 1 e 10</string>
+    <string name="trait_parameter_invalid_number">Numero non valido</string>
+    <string name="trait_parameter_mathematical_symbols">Simboli Matematici</string>
+    <string name="traits_create_warning_math_symbols_conflict">Simboli matematici e restrizioni della posizione decimale non possono essere applicati simultaneamente</string>
+    <string name="trait_parameter_repeated_measures">Misure Ripeti</string>
+    <string name="trait_parameter_auto_switch_plot">Passa Automaticamente Alla Prossima Parcella</string>
+    <string name="trait_parameter_invalid_value">Consenti Valore Non Valido</string>
     <string name="select_trait">Seleziona Carattere</string>
     <string name="edit_traits">Modifica</string>
+    <!-- Trait Editor -->
+    <string name="error_loading_traits">Errore nel caricamento dei caratteri</string>
+    <string name="error_deleting_traits">Eliminazione caratteri fallita</string>
+    <string name="error_toggling_all_traits_visibility">Impossibile attivare la visibilità dei caratteri</string>
+    <string name="error_importing_traits">Importazione caratteri fallita</string>
+    <string name="error_saving_trait_order">Impossibile salvare l\'ordine di caratteri</string>
+    <string name="error_exporting_traits">Esportazione caratteri fallita</string>
+    <string name="message_all_traits_deleted">Tutti i caratteri eliminati</string>
+    <string name="message_traits_imported">Importati %1$d caratteri</string>
+    <string name="message_traits_imported_with_skipped">Importati %1$d caratteri, saltati %2$d duplicati</string>
+    <string name="message_traits_exported">Esportati %1$d caratteri</string>
+    <!-- Trait Detail -->
+    <string name="trait_detail_title">Dettagli dei Caratteri</string>
+    <string name="trait_format_details">Dettagli di Formato</string>
+    <string name="trait_data_title">Dati Di Osservazione</string>
+    <string name="trait_default_value">Valore Predefinito: %s</string>
+    <string name="trait_min_value">Valore Minimo: %s</string>
+    <string name="trait_max_value">Valore Massimo: %s</string>
+    <string name="trait_categories">Categorie: %s</string>
+    <string name="trait_details">Dettagli: %s</string>
+    <string name="trait_visible">Visibile</string>
+    <string name="trait_hidden">Nascosto</string>
+    <string name="trait_options_title">Opzioni</string>
+    <string name="trait_new_trait_name">Nome del carattere copiato</string>
+    <string name="trait_observation_data">Dato</string>
+    <string name="trait_observation_count">%d osservazioni</string>
+    <string name="trait_not_chartable">Questo formato de carattere non può essere visualizzato in un grafico</string>
+    <string name="traits_options_copy_title">Copia Carattere</string>
+    <string name="trait_name_empty_error">Il nome del carattere non può essere vuoto</string>
+    <string name="trait_name_exists_error">Esiste già un carattere con questo nome</string>
+    <string name="trait_copied_success">Carattere copiato in %1$s</string>
+    <string name="trait_date_format_dialog_title">Seleziona Formato Della Data</string>
+    <string name="trait_date_format_display">Data (%s)</string>
+    <string name="trait_day_format_display">Giorno dell\'Anno (%s)</string>
+    <string name="trait_brapi_display_dialog_title">Seleziona Testo Del Pulsante</string>
+    <string name="trait_brapi_label_display">Mostra Descrizione (es. %s)</string>
+    <string name="trait_brapi_value_display">Mostra Valori (es. %s)</string>
+    <string name="error_loading_trait_detail">Errore nel caricare le informazioni del carattere</string>
+    <string name="error_deleting_trait">Errore: impossibile eliminare il carattere</string>
+    <string name="error_updating_trait_resource_file">Errore nell\'aggiornamento del file di risorsa del carattere</string>
+    <string name="error_updating_trait_visibility">Errore nell\'aggiornare la visibilità del carattere</string>
+    <string name="error_empty_trait_name">Il nome del carattere non può essere vuoto</string>
+    <string name="error_copy_trait">Errore durante la copia del carattere</string>
+    <string name="trait_swap_synonym_dialog_title">Sinonimi</string>
+    <string name="trait_swap_name_set_alias">Imposta Alias</string>
+    <string name="error_updating_trait_alias">Errore nell\'aggiornare l\'alias di carattere</string>
+    <string name="error_updating_trait_options">Errore nell\'aggiornare le opzioni di carattere</string>
+    <string name="trait_add_synonym_new">Aggiungi Nuovo</string>
+    <string name="trait_add_synonym_new_dialog">Aggiungi Nuovo Sinonimo</string>
+    <string name="trait_synonym">Sinonimo</string>
+    <string name="trait_add_synonym_new_dialog_blank">Sinonimo non può essere vuoto</string>
+    <string name="trait_add_synonym_already_exists">Questo sinonimo già esiste</string>
+    <string name="trait_parameter_enabled">%s abilitato</string>
+    <string name="trait_parameter_disabled">%s disabilitato</string>
+    <string name="trait_detail_chip_rename">Rinomina</string>
+    <string name="trait_detail_chip_math_symbols">Simboli matematici</string>
+    <string name="trait_detail_chip_multiple_categories">Categorie multiple</string>
+    <string name="trait_detail_chip_single_category">Categoria singola</string>
+    <string name="trait_detail_chip_automatic_switch">Avanzamento automatico</string>
+    <string name="trait_detail_chip_format_date">Formato: %s</string>
+    <string name="trait_detail_chip_transfer_images">Trasferire immagini</string>
+    <string name="trait_detail_chip_invalid_value">Valori anomali</string>
+    <string name="trait_detail_chip_severities">Severità</string>
+    <string name="trait_detail_chip_duration">Durata: %s</string>
+    <string name="trait_parameter_allow_multicat">Selezione Categoria Multiple</string>
+    <string name="trait_parameter_allow_other">Consenti Altra Categoria</string>
+    <string name="trait_other_button">Altro</string>
+    <string name="trait_other_dialog_title">Aggiungi Nuova Categoria</string>
+    <string name="trait_other_dialog_hint">Nome categoria</string>
+    <string name="trait_other_duplicate">Categoria già esistente</string>
+    <string name="trait_other_empty">Nome categoria non può essere vuoto</string>
+    <string name="trait_parameter_display_value">Mostra Valore</string>
+    <string name="trait_parameter_resource_file">File di Risorsa</string>
+    <string name="trait_parameter_use_day_of_year">Usa Giorno Dell\'Anno</string>
+    <string name="list_item_trait_parameter_resource_file_hint">Selezionare un file di risorsa</string>
+    <string name="trait_resource_file_updated">File di Risorsa Aggiornato</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">Il valore è minore rispetto al minimo impostato</string>
     <string name="trait_error_maximum_value">Il valore è maggiore del massimo impostato</string>
+    <string name="trait_error_decimal_places">Il valore non può avere più di %d decimali</string>
+    <string name="trait_error_mathematical_symbols_disabled">I simboli matematici non sono consentiti</string>
+    <string name="trait_error_integers_only">Sono consentiti solo valori interi</string>
+    <string name="dialog_invalid_value_title">Valore non Valido</string>
+    <string name="dialog_save_invalid_value_message">Vuoi comunque salvare questo valore?</string>
     <string name="trait_error_disease_severity">Severità già registrata</string>
     <string name="act_collect_study_names_empty">Lo studio selezionato ha nomi univoco, primario o secondario vuoti.</string>
     <!-- Toolbar -->
     <string name="main_toolbar_resources">Risorse</string>
-    <string name="main_trait_details">Dettagli carattere</string>
+    <string name="main_trait_details">Dettagli del carattere</string>
     <string name="main_infobar_data_missing">Nessun dato</string>
     <string name="main_infobar_select_data">Seleziona</string>
     <string name="main_toolbar_next_entry_no_data">Prossima entrata senza dati</string>
@@ -416,10 +562,37 @@
     <string name="activity_collect_dialog_neutral_button">Modifica impostazioni</string>
     <string name="activity_collect_dialog_new_collector">Vuoi salvare il nome di utente che raccoglie i dati?</string>
     <!--- Datagrid -->
-    <string name="act_data_grid_cursor_failed">La griglia di dati non è riuscita a caricare i dati.</string>
-    <string name="dialog_data_grid_header_picker_title">Scegli Le Intestazioni Di Riga</string>
+    <string name="data_grid_empty">Nessun dato da visualizzare.</string>
+    <string name="dialog_data_grid_header_picker_ok">OK</string>
+    <string name="dialog_data_grid_column_picker_title">Scegliere le colonne</string>
     <string name="dialog_data_grid_repeated_measures_title">Scegli Osservazione</string>
     <string name="menu_action_header_view_data_grid_title">Aggiorna Intestazioni di Riga</string>
+    <string name="menu_action_column_view_data_grid_title">Aggiorna Intestazioni di Riga</string>
+    <string name="menu_action_reset_sort_data_grid_title">Resetta Ordinamento</string>
+    <string name="menu_data_grid_action_locate_plot">Individua La Parcella Attiva</string>
+    <string name="menu_action_wrap_content_data_grid_title">Avvolgi Contenuto</string>
+    <string name="menu_action_heatmap_data_grid_title">Mappa Calore</string>
+    <string name="menu_data_grid_action_map_view">Vista Mappa</string>
+    <string name="menu_data_grid_action_grid_view">Vista Griglia</string>
+    <string name="menu_data_grid_action_map_attributes">Imposta Riga/Colonna</string>
+    <string name="map_view_no_layout">Layout del campo non disponibile. Apri le impostazioni della mappa per definire gli attributi di riga e colonna.</string>
+    <string name="map_view_choose_attributes_title">Scegli Riga e colonna</string>
+    <string name="map_settings_title">Impostazioni Della Mappa</string>
+    <string name="map_settings_row_attribute">Attributo di riga</string>
+    <string name="map_settings_col_attribute">Attributo di colonna</string>
+    <string name="map_settings_invert_subheader">Invertire</string>
+    <string name="map_settings_invert_row">Inverti ordine righe</string>
+    <string name="map_settings_invert_col">Inverti ordine delle colonne</string>
+    <string name="map_view_row_prompt">Seleziona attributo per ROW:</string>
+    <string name="map_view_col_prompt">Seleziona attributo per COLONNA:</string>
+    <string name="map_view_row">Riga</string>
+    <string name="map_view_col">Colonna</string>
+    <string name="map_view_choose_attributes_ok">Imposta Attributi</string>
+    <string name="map_view_legend_complete">Completo</string>
+    <string name="map_view_legend_partial">Parziale</string>
+    <string name="map_view_legend_empty">Vuoto</string>
+    <string name="map_view_legend_missing">Mancante</string>
+    <string name="map_view_use_geo_coordinates">Usa le coordinate GPS (rilevate %d)</string>
     <!--- Lock -->
     <string name="activity_collect_locked_state">Bloccato - inserimento, modifica o eliminazione dei dati sono disabilitati</string>
     <string name="activity_collect_frozen_state">Congelato - una volta salvati i dati non possono essere modificati o eliminati</string>
@@ -429,7 +602,7 @@
     <string name="trait_error_hardware_missing">Il dispositivo non dispone una fotocamera che può essere utilizzata per scattare una foto.</string>
     <string name="trait_delete_warning_photo">Sei sicuro di voler eliminare questa foto?</string>
     <string name="trait_photo_capture_button_content_description">Premere per aprire una vista della fotocamera per catturare.</string>
-    <string name="photo_failed_to_delete">Impossibile eliminare il file.</string>
+    <string name="photo_failed_to_delete">Eliminazione del file fallita.</string>
     <!-- Trait Layout: GNSS -->
     <string name="trait_gnss_geo_coord_update_dialog_title">Avviso Aggiornamento Coordinata</string>
     <string name="trait_gnss_geo_coord_update_dialog_message">Hai una coordinata salvata per questa unità, sei sicuro di volerla aggiornare?</string>
@@ -459,7 +632,8 @@
     <string name="trait_boolean_unset">Rimuovi</string>
     <!-- Trait Layout: GoPro -->
     <string name="trait_go_pro_capture_button_text">Cattura\n</string>
-    <string name="trait_go_pro_await_device_title">Scansione per GoPro</string>
+    <string name="trait_go_pro_await_device_title">Seleziona una GoPro associata</string>
+    <string name="trait_go_pro_no_paired_devices">Nessuna GoPro associata trovata. Associa prima la fotocamera nelle impostazioni Bluetooth di Android.</string>
     <string name="trait_go_pro_await_ble_title">In Attesa Della Connessione GoPro BLE</string>
     <string name="trait_go_pro_await_ble_message">Comunicando con GoPro BLE, questo potrebbe richiedere un minuto.</string>
     <string name="trait_go_pro_await_ap_title">Aspettando GoPro AP</string>
@@ -469,6 +643,23 @@
     <string name="go_pro_layout_black_11_not_detected">Questo carattere è stato fatto per un GoPro Black 11, si prega di contattare gli sviluppatori per implementare il tuo modello GoPro.\n</string>
     <string name="go_pro_frag_connect_btn_content_description">Connettiti a una fotocamera GoPro.\n</string>
     <string name="trait_go_pro_capture_content_description">Cattura un\'immagine da un dispositivo GoPro connesso.\n</string>
+    <string name="gopro_error_ble_failed">Impossibile connettersi al GoPro tramite Bluetooth.</string>
+    <string name="gopro_error_ble_timeout">Tempo scaduto il collegamento al GoPro tramite Bluetooth.</string>
+    <string name="gopro_error_ble_disconnected">Ha perso la connessione Bluetooth a GoPro.</string>
+    <string name="gopro_error_wifi_unavailable">Impossibile entrare nella rete Wi-Fi GoPro.</string>
+    <string name="gopro_error_wifi_lost">Ha perso la rete Wi-Fi GoPro.</string>
+    <string name="gopro_error_stream_failed">Impossibile avviare l\'anteprima live di GoPro.</string>
+    <string name="gopro_error_stream_timeout">L\'anteprima live di GoPro non è iniziata. Accendi la fotocamera spenta e accesa, quindi riprova.</string>
+    <string name="gopro_stage_bluetooth">Connessione tramite Bluetooth…</string>
+    <string name="gopro_stage_enabling_ap">Attivazione della fotocamera Wi‐Fi…</string>
+    <string name="gopro_stage_joining_wifi">Entrando nella fotocamera Wi‐Fi…</string>
+    <string name="gopro_stage_starting_preview">Avvio dell\'anteprima live…</string>
+    <string name="gopro_error_not_connected">GoPro non è connesso.</string>
+    <string name="gopro_error_capture_busy">Salvando ancora la foto precedente.</string>
+    <string name="gopro_error_capture_timeout">GoPro non ha finito di catturare in tempo.</string>
+    <string name="gopro_error_capture_failed">L\'acquisizione di GoPro non è riuscita.</string>
+    <string name="gopro_error_no_new_photo">Il GoPro non ha prodotto una nuova foto.</string>
+    <string name="gopro_error_download_failed">Impossibile copiare la foto da GoPro.</string>
     <!-- Trait Layout: USB Camera -->
     <string name="trait_usb_camera_zoom_in_button_text">Aumenta Zoom</string>
     <string name="trait_usb_camera_zoom_out_button_text">Diminuisci Zoom</string>
@@ -522,7 +713,7 @@
     <string name="fragment_summary_toolbar_title">Riepilogo</string>
     <string name="menu_fragment_summary_filter_title">Filtro</string>
     <string name="fragment_summary_filter_title">Seleziona etichette di riepilogo</string>
-    <string name="dialog_fragment_summary_neutral_button">Commuta Tutto</string>
+    <string name="dialog_fragment_summary_neutral_button">Attiva/Disattiva Tutto</string>
     <string name="fragment_summary_prev_button_text">Precedente</string>
     <string name="fragment_summary_next_button_text">Successivo</string>
     <string name="fragment_summary_prev_button_content_description">Naviga alla entrata precedente.</string>
@@ -531,12 +722,17 @@
     <!--- Repeated measures -->
     <string name="view_repeated_values_add_button_content_description">Aggiunge una nuova osservazione.</string>
     <string name="view_repeated_values_add_button_fail">Devi inserire un valore prima di creare una nuova osservazione.</string>
-    <string name="menu_collect_repeated_values_indicator">Visualizza il numero di valori ripetuti.</string>
+    <string name="menu_collect_repeated_values_indicator">Mostra il numero di valori ripetuti.</string>
     <string name="dialog_multi_measure_delete_no_observations">Nessuna osservazione esistente.</string>
     <string name="dialog_multi_measure_delete_title">Osservazioni</string>
-    <string name="dialog_multi_measure_confirm_delete_title">Tutte le osservazioni per questo carattere verranno eliminate definitivamente.</string>
+    <string name="dialog_multi_measure_confirm_delete_title">Le osservazioni selezionate e i media allegati per questo carattere verranno eliminati definitivamente.</string>
     <string name="dialog_multi_measure_delete">Elimina</string>
     <string name="dialog_multi_measure_select_all">Seleziona tutti</string>
+    <!--- Save failure -->
+    <string name="dialog_save_failed_title">Impossibile salvare questo valore</string>
+    <string name="dialog_save_failed_message">Nulla è stato registrato per la entrata %1$s. Il valore è ancora a schermo ma non è nel database.\n\nQuesto di solito significa che il dispositivo è fuori spazio di archiviazione. Libera spazio, poi riprova.\n\nNon continuare a raccogliere fino a quando un valore salva - tutto ciò che inserisci sarà perso.</string>
+    <string name="dialog_save_failed_retry">Riprovare</string>
+    <string name="dialog_save_failed_dismiss">Ignora</string>
     <!--- GeoNav -->
     <string name="menu_collect_start_geo_nav_title">Avvia GeoNav</string>
     <string name="activity_collect_found_plot">Navigato verso la parcella in prossimità</string>
@@ -567,8 +763,9 @@
     <string name="observation_metadata_title">Metadati Dell\'Osservazione</string>
     <string name="observation_info_study_name">Nome dello Studio</string>
     <string name="observation_info_entry_id">ID Entrata</string>
-    <string name="observation_info_trait_format">Formati del Carattere</string>
-    <string name="observation_info_trait_name">Nome del Carattere</string>
+    <string name="observation_info_trait_format">Formati di Carattere</string>
+    <string name="observation_info_trait_name">Nome di Carattere</string>
+    <string name="observation_info_trait_alias">Alias di Carattere</string>
     <string name="observation_info_value">Valore</string>
     <string name="observation_info_timestamp">Timestamp Dell\'Osservazione</string>
     <string name="observation_info_collector">Collettore</string>
@@ -644,6 +841,9 @@
     <string name="preferences_profile_device_name_dialog_title">Imposta Nome Del Dispositivo</string>
     <string name="preferences_profile_device_name_error">Questo campo non può essere vuoto</string>
     <string name="preferences_profile_device_name_default_format">Predefinito: %s</string>
+    <string name="preferences_system_debugging_title">Debugging</string>
+    <string name="pref_debug_application_title">Debug Applicazione</string>
+    <string name="pref_debug_application_summary">Ottieni un file per aiutare gli sviluppatori a risolvere i problemi nell\'app</string>
     <string name="pref_profile_crashlytics_user_id_enabled">ID Univoco</string>
     <string name="pref_profile_crashlytics_user_id_enabled_summary">Includi un ID anonimo e univoco nei crash log per aiutare il team di sviluppo a correggere i bug</string>
     <string name="pref_profile_crashlytics_refresh_title">Aggiorna ID</string>
@@ -674,7 +874,7 @@
     <string name="preferences_appearance_collect_toolbar_title">Barra Degli Strumenti Di Raccolta</string>
     <string name="preferences_appearance_tutorial_description">Aggiungi un pulsante nella barra degli strumenti nell\'app che apre il tutorial</string>
     <string name="preferences_appearance_toolbar_customize">Barra Degli Strumenti Di Azioni</string>
-    <string name="preferences_appearance_toolbar_customize_description">Commuta la visibilità delle funzioni predefinite</string>
+    <string name="preferences_appearance_toolbar_customize_description">Attiva/disattiva la visibilità delle funzioni predefinite</string>
     <string name="preferences_appearance_toolbar_customize_search">Cerca</string>
     <string name="preferences_appearance_toolbar_customize_resources">Risorse</string>
     <string name="preferences_appearance_toolbar_customize_summary">Riassunto</string>
@@ -696,10 +896,14 @@
     <string name="preferences_appearance_infobar_hide_prefix_description">Il prefisso InfoBar sarà sostituito da un\'icona generica</string>
     <string name="preferences_appearance_quickgoto">Vai Rapido a</string>
     <string name="preferences_appearance_quickgoto_description">Cambia la sezione centrale della schermata principale in quella precedente \'Vai Rapido a\"</string>
+    <string name="preferences_appearance_hide_entry_navigation">Nascondi navigazione voce</string>
+    <string name="preferences_appearance_hide_entry_navigation_description">Nasconde le frecce di navigazione d\'ingresso, gli identificatori e la barra di avanzamento sullo schermata di raccolta</string>
     <string name="preferences_appearance_range_progress_bar">Barra di progresso delle entrate</string>
     <string name="preferences_appearance_range_progress_bar_description">Mostra la tua posizione corrente nel campo</string>
     <string name="preferences_appearance_traits_progress_bar">Barra di progresso dei caratteri</string>
     <string name="preferences_appearance_traits_progress_bar_description">Mostra se i caratteri attive hanno dati ed evidenzia il carattere corrente</string>
+    <string name="preferences_appearance_observation_timestamp">Timestamp dell\'osservazione</string>
+    <string name="preferences_appearance_observation_timestamp_description">Mostra il timestamp dell\'osservazione salvata sotto il valore</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamento</string>
     <string name="preferences_behavior_movement_title">Movimento</string>
@@ -732,6 +936,10 @@
     <string name="preferences_behavior_return_character_next_trait">Il tasto di ritorno fa avanzare il carattere</string>
     <string name="preferences_general_use_day_number">Usa Giorno Dell\'Anno</string>
     <string name="preferences_general_use_day_number_description">Usa il giorno dell\'anno per la raccolta dei dati anziché la data</string>
+    <string name="preferences_behavior_barcode_scanning_move_to_entry">Muovi alla entrata</string>
+    <string name="preferences_behavior_barcode_scanning_record_value">Registra valore</string>
+    <string name="preferences_behavior_barcode_scanning_enter_if_not_id">Registra il valore se non l\'ID della entrata</string>
+    <string name="preferences_behavior_barcode_scanning_ask">Chiedi ogni volta</string>
     <!-- Location -->
     <string name="preferences_location_title">Posizione</string>
     <string name="preferences_location_defaults_title">GeoCoordinates</string>
@@ -890,6 +1098,7 @@
     <string name="no_updates_title">Ultima Versione In Esecuzione</string>
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
+    <string name="preferences_brapi_title">Configurazione</string>
     <string name="brapi_info_title">Informazioni sulla sincronizzazione BrAPI</string>
     <string name="preferences_brapi_enable_title">Abilita BrAPI</string>
     <string name="preferences_brapi_enable_summary">L\'Breeding API consente un semplice trasferimento di dati a database compatibili.</string>
@@ -900,7 +1109,6 @@
     <string name="preferences_brapi_barcode_config_share">Condividi le impostazioni correnti</string>
     <string name="preferences_brapi_barcode_config_dialog_title">Configurazione BrAPI Scansionabile</string>
     <string name="qr_code_share_choose_action_title">Scegli L\'Azione</string>
-    <string name="menu_action_brapi_pref_title">Autorizza BrAPI</string>
     <string name="act_brapi_auth_http_warning_title">Avviso HTTP</string>
     <string name="act_brapi_auth_http_warning_message">Hai inserito un url http. Non c\'è garanzia che questa connessione sia sicura.</string>
     <string name="brapi_base_url">URL di base</string>
@@ -917,11 +1125,12 @@
     <string name="brapi_pagination">Dimensione Della Pagina</string>
     <string name="brapi_timeout">Timeout del server</string>
     <string name="brapi_chunk_size">Dimensione Chunk</string>
+    <string name="brapi_max_concurrent_image_content">Esporta Massima Immagine Concorrente</string>
+    <string name="brapi_max_concurrent_observation_transfer">Trasferimento Di Osservazione Concorrente Massima</string>
     <string name="preferences_brapi_authorization_title">Authorization</string>
     <string name="preferences_brapi_advanced_title">Avanzato</string>
     <string name="preferences_brapi_oidc_flow_oauth_code">OAuth2 Authorization Code</string>
     <string name="preferences_brapi_oidc_flow_oauth_implicit">OAuth2 Implicit Grant</string>
-    <string name="preferences_brapi_oidc_flow_old_custom">Original Field Book Custom</string>
     <string name="brapi_oidc_url">OIDC Discovery URL</string>
     <string name="brapi_oidc_url_desc">The location of the OIDC Discovery JSON document</string>
     <string name="brapi_oidc_clientid">OIDC Client ID</string>
@@ -930,53 +1139,72 @@
     <string name="brapi_oidc_scope_desc">The Scope to be used in the authentication provider</string>
     <string name="preferences_brapi_traits_title">Preferenze</string>
     <string name="preferences_appearance_collect_labelval_customize">Valore vs Descrizione per Visualizzare</string>
-    <string name="preferences_appearance_collect_labelval_customize_description">Visualizza i valori o le descrizione sullo schermo di raccolta</string>
+    <string name="preferences_appearance_collect_labelval_customize_description">Mostra i valori o le descrizione sullo schermo di raccolta</string>
     <string name="preferences_appearance_collect_labelval_customize_value">Valore</string>
     <string name="preferences_appearance_collect_labelval_customize_label">Descrizione</string>
-    <string name="preferences_brapi_servers_title">Server Della Community</string>
-    <string name="preferences_brapi_server_barcode">Scansiona un codice a barre del server</string>
     <string name="preferences_brapi_server_scan_error">Errore Di Scansione</string>
-    <string name="preferences_brapi_server_add">Invia un server</string>
-    <!-- Community Servers -->
-    <string-array name="community_servers_names">
-        <item>CassavaBase</item>
-        <item>T3/Wheat</item>
-        <item>T3/Oat</item>
-        <item>T3/Barley</item>
-        <item>Server Di Test Predefinito</item>
-    </string-array>
-    <string-array name="community_servers_urls">
-        <item>https://www.cassavabase.org</item>
-        <item>https://wheat-sandbox.triticeaetoolbox.org</item>
-        <item>https://oat-sandbox.triticeaetoolbox.org</item>
-        <item>https://barley-sandbox.triticeaetoolbox.org</item>
-        <item>https://test-server.brapi.org</item>
-    </string-array>
-    <string-array name="community_servers_oidc_urls">
-        <item>https://www.cassavabase.org/.well-known/openid-configuration</item>
-        <item>https://wheat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
-        <item>https://oat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
-        <item>https://barley-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
-        <item>https://test-server.brapi.org/.well-known/openid-configuration</item>
-    </string-array>
-    <string-array name="community_servers_grant_types">
-        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
-        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
-        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
-        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
-        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
-    </string-array>
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_pref">Verifica compatibilità</string>
+    <string name="brapi_server_info_pref_summary">Visualizza le chiamate BrAPI supportate e le informazioni sul server</string>
+    <string name="brapi_compatibility">Compatibilità BrAPI</string>
+    <string name="brapi_compatibility_with_app">Compatibilità con %s</string>
+    <string name="brapi_server_name_label">%1$s</string>
+    <string name="brapi_organization_name_label">%1$s</string>
+    <string name="brapi_server_description_label">%1$s</string>
+    <string name="brapi_compatibility_all_calls">BrAPI nel Field Book</string>
+    <string name="brapi_compatibility_server_support">Supportato dal server</string>
+    <string name="brapi_compatibility_no_server_support">Non supportato dal server</string>
+    <string name="brapi_compatibility_fieldbook_support">Supportato dal Field Book</string>
+    <string name="brapi_compatibility_no_fieldbook_support">Supportato dal Field Book</string>
+    <string name="brapi_server_calls_implemented">%1$d/%2$d chiamate implementate (%3$d%%)</string>
+    <string name="brapi_server_returned_empty_response">Il server ha restituito una risposta vuota</string>
+    <string name="brapi_server_expand_content_description">Espandi</string>
+    <string name="brapi_server_collapse_content_description">Comprimi</string>
+    <string name="brapi_server_info_call">Chiama</string>
+    <string name="brapi_server_info_server">Server</string>
+    <string name="brapi_server_info_field_book">Field Book</string>
     <!-- Authorization -->
     <string name="brapi_save_authorize">Salva e autorizza</string>
-    <string name="brapi_display_name">Visualizza Nome</string>
+    <string name="brapi_display_name">Mostra Nome</string>
     <string name="brapi_revoke_auth">Disconnettersi</string>
+    <!-- Multi-account management -->
+    <string name="brapi_add_account_title">Aggiungi Account</string>
+    <string name="brapi_edit_account_title">Modificare account</string>
+    <string name="brapi_add_account_guided_setup">Inserimento Manuale</string>
+    <string name="brapi_add_account_scan_config">Scansione Codice Di Configurazione</string>
+    <string name="brapi_switch_server_title">Cambia Il Server</string>
+    <string name="brapi_switch_server_unauthenticated_message">Vuoi autenticarti prima di passare a questo server?</string>
+    <string name="brapi_chip_compatibility">Compatibilità</string>
+    <string name="brapi_chip_share">Condividi</string>
+    <string name="brapi_chip_edit">Modifica</string>
+    <string name="brapi_chip_logout">Disconnettiti</string>
+    <string name="brapi_chip_authorize">Salva e autorizza</string>
+    <string name="brapi_chip_remove">Rimuovi</string>
+    <string name="brapi_auth_required_title">Autenticazione Richiesta</string>
+    <string name="brapi_auth_required_message">La sessione è scaduta. Autorizzare nuovamente?</string>
+    <string name="brapi_logout_manage_title">Gestisci Server</string>
+    <string name="brapi_logout_manage_message">Scegli un\'azione per %1$s.</string>
+    <string name="brapi_logout_and_remove">Rimuovi</string>
+    <string name="brapi_logout_only">Disconnettiti</string>
+    <string name="brapi_section_active_server">Server Attivo</string>
+    <string name="brapi_section_available_servers">Server Disponibili</string>
+    <string name="brapi_add_account">Aggiungi Account</string>
+    <string name="brapi_advanced_settings">Impostazioni Di Trasmissione</string>
+    <string name="menu_overflow">Più opzioni</string>
     <string name="brapi_auth_btn">Accedi al sito</string>
     <string name="brapi_auth_success">Autorizzazione BrAPI riuscita</string>
     <string name="brapi_auth_deny">Autorizzazione BrAPI negata</string>
+    <string name="brapi_auth_failed_remove">Rimuovi</string>
     <string name="brapi_auth_error_starting">Errore durante l\'avvio dell\'autenticazione BrAPI</string>
+    <string name="brapi_auth_error_starting_reason">Errore Nell\'Avvio Di BrAPI Auth: %1$s</string>
     <string name="brapi_auth_permission_deny">ERRORE: Non hai i permessi necessari per eseguire questa azione</string>
     <string name="brapi_auth_needed_title">Accesso necessario</string>
     <string name="brapi_auth_needed">Devi aver effettuato l\'accesso al sistema con cui stai tentando di sincronizzare i dati in per sincronizzare i tuoi dati.\n\nVuoi autenticarti ora?</string>
+    <string name="brapi_account_migration_deferred">Riavvia il Field Book per completare l\'aggiornamento di BrAPI</string>
+    <string name="brapi_shared_account_not_signed_in">Accedi a questo server dall\'app che lo possiede, quindi selezionalo di nuovo qui</string>
+    <string name="brapi_add_account_already_shared">%1$s fornisce già questo server. Sceglierlo dai server condivisi invece di aggiungerlo di nuovo</string>
+    <string name="brapi_auth_success_already_shared">Accesso effettuato. Questo server è già condiviso da un\'altra app, quindi rimane elencato</string>
+    <string name="brapi_auth_success_no_account">Accesso effettuato, ma il server non può essere salvato. Riavvia il Field Book e riprova</string>
     <!-- BrAPI Import -->
     <string name="import_dialog_title_brapi_fields">Importazione Campo BrAPI</string>
     <string name="brapi_load_data_button">Carica Campi</string>
@@ -1008,7 +1236,8 @@
     <string name="brapi_warning_select_program">Per favore seleziona un programma</string>
     <string name="brapi_warning_select_trial">Per favore seleziona una prova</string>
     <string name="brapi_warning_select_study">Per favore seleziona un campo</string>
-    <string name="brapi_export_failed">Esportazione BrAPI non riuscita</string>
+    <string name="brapi_export_load_stats_error">Errore nel caricamento delle statistiche di esportazione</string>
+    <string name="brapi_export_failed">Esportazione BrAPI Fallita</string>
     <string name="brapi_export_permission_deny">ERRORE: non si dispone delle autorizzazioni per inviare i dati al sistema specificato.</string>
     <string name="brapi_export_not_supported">ERRORE: il sistema di destinazione non supporta l\'invio di osservazioni tramite BrAPI.</string>
     <string name="brapi_export_wrong_num_obs">ERRORE: numero di risposta delle osservazioni diverso dalla richiesta</string>
@@ -1054,6 +1283,21 @@
     <string name="brapi_export_images">Immagini</string>
     <string name="brapi_delete_message">Impossibile eliminare l\'osservazione BrAPI sincronizzata, utilizzando invece NA</string>
     <string name="act_brapi_export_image_load_failed">Caricamento immagine fallito.</string>
+    <string name="brapi_export_progress_title">Esportazione a BrAPI</string>
+    <string name="brapi_export_status">Stato</string>
+    <string name="brapi_export_current_operation">Operazione Attuale</string>
+    <string name="brapi_export_preparing">Preparazione esportazione...</string>
+    <string name="brapi_export_new_observations_pending">Nuove Osservazioni</string>
+    <string name="brapi_export_edited_observations_pending">Osservazioni Modificate</string>
+    <string name="brapi_export_new_images_pending">Nuove immagini</string>
+    <string name="brapi_export_edited_images_pending">Immagini Modificate/Incomplete</string>
+    <string name="cancelling">Annullando...</string>
+    <string name="brapi_export_uploading_new_observations">Caricando nuove osservazioni...</string>
+    <string name="brapi_export_uploading_edited_observations">Caricando osservazioni modificate...</string>
+    <string name="brapi_export_uploading_new_images">Caricando nuove immagini...</string>
+    <string name="brapi_export_uploading_edited_images">Caricando immagini modificate/incomplete...</string>
+    <string name="brapi_export_complete">Esportazione completata</string>
+    <string name="cancel">Annulla</string>
     <!-- Pagination -->
     <string name="next">Successivo</string>
     <string name="prev">Precedente</string>
@@ -1099,7 +1343,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_main_lockdata_title">Blocca dati</string>
     <string name="tutorial_main_lockdata_description">Questo blocca l\'input di dati corrente</string>
     <string name="tutorial_settings_fields_title">Campi</string>
-    <string name="tutorial_settings_fields_description">ti permette di importare e gestire i campi.</string>
+    <string name="tutorial_settings_fields_description">ti consente di importare e gestire i campi.</string>
     <string name="tutorial_settings_fields_import">Per iniziare a usare Field Book, prima importare un file di campo.</string>
     <string name="tutorial_settings_traits_title">Caratteri</string>
     <string name="tutorial_settings_traits_description">ti consente di aggiungere, importare e gestire i caratteri.</string>
@@ -1151,12 +1395,23 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="repeated_values_left_button_content_description">sinistra</string>
     <string name="export_util_repeated_measures_table_warning_title">Tabella Delle Misure Ripetute</string>
     <string name="export_util_repeated_measures_table_warning_message">Solo il valore delle ultime misure ripetute sarà esportato in formato tabella.</string>
+    <string name="export_util_bundle_media_warning_title">Pacchetto Multimediale Grande</string>
+    <string name="export_util_bundle_media_warning_message">Questa esportazione contiene %d file multimediali. Il raggruppamento di un gran numero di file potrebbe essere lento e causare il blocco del dispositivo. Continuare?</string>
+    <string name="export_util_bundle_media_warning_continue">Continuare</string>
     <string name="activity_file_explorer_up_directory_name">Su</string>
+    <string name="file_explorer_select_file_title">Seleziona File</string>
     <!-- base camera strings -->
     <string name="trait_camera_connect_content_description">Avvia una connessione del dispositivo.</string>
     <string name="trait_camera_preview_content_description">Questo visualizza l\'anteprima del scherno della fotocamera.</string>
     <string name="trait_camera_capture_content_description">Cattura una foto</string>
-    <string name="delete_local_photo">Elimina Foto</string>
+    <string name="trait_camera_view_media_content_description">Visualizza media</string>
+    <string name="trait_camera_switch_content_description">Cambia fotocamera</string>
+    <!-- Video recording messages -->
+    <string name="video_recording_started">Registrazione video avviata</string>
+    <string name="video_recording_saved">Registrazione video salvato</string>
+    <!-- Audio pause not supported message -->
+    <string name="field_audio_pause_not_supported">La funzione pausa/ripresa non è supportata su questo dispositivo</string>
+    <string name="delete_local_photo">Sei sicuro di voler eliminare questo elemento?</string>
     <string name="trait_system_photo_settings_title">Impostazioni delle Foto di Sistema</string>
     <string name="trait_photos_no_settings">Questo carattere non ha impostazioni.</string>
     <string name="view_trait_photo_settings_preview_title">Anteprima</string>
@@ -1204,6 +1459,29 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="delete_color">Elimina Osservazione Del Colore</string>
     <string name="delete_color_message">Questo eliminerà definitivamente l\'osservazione</string>
     <string name="nix_device_connecting">Il dispositivo si sta connettendo.</string>
+    <!-- inno spectra -->
+    <string name="inno_spectra_save_failed">Salvataggio fallito</string>
+    <string name="inno_spectra_hardware_incompatible">Hardware incompatibile</string>
+    <string name="inno_spectra_function_locked">Funzione Bloccata</string>
+    <!-- stages reported while the inno spectra device is connecting -->
+    <string name="inno_spectra_connect_connecting">Connessione in corso</string>
+    <string name="inno_spectra_connect_handshake">Avvio in corso</string>
+    <string name="inno_spectra_connect_device_info">Lettura informazioni dispositivo</string>
+    <string name="inno_spectra_connect_device_uuid">Identificazione del dispositivo</string>
+    <string name="inno_spectra_connect_device_status">Stato di lettura</string>
+    <string name="inno_spectra_connect_scan_configs">Caricamento impostazioni di scansione</string>
+    <string name="inno_spectra_connect_ready">Pronto</string>
+    <string name="header_temperature">Temperatura</string>
+    <string name="header_humidity">Umidità</string>
+    <string name="header_firmware">Firmware</string>
+    <string name="header_total_lamp_time">Tempo Totale Della Lampada</string>
+    <string name="header_battery">Batteria</string>
+    <string name="header_software_version">Versione Software</string>
+    <string name="header_hardware_version">Versione Hardware</string>
+    <string name="header_device_id">ID Dispositivo</string>
+    <string name="header_serial_id">ID Seriale</string>
+    <string name="header_uuid">UUID</string>
+    <string name="delete_spectral_data_plot">Elimina Dati Spettrali</string>
     <string name="brapi_studies_filter_title">Studi</string>
     <string name="brapi_trials_filter_title">Prove</string>
     <string name="brapi_filter_dialog_title">Filtra per</string>
@@ -1232,7 +1510,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="act_brapi_study_import_title">Importazione Studio</string>
     <string name="select">Seleziona</string>
     <string name="results">risultati</string>
-    <string name="failed_to_fetch_observation_units">Recupero delle unità di osservazione non riuscito</string>
+    <string name="failed_to_fetch_observation_units">Recupero delle unità di osservazione fallito</string>
     <string name="preferences_brapi_cache_invalidate_dialog_title">Invalida le Scelte dell\'Intervallo della Cache</string>
     <string name="preferences_brapi_cache_invalidate_summary">%s</string>
     <string name="preferences_brapi_cache_invalidate_title">Invalidazione Cache</string>
@@ -1240,6 +1518,10 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="no_programdbid_provided">Nessun programDbId fornito</string>
     <string name="no_studydbids_provided">Nessun studyDbIds fornito</string>
     <string name="act_brapi_list_api_exception">Errore sconosciuto. Controlla le preferenze BrAPI o contatta gli sviluppatori.</string>
+    <string name="brapi_error_unauthorized">Autenticazione richiesta. Effettua il login e riprova.</string>
+    <string name="brapi_error_forbidden">Accesso negato. Potresti non avere il permesso di utilizzare questo server.</string>
+    <string name="brapi_error_not_found">Questo server non sembra supportare l\'endpoint /serverinfo.</string>
+    <string name="brapi_error_network">Impossibile raggiungere il server. Controlla la tua connessione e l\'URL del server.</string>
     <string name="act_brapi_list_filter_reset_cache_title">Conferma Reimpostazione</string>
     <string name="act_brapi_list_filter_reset_cache_message">Questo eliminerà i dati BrAPI locali utilizzati per la ricerca e l\'importazione.</string>
     <string name="search_bar_hint">Ricercando… %s</string>
@@ -1267,15 +1549,39 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="pref_alpha_brapi_import_title">Nuova UI Di Importazione BrAPI</string>
     <string name="opening_brapi_no_network_error">La rete deve essere abilitata per utilizzare le funzionalità BrAPI.</string>
     <string name="act_brapi_list_filter_reset_selection_message">Questo cancellerà la lista in esecuzione degli elementi selezionati.</string>
-    <string name="pref_alpha_media_keycode_events_summary">Abilita per utilizzare i comandi multimediali per interazioni app</string>
-    <string name="pref_alpha_media_keycode_events_title">Abilita Comandi Media</string>
+    <string name="pref_experimental_generate_sample_data_title">Genera Campo di Esempio</string>
+    <string name="pref_experimental_generate_sample_data_summary">Crea un campo di esempio con osservazioni artificiali per tutti i caratteri caricati. I timestamp vengono randomizzati negli ultimi tre mesi.</string>
+    <string name="pref_experimental_generate_sample_data_confirm_title">Generare Campo di Esempio?</string>
+    <string name="pref_experimental_generate_sample_data_confirm_message">Questo creerà o popolerà un campo chiamato \"field_sample\" con osservazioni artificiali. I caratteri di esempio saranno caricate automaticamente se non sono presenti.</string>
+    <string name="pref_experimental_generate_sample_data_success">Campo di esempio creato con successo.</string>
+    <string name="pref_experimental_generate_sample_data_failure">Impossibile generare il campo di esempio. Controllare che l\'archiviazione sia configurata correttamente.</string>
+    <string name="traits_format_experimental">Sperimentale</string>
+    <string name="traits_format_canopy_cover">Copertura di Canopia</string>
+    <string name="trait_canopy_sensitivity_label">Sensibilità</string>
+    <string name="canopy_cover_preview_description">Immagine catturata con sovrapposizione a canopia verde</string>
+    <string name="canopy_cover_capture_description">Cattura immagine per l\'analisi della copertura a canopia</string>
+    <string name="canopy_cover_embiggen_description">Espandi l\'immagine catturata a schermo intero</string>
+    <string name="canopy_cover_overwrite_title">Sovrascrivere l\'immagine della canopia?</string>
+    <string name="canopy_cover_overwrite_message">L\'acquisizione di una nuova immagine sostituirà l\'immagine e il valore attuali della canopia per questa osservazione.</string>
+    <string name="canopy_cover_overwrite_positive">Sovrascrivi</string>
+    <string name="canopy_param_test_capture">Prova Acquisizione</string>
+    <string name="canopy_param_test">Prova</string>
+    <string name="canopy_param_threshold_format">Soglia: %.2f</string>
+    <string name="canopy_param_output_format">Valore di uscita: %.1f</string>
+    <string name="canopy_param_locked_title">Sensibilità bloccata</string>
+    <string name="canopy_param_locked_message">La sensibilità non può essere cambiata perché i dati sono già stati raccolti con questo carattere. Crea un nuovo carattere della Canopia per raccogliere con una sensibilità diversa.</string>
+    <string name="pref_experimental_traits_category_title">Caratteri Sperimentali</string>
+    <string name="pref_experimental_traits_category_summary">Mostra una categoria di caratteri sperimentali nel selettore del tipo di carattere</string>
+    <string name="pref_alpha_media_keycode_events_summary">La traccia successiva/precedente naviga i entrati, il volume su/giù si muove attraverso i caratteri, la chiamata catturerà le foto</string>
+    <string name="pref_alpha_media_keycode_events_title">Naviga Tramite Comandi Multimediali dell\'Hardware</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav si ferma automaticamente quando la distanza da tutti le parcelle supera questo valore in chilometri.</string>
     <string name="pref_geonav_distance_threshold_title">Controllo Di Prossimità</string>
     <string name="activity_collect_proximity_warning">GeoNav Fermo, al di fuori delle coordinate</string>
-    <string name="failed_to_save_study">Impossibile salvare lo studio</string>
+    <string name="failed_to_save_study">Salvataggio dello studio fallito</string>
     <string name="no_suitable_file_manager_was_found">Non è stato trovato alcun Gestore File adatto.</string>
     <string name="trait_error_invalid_multicat_value">Dati categorici inseriti non validi.</string>
-    <string name="dialog_crash_report_title">Impossibile caricare i dati</string>
+    <string name="trait_error_multicat_disabled">Trovate più categorie ma multicat è disabilitato per questo carattere</string>
+    <string name="dialog_crash_report_title">Caricamento dei dati fallito</string>
     <string name="dialog_crash_report_message">Premi OK per inviare un report diagnostico anonimo per aiutarti a migliorare l\'app.</string>
     <string name="dialog_quick_goto_title">Vai Rapido a</string>
     <string name="dialog_quick_goto_go">Vai</string>
@@ -1285,11 +1591,11 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="failed_to_fetch_observation_levels">Recupero dei livelli di osservazione fallito</string>
     <string name="traits_sort_default">Impostazioni predefinite</string>
     <string name="traits_crop_image_parameter">Ritaglia</string>
-    <string name="dialog_crop_title">Imposta Regione Di Ritaglio</string>
-    <string name="dialog_crop_message">Definire una regione di ritaglio che sarà applicata a tutte le immagini future per questo carattere.</string>
+    <string name="dialog_crop_title">Definisci Regione Di Ritaglio</string>
+    <string name="dialog_crop_message">Vuoi ritagliare le immagini catturate per questo carattere?</string>
     <string name="view_trait_photo_settings_crop">Imposta Regione Ritaglio</string>
     <string name="crop_image_clip_data_label">Dati della regione di retaglio del Field Book</string>
-    <string name="quick_goto_swap_content_description">commuta tipo d\'ingresso</string>
+    <string name="quick_goto_swap_content_description">attiva/disattiva tipo d\'input</string>
     <!--  NearbyShare  -->
     <string name="nearby_share_title">Condividi Nelle Vicinanze</string>
     <string name="nearby_share_preferences_title">Preferenze Di Condividi</string>
@@ -1310,14 +1616,14 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="nearby_share_already_searching_for_sender">Già alla ricerca del mittente…</string>
     <string name="nearby_share_no_devices_found">Nessun dispositivo trovato ancora</string>
     <string name="nearby_share_permissions_required">Autorizzazioni Per Dispositivi Nelle Vicinanze Richieste</string>
-    <string name="nearby_share_failed_discovery">Avvio della scoperta non riuscito: %s</string>
+    <string name="nearby_share_failed_discovery">Avvio della scoperta fallito: %s</string>
     <string name="nearby_share_failed_advertising">Errore durante l\'attesa dei dispositivi: %s</string>
-    <string name="nearby_share_failed_transfer">Avvio del trasferimento non riuscito: %s</string>
+    <string name="nearby_share_failed_transfer">Avvio del trasferimento fallito: %s</string>
     <string name="nearby_share_failed_payload">Creazione del file payload non riuscita</string>
-    <string name="nearby_share_failed_request">Impossibile richiedere la connessione: %s</string>
+    <string name="nearby_share_failed_request">Richiesta di connessione fallita: %s</string>
     <string name="nearby_share_failed_handle_file">Gestione del file non riuscita: %s</string>
     <string name="nearby_share_generating_file">Preparazione del file per il trasferimento</string>
-    <string name="nearby_share_failed_import">Importazione del file non riuscita: %s</string>
+    <string name="nearby_share_failed_import">Importazione del file fallita: %s</string>
     <string name="nearby_share_failed_export_generation_message">Errore nel generare il file per la condivisione: %s</string>
     <string name="nearby_share_failed_export_generation">Errore nel generare il file per la condivisione</string>
     <string name="nearby_share_file_imported_successfully">%s importato con successo</string>
@@ -1362,6 +1668,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="nix_error_bluetooth_permissions">Devi accettare i permessi bluetooth o provare a riavviare l\'app.</string>
     <string name="nix_error_bluetooth_unavailable">Bluetooth non disponibile.</string>
     <string name="nix_error_bluetooth_disabled">Il Bluetooth è disabilitato sul dispositivo.</string>
+    <string name="nix_error_connect_failed">Impossibile connettersi al dispositivo, riprovare.</string>
     <string name="list_item_color_placeholder_content_description">Segnaposto per nuova scansione</string>
     <string name="loading">Caricando</string>
     <string name="nix_error_no_network">Nix potrebbe richiedere internet per funzionare correttamente.</string>
@@ -1375,10 +1682,122 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="play">Riproduci</string>
     <string name="pause">Pausa</string>
     <string name="save">Salva</string>
+    <string name="stop">Ferma</string>
     <string name="database_export_invalid_filename">Nome del file di esportazione non valido.</string>
     <string name="device_settings_dialog_name">Nome: %s</string>
     <string name="device_settings_dialog_address">Indirizzo: %s</string>
     <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth Sconosciuto</string>
     <string name="device_settings_dialog_title">Impostazioni Dispositivo Bluetooth</string>
     <string name="no_data_captured">Nessun dato catturato.</string>
+    <string name="media_photo">Stato foto</string>
+    <string name="media_video">Stato video</string>
+    <string name="media_audio">Stato audio</string>
+    <string name="no_observation">I dati devono essere raccolti prima che i media possano essere allegati.</string>
+    <string name="preferences_behavior_barcode_scanning_title">Scansione del Codice a Barre della Barra degli Strumenti</string>
+    <string name="barcode_ask_enter">Inserisci Valore</string>
+    <string name="barcode_ask_move">Muovi</string>
+    <string name="barcode_ask_message">Scansionato: %s</string>
+    <string name="barcode_ask_title">Scegli un\'opzione</string>
+    <string name="no_media_found">Nessun media %1$s trovato</string>
+    <string name="media_viewer">Visualizzatore Media</string>
+    <string name="unable_to_load_image">Impossibile caricare l\'immagine</string>
+    <string name="delete">Elimina</string>
+    <string name="confirm_delete">Vuoi eliminare definitivamente questo elemento multimediale?</string>
+    <string name="audio_permission_required">Autorizzazione audio richiesta</string>
+    <string name="back_button">Torna all\'attività precedente</string>
+    <string name="na_placeholder">Segnaposto immagine non disponibile</string>
+    <string name="confirm_replace_media_message">Vuoi sostituire i media attuali per questa osservazione?</string>
+    <string name="confirm_replace_media_title">Sostituisci I Media Esistenti</string>
+    <string name="failed_to_find_file_name">Impossibile recuperare il nome del file.</string>
+    <string name="act_brapi_export_starting">Avvio esportazione</string>
+    <string name="act_brapi_export_success">Esportazione eseguita con successo</string>
+    <string name="nothing_to_sync">Niente da sincronizzare</string>
+    <string name="export_cancelled">Esportazione annullata.</string>
+    <string name="creating_observations">Creazione di osservazioni %1$d…</string>
+    <string name="creating_observations_progress">Creazione di %1$d/%2$d osservazioni…</string>
+    <string name="authentication_failed">Autenticazione fallita.</string>
+    <string name="editing_observations">Modifica di %1$d osservazioni…</string>
+    <string name="editing_observations_progress">Modifica di %1$d/%2$d osservazioni…</string>
+    <string name="uploading_metadata">Caricando Metadati: %1$s</string>
+    <string name="loading_brapi_images">Caricamento: %1$s</string>
+    <string name="uploading_content">Caricando Contenuto: %1$s</string>
+    <string name="completed_brapi_upload">Completato: %1$s</string>
+    <string name="failed_brapi_image_upload">Fallito: %1$s</string>
+    <string name="updating_metadata_brapi_image">Aggiornamento Metadati: %1$s</string>
+    <string name="updating_content_brapi_image">Aggiornamento Contenuto: %1$s</string>
+    <string name="edited_brapi_image">Modificato: %1$s</string>
+    <string name="brapi_download_button">Scarica</string>
+    <string name="brapi_sync_button">Sincronizza</string>
+    <string name="brapi_downloading_observations">Estrazione dei dati da BrAPI</string>
+    <string name="brapi_updating_local_database">Aggiornamento database locale</string>
+    <string name="brapi_finished_local_update">Aggiornamento del database locale terminato</string>
+    <string name="brapi_downloading_page">Scarica la pagina %1$d/%2$d</string>
+    <string name="brapi_upload_button">Caricare</string>
+    <string name="study_info_missing">Informazioni dello studio mancanti</string>
+    <string name="nothing_to_upload">Niente da caricare</string>
+    <string name="download_cancelled">Scaricamento annullato</string>
+    <string name="download_failed">Scaricamento Fallito</string>
+    <string name="no_new_or_updated_observations_found">Nessuna osservazione nuova o aggiornata trovata</string>
+    <string name="user_cancelled_operation">Operazione annullata dall\'utente.</string>
+    <string name="upload_failed">Caricamento Fallito</string>
+    <string name="study_not_initialized">Studio non inizializzato</string>
+    <string name="brapi_study_db_id_is_missing">DB ID Studio BrAPI mancante</string>
+    <string name="no_fields_to_process">Nessun campo da processare.</string>
+    <string name="authenticate">Autenticare</string>
+    <string name="downloaded">Scaricato</string>
+    <string name="upload_to_brapi">Carica su %1$s</string>
+    <string name="authentication_error">Errore di autenticazione</string>
+    <string name="brapi_upload_error">Errore di caricamento BrAPI %1$s</string>
+    <string name="uploaded">Caricato</string>
+    <string name="new_observations">Nuove Osservazioni</string>
+    <string name="edited_observations">Osservazioni Modificate</string>
+    <string name="new_images">Nuove immagini</string>
+    <string name="edited_images">Immagini modificate</string>
+    <string name="include_images">Includi Immagini</string>
+    <string name="no_observations_to_upload">Nessuna osservazione da caricare</string>
+    <plurals name="brapi_unsyncable_observations">
+        <item quantity="one">L\'osservazione di %1$d non può essere sincronizzata perché le carattere non è stata importata da %2$s.</item>
+        <item quantity="other">Le osservazioni di %1$d non possono essere sincronizzate perché le carattere non sono state importate da %2$s.</item>
+    </plurals>
+    <string name="sync_statistics">Statistiche Di Sincronizzazione</string>
+    <string name="synced_observations">Osservazioni Sincronizzate</string>
+    <string name="synced_images">Immagini sincronizzate</string>
+    <string name="operation_was_cancelled">Operazione annullata: %1$s</string>
+    <string name="new_items">%1$d nuovi %2$s elementi</string>
+    <string name="edited_items">%1$d elementi modificati</string>
+    <string name="failed_items">%1$d elementi falliti</string>
+    <string name="failed_images">%1$d immagini fallite</string>
+    <string name="complete">Completo</string>
+    <string name="conflict_resolution_strategy">Risolvi i Conflitti</string>
+    <string name="server">Server</string>
+    <string name="local">Locale</string>
+    <string name="recent">Più recenti</string>
+    <string name="brapi_sync">BrAPI Sync</string>
+    <string name="download_from">Scarica da %1$s</string>
+    <string name="last_checked">Ultima verificata: %1$s</string>
+    <string name="brapi_conflicts_found">Trovate osservazioni in conflitto %1$d. Scegli una strategia di fusione:</string>
+    <string name="manual">Manuale</string>
+    <string name="select_all_local">Seleziona tutto (locale)</string>
+    <string name="select_all_server">Seleziona tutto (server)</string>
+    <string name="toggle">Attiva/Disattiva</string>
+    <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">Ci sono osservazioni o immagini non caricate. Vuoi caricarle prima di scaricare?</string>
+    <string name="upload_first">Caricare</string>
+    <string name="download_anyway">Scarica</string>
+    <string name="confirm_delete_with_media_title">Elimina osservazione</string>
+    <string name="confirm_delete_with_media_message">L\'eliminazione di questa osservazione eliminerà anche tutti i contenuti multimediali allegati. Sei sicuro di voler eliminare questa osservazione?</string>
+    <string name="confirm_na_title">Segna come mancante</string>
+    <string name="attach">Allega</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <string name="alert_jump_to_plot_bottom_toolbar_message">La barra degli strumenti inferiore è stata aggiornata per supportare la navigazione della entrata tramite codice a barre.</string>
+    <!-- Preference: Attach media barcode prioritize -->
+    <string name="preferences_behavior_attach_media_barcode_prioritize">Usa sempre il codice a barre rilevato</string>
+    <string name="preferences_behavior_attach_media_barcode_prioritize_description">Quando viene rilevato un codice a barre, il Field Book analizzerà automaticamente il codice a barre senza l\'interazione dell\'utente.</string>
+    <string name="edit">Modifica</string>
+    <string name="trait_categorical_other_btn_description">Aggiungi una nuova categoria</string>
+    <!-- InnoSpectra settings layout -->
+    <string name="view_trait_innospectra_device_name_label">Nome</string>
+    <string name="view_trait_innospectra_mac_label">MAC</string>
+    <string name="view_trait_innospectra_unknown">Sconosciuto</string>
+    <string name="view_trait_innospectra_na">N/A</string>
+    <string name="unknown">Sconosciuto</string>
 </resources>

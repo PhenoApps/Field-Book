@@ -22,14 +22,13 @@ import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.interfaces.CollectController;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.traits.formats.Formats;
+import com.fieldbook.tracker.traits.formats.feature.DisplayValue;
 import com.fieldbook.tracker.views.CollectInputView;
-import com.fieldbook.tracker.views.RepeatedValuesView;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public abstract class BaseTraitLayout extends LinearLayout {
 
@@ -92,8 +91,24 @@ public abstract class BaseTraitLayout extends LinearLayout {
      */
     public void refreshLayout(Boolean onNew) {
 
+        // When frozen with repeated measures, update isLocked per-observation so
+        // existing rep values stay read-only while new empty reps remain editable.
+        CollectActivity act = (CollectActivity) getContext();
+        if (act.isFrozen() && getCollectInputView().isRepeatEnabled()) {
+            isLocked = !getCollectInputView().getText().isEmpty();
+        }
+
         getCollectInputView().getRepeatView().refresh();
 
+    }
+
+    /**
+     * Called when navigating to a new plot or trait with the same format.
+     * Skips view inflation and only reloads data to prevent flickering.
+     * Override in subclasses to customize refresh behavior.
+     */
+    public void onRefresh() {
+        loadLayout();
     }
 
     public void loadLayout() {
@@ -102,16 +117,9 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
         //right now text entry is disabled in the camera and photo traits
         //uris are too long to be nicely displayed in the current editTexts
-        if (type().equals(PhotoTraitLayout.type)
-                || type().equals(UsbCameraTraitLayout.type)
-                || isTraitType(LabelPrintTraitLayout.type)
-                || type().equals(AudioTraitLayout.type)
-                || type().equals(GoProTraitLayout.type)
-                || type().equals(CanonTraitLayout.type)) {
-            toggleVisibility(View.GONE);
-        } else {
+        if (Formats.Companion.findTrait(type()) instanceof DisplayValue) {
             toggleVisibility(View.VISIBLE);
-        }
+        } else toggleVisibility(View.GONE);
 
         //hide soft input if it is not the text format
         if (!type().equals(TextTraitLayout.type)) {
@@ -216,24 +224,51 @@ public abstract class BaseTraitLayout extends LinearLayout {
     public void onExit() {}
 
     /**
+     * Called for every trait layout when the hosting activity is destroyed.
+     *
+     * Layouts are constructed once per CollectActivity, so anything a layout owns that outlives a
+     * view - a coroutine scope, a Bluetooth scan, a receiver registered on an application scoped
+     * manager - has to be released here or it leaks the activity along with it.
+     */
+    public void onDestroy() {}
+
+    /**
+     * Optional warning shown before a toolbar action discards collected data, s.a. delete or
+     * marking an observation missing. Return null to let the action proceed without confirming.
+     */
+    @Nullable
+    public String getDataLossWarning() {
+        return null;
+    }
+
+    /**
      * Handles the repeated value view list state.
      * If this feature is enabled, the list will be modified and updated.
      */
     public void deleteTraitListener() {
-        CollectInputView inputView = getCollectInputView();
-        if (inputView.isRepeatEnabled()) {
-            inputView.getRepeatView().userDeleteCurrentRep();
-        }
-        //check if sound on delete is enabled in preferences and play sound
-        if (getPrefs().getBoolean(PreferenceKeys.DELETE_OBSERVATION_SOUND, false)) {
-            controller.getSoundHelper().playDelete();
+        if (!isLocked) {
+            CollectInputView inputView = getCollectInputView();
+            if (inputView.isRepeatEnabled()) {
+                inputView.getRepeatView().userDeleteCurrentRep();
+            }
+            //check if sound on delete is enabled in preferences and play sound
+            if (getPrefs().getBoolean(PreferenceKeys.DELETE_OBSERVATION_SOUND, false)) {
+                controller.getSoundHelper().playDelete();
+            }
         }
     }
 
     public abstract void setNaTraitsText();
 
     public void refreshLock() {
-        //((CollectActivity) getContext()).traitLockData();
+
+        if (getCurrentObservation() != null) {
+            // If there is an existing observation for the current rep, lock if frozen or locked
+            isLocked = getCollectActivity().isFrozen() || getCollectActivity().isLocked();
+        } else {
+            // If there is no existing observation, only lock if locked (not frozen)
+            isLocked = getCollectActivity().isLocked();
+        }
     }
 
     public TraitObject getCurrentTrait() {
@@ -296,16 +331,11 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
         inputView.setVisibility(visibility);
 
-        RepeatedValuesView repeatView = inputView.getRepeatView();
-        EditText editText = inputView.getEditText();
+        inputView.updateInputViewVisibility(visibility);
 
         // Clear hint for NA since a focus change doesn't happen for the numeric trait layout
-        if (inputView.isRepeatEnabled()) {
-            repeatView.setVisibility(visibility);
-        } else {
-            editText.setVisibility(visibility);
-            editText.setHint("");
-
+        if (!inputView.isRepeatEnabled()) {
+            EditText editText = inputView.getEditText();
             if (isTraitType(TextTraitLayout.type)
                     || isTraitType(AudioTraitLayout.type)
                     || isTraitType(PhotoTraitLayout.type)) {
@@ -326,6 +356,13 @@ public abstract class BaseTraitLayout extends LinearLayout {
         ((CollectActivity) getContext()).updateObservation(trait, value, null);
 
         setCurrentValueAsEdited();
+        handleAutoSwitchToNextPlot(trait);
+    }
+
+    protected void handleAutoSwitchToNextPlot(TraitObject trait) {
+        if (trait.getAutoSwitchPlot()) {
+            controller.getRangeBox().moveEntryRight();
+        }
     }
 
     public void removeTrait(TraitObject trait) {

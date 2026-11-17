@@ -29,8 +29,8 @@ import com.fieldbook.tracker.database.dao.spectral.ProtocolDao;
 import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.spectral.UriDao;
+import com.fieldbook.tracker.database.migrators.ObservationMediaMigratorVersion21;
 import com.fieldbook.tracker.database.views.ObservationVariableAttributeDetailViewCreator;
-import com.fieldbook.tracker.database.migrators.StudyConfigurationVersion17;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.database.models.ObservationVariableModel;
@@ -52,6 +52,7 @@ import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.threeten.bp.OffsetDateTime;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,26 +62,28 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
-import dagger.hilt.android.qualifiers.ActivityContext;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 
 /**
  * All database related functions are here
  */
 public class DataHelper {
 
-    public static final int DATABASE_VERSION = StudyConfigurationVersion17.VERSION;
+    public static final int DATABASE_VERSION = ObservationMediaMigratorVersion21.VERSION;
     private static final String DATABASE_NAME = "fieldbook.db";
     public static SQLiteDatabase db;
     private static final String TAG = "Field Book";
-    private static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSZZZZZ";
+    public static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSZZZZZ";
     private Context context;
     private SimpleDateFormat timeStamp;
 
@@ -102,7 +105,7 @@ public class DataHelper {
     private final GroupDao studyGroupDao = new GroupDao(GroupsTable.Type.STUDY);
 
     @Inject
-    public DataHelper(@ActivityContext Context context) {
+    public DataHelper(@ApplicationContext Context context) {
         try {
             this.context = context;
 
@@ -352,7 +355,13 @@ public class DataHelper {
 
         open();
 
-        return ObservationDao.Companion.insertObservation(plotId, traitDbId, value, person, location, notes, studyId, observationDbId, timestamp, lastSyncedTime, rep);
+        return ObservationDao.Companion.insertObservation(plotId, traitDbId, value, person, location, notes, studyId, observationDbId, timestamp, lastSyncedTime, rep, null, null, null);
+    }
+
+    // New overload to accept optional media URIs. Kept for Java callers that may supply media URIs.
+    public long insertObservation(String plotId, String traitDbId, String value, String person, String location, String notes, String studyId, @Nullable String observationDbId, @Nullable OffsetDateTime timestamp, @Nullable OffsetDateTime lastSyncedTime, @Nullable String rep, @Nullable String audioUri, @Nullable String videoUri, @Nullable String photoUri) {
+        open();
+        return ObservationDao.Companion.insertObservation(plotId, traitDbId, value, person, location, notes, studyId, observationDbId, timestamp, lastSyncedTime, rep, audioUri, videoUri, photoUri);
     }
 
     /**
@@ -446,6 +455,26 @@ public class DataHelper {
     }
 
     /**
+     * Get all BrAPI export data categorized by type and status
+     * @param fieldId The field ID to get data for
+     * @param hostUrl The BrAPI host URL
+     * @return Map containing categorized observations
+     */
+    public Map<String, List<Observation>> getBrAPIExportData(int fieldId, String hostUrl) {
+        return ObservationDao.Companion.getBrAPIExportData(Integer.toString(fieldId), hostUrl);
+    }
+
+    /**
+     * Convert observations to FieldBookImage objects
+     * @param ctx Context for file operations
+     * @param observations List of observations to convert
+     * @return List of FieldBookImage objects
+     */
+    public List<FieldBookImage> getImageDetails(Context ctx, List<Observation> observations) {
+        return ObservationDao.Companion.getImageDetails(ctx, observations, missingPhoto);
+    }
+
+    /**
      * Get the image observations for brapi export to external system
      */
     public List<FieldBookImage> getImageObservations(Context ctx, String hostUrl) {
@@ -460,28 +489,60 @@ public class DataHelper {
         ObservationUnitDao.Companion.updateObservationUnitModels(db, models);
     }
 
-    public void updateObservationModels(SQLiteDatabase db, List<ObservationModel> observations) {
+    public int updateObservationModels(SQLiteDatabase db, List<ObservationModel> observations) {
 
-        ObservationDao.Companion.updateObservationModels(db, observations);
+        return ObservationDao.Companion.updateObservationModels(db, observations);
 
     }
 
-    public void updateObservation(ObservationModel observation) {
+    /**
+     * Reads an observation back out of the database to confirm a write actually landed.
+     * <p>
+     * Android's SQLiteDatabase.insert() catches SQLException internally and returns -1, so a full
+     * disk (SQLiteFullException) or an I/O error (SQLiteDiskIOException) is otherwise
+     * indistinguishable from a successful save. Anything that shows the collector a saved state
+     * must confirm the row exists first.
+     *
+     * @param internalId    the primary key the write should have produced
+     * @param expectedValue the value that was submitted
+     * @return true only if the row exists and holds the submitted value
+     */
+    public boolean isObservationSaved(long internalId, String expectedValue) {
+
+        if (internalId <= 0) return false;
 
         open();
 
-        ObservationDao.Companion.updateObservation(observation);
+        String stored = ObservationDao.Companion.getValueById(String.valueOf(internalId));
 
+        if (stored == null) return false;
+
+        return ObservationDao.Companion.sanitizeValue(stored)
+                .equals(ObservationDao.Companion.sanitizeValue(expectedValue));
+    }
+
+    public void updateObservationMediaUris(ObservationModel observation) {
+
+        open();
+
+        ObservationDao.Companion.updateObservationMediaUris(observation);
     }
 
     /**
      * Sync with observationdbids BrAPI
      */
-    public void updateObservations(List<Observation> observations) {
+    public void updateObservationsByBrapiId(List<Observation> observations) {
 
         open();
 
-        ObservationDao.Companion.updateObservations(observations);
+        ObservationDao.Companion.updateObservationsByBrapiId(observations);
+    }
+
+    public void updateObservationsByFieldBookId(List<Observation> observations) {
+
+        open();
+
+        ObservationDao.Companion.updateObservationsByFieldBookId(observations);
     }
 
     public List<String> getPossibleUniqueAttributes(int studyId) {
@@ -504,11 +565,11 @@ public class DataHelper {
         return ObservationUnitDao.Companion.getBySearchAttribute(studyId, searchValue);
     }
 
-    public void updateImage(FieldBookImage image, Boolean writeLastSyncedTime) {
+    public void updateImage(FieldBookImage image) {
 
         open();
 
-        ObservationDao.Companion.updateImage(image, writeLastSyncedTime);
+        ObservationDao.Companion.updateImage(image);
     }
 
     /**
@@ -534,6 +595,10 @@ public class DataHelper {
         }
     }
 
+    public ValueProcessorFormatAdapter getValueFormatter() {
+        return new ValueProcessorFormatAdapter(context, spectralFileProcessor);
+    }
+
     /**
      * Retrieves the columns needed for database export with all imported attributes
      */
@@ -541,7 +606,7 @@ public class DataHelper {
 
         open();
 
-        ValueProcessorFormatAdapter processor = new ValueProcessorFormatAdapter(context, spectralFileProcessor);
+        ValueProcessorFormatAdapter processor = getValueFormatter();
 
         return ObservationUnitPropertyDao.Companion.getExportDbData(
                 context, fieldId, fieldList, traits, processor);
@@ -555,7 +620,7 @@ public class DataHelper {
 
         open();
 
-        ValueProcessorFormatAdapter processor = new ValueProcessorFormatAdapter(context, spectralFileProcessor);
+        ValueProcessorFormatAdapter processor = getValueFormatter();
 
         return ObservationUnitPropertyDao.Companion.getExportDbDataShort(
                 context, fieldId, fieldList, uniqueId, traits, processor);
@@ -602,6 +667,18 @@ public class DataHelper {
     }
 
     /**
+     * Lightweight DataGrid-specific query: same SQL as getExportTableData but returns the raw
+     * cursor without value processing. Avoids O(rows × traits) getTraitByName() DB calls.
+     */
+    public Cursor getDataGridTableData(int fieldId, ArrayList<TraitObject> traits, List<String> requiredAttributes) {
+
+        open();
+
+        return ObservationUnitPropertyDao.Companion.getDataGridTableData(context, fieldId, traits, requiredAttributes);
+
+    }
+
+    /**
      * Used by the application to return all traits which are visible
      */
     public ArrayList<TraitObject> getVisibleTraits() {
@@ -644,11 +721,30 @@ public class DataHelper {
         );
     }
 
-    public FieldObject getFieldObject(Integer studyId) {
+    public ArrayList<FieldObject> getAllFieldObjects(String sortOrder) {
 
         open();
 
-        List<FieldObject.TraitDetail> traitDetails = getTraitDetailsForStudy(studyId);
+        return StudyDao.Companion.getAllFieldObjects(sortOrder);
+    }
+
+    public FieldObject getFieldObject(Integer studyId) {
+
+        return getFieldObject(studyId, true);
+    }
+
+    /**
+     * Loads a study. Its trait details carry every observation value recorded against the study,
+     * so callers that never read them should pass false rather than paying to build and discard
+     * them.
+     */
+    public FieldObject getFieldObject(Integer studyId, boolean loadTraitDetails) {
+
+        open();
+
+        List<FieldObject.TraitDetail> traitDetails = loadTraitDetails
+                ? getTraitDetailsForStudy(studyId)
+                : Collections.emptyList();
 
         return StudyDao.Companion.getFieldObject(
                 studyId,
@@ -674,6 +770,15 @@ public class DataHelper {
 
         return ObservationVariableDao.Companion.getAllTraitObjects(
                 preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position")
+        );
+    }
+
+    public List<String> getExistingObservationUnitCoreColumns() {
+        return java.util.Arrays.asList(
+            "primary_id",
+            "secondary_id",
+            "observation_unit_db_id",
+            "geo_coordinates"
         );
     }
 
@@ -907,16 +1012,25 @@ public class DataHelper {
     /**
      * V2 - Edit existing trait
      */
-    public long editTraits(String traitDbId, String trait, String format, String defaultValue,
+    public long editTraits(String traitDbId, String trait, String traitAlias,String format, String defaultValue,
                            String minimum, String maximum, String details, String categories,
                            Boolean closeKeyboardOnOpen,
-                           Boolean cropImage,
-                           Boolean saveImage) {
+                           Boolean saveImage,
+                           Boolean cropImage, Boolean useDayOfYear, Boolean categoryDisplayValue, String resourceFile,
+                           List<String> synonyms, String decimalPlacesRequired, Boolean mathSymbolsEnabled,
+                           Boolean allowMulticat, Boolean repeatMeasure, Boolean autoSwitchPlot, String unit,
+                           Boolean invalidValues,
+                           Boolean multiMediaPhoto,
+                           Boolean multiMediaAudio,
+                           Boolean multiMediaVideo) {
 
         open();
 
-        return ObservationVariableDao.Companion.editTraits(traitDbId, trait, format, defaultValue,
-                minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage, saveImage);
+        return ObservationVariableDao.Companion.editTraits(traitDbId, trait, traitAlias, format, defaultValue,
+                minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage,
+                saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms, decimalPlacesRequired,
+                mathSymbolsEnabled, allowMulticat, repeatMeasure, autoSwitchPlot, unit, invalidValues,
+                multiMediaPhoto, multiMediaAudio, multiMediaVideo);
     }
 
     /**
@@ -932,6 +1046,13 @@ public class DataHelper {
         open();
 
         return ObservationVariableDao.Companion.getTraitByName(name);
+    }
+
+    public TraitObject getTraitByAlias(String name) {
+
+        open();
+
+        return ObservationVariableDao.Companion.getTraitByAlias(name);
     }
 
     public TraitObject getTraitById(String id) {
@@ -952,10 +1073,14 @@ public class DataHelper {
 
         open();
 
-        return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getName(),
+        return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getName(), trait.getAlias(),
                 trait.getFormat(), trait.getDefaultValue(), trait.getMinimum(), trait.getMaximum(),
                 trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen(), trait.getCropImage(),
-                trait.getSaveImage());
+                trait.getSaveImage(),
+                trait.getUseDayOfYear(), trait.getCategoryDisplayValue(), trait.getResourceFile(), trait.getSynonyms(),
+                trait.getMaxDecimalPlaces(), trait.getMathSymbolsEnabled(), trait.getAllowMulticat(),
+                trait.getRepeatedMeasures(), trait.getAutoSwitchPlot(), trait.getUnit(), trait.getInvalidValues(),
+                trait.getAttachPhoto(), trait.getAttachVideo(), trait.getAttachAudio());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {
@@ -985,7 +1110,6 @@ public class DataHelper {
         open();
         StudyDao.Companion.updateStudyAlias(studyId, newName);
         preferences.edit().putString(GeneralKeys.FIELD_ALIAS, newName).apply();
-        close();
     }
 
     /**
@@ -1176,11 +1300,13 @@ public class DataHelper {
     public void exportDatabase(Context ctx, String filename) throws IOException {
         String internalDbPath = getDatabasePath(this.context);
 
-        close();
+        File snapshot = null;
 
         try {
 
-            File oldDb = new File(internalDbPath);
+            // Snapshot the db file without closing the shared connection. This runs on a background
+            // thread (CollectActivity.onPause), and closing would crash any other thread mid-query.
+            snapshot = snapshotDatabase(internalDbPath);
 
             DocumentFile databaseDir = BaseDocumentTreeUtil.Companion.getDirectory(ctx, R.string.dir_database);
 
@@ -1225,7 +1351,7 @@ public class DataHelper {
                 OutputStream outputStream = context.getContentResolver().openOutputStream(zipFile.getUri());
                 if (backupDatabaseFile != null && backupPreferenceFile != null) {
 
-                    BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldDb), backupDatabaseFile);
+                    BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(snapshot), backupDatabaseFile);
 
                     if (outputStream != null){
                         ZipUtil.Companion.zip(context, new DocumentFile[] { backupDatabaseFile, backupPreferenceFile }, outputStream);
@@ -1249,11 +1375,47 @@ public class DataHelper {
 
         } finally {
 
-            open();
+            if (snapshot != null && snapshot.exists()) {
+                snapshot.delete();
+            }
+        }
+    }
 
+    /**
+     * Copies the database file to a temp file in the cache dir and returns it.
+     * The copy is taken inside an exclusive transaction so no other thread can write mid-copy;
+     * WAL is disabled, so the main file holds every committed change.
+     * The local copy keeps the lock short; the slower storage-access-framework copy happens after.
+     */
+    private File snapshotDatabase(String internalDbPath) throws IOException {
+
+        File snapshot = File.createTempFile("fieldbook_backup", ".db", context.getCacheDir());
+
+        // db is not yet assigned when this runs from onUpgrade, where the file is already safe to copy
+        SQLiteDatabase lockDb = db;
+        boolean locked = lockDb != null && lockDb.isOpen();
+
+        if (locked) {
+            lockDb.beginTransaction();
         }
 
-        open();
+        try (InputStream in = new FileInputStream(internalDbPath);
+             OutputStream out = new FileOutputStream(snapshot)) {
+
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+
+        } finally {
+
+            if (locked) {
+                lockDb.endTransaction();
+            }
+        }
+
+        return snapshot;
     }
 
     public static String getDatabasePath(Context context) {
@@ -1301,6 +1463,13 @@ public class DataHelper {
         openHelper.getWritableDatabase().setTransactionSuccessful();
     }
 
+    public ObservationModel[] getAllObservationDetails(boolean includeDeleted) {
+
+        open();
+
+        return ObservationDao.Companion.getAllVariableDetails(includeDeleted);
+    }
+
     public ObservationModel[] getAllObservations() {
 
         open();
@@ -1313,6 +1482,15 @@ public class DataHelper {
         open();
 
         return ObservationDao.Companion.getAllOfTrait(traitDbId);
+    }
+
+    /**
+     * Get the count of missing observations for a trait
+     * @param traitId the trait ID
+     * @return the count of missing observations
+     */
+    public int getMissingObservationsCount(String traitId) {
+        return ObservationDao.Companion.getMissingObservationsCount(traitId);
     }
 
     public ObservationModel[] getAllObservations(SQLiteDatabase db) {
@@ -1362,6 +1540,13 @@ public class DataHelper {
         return ObservationDao.Companion.getAllRepeatedValues(studyId, plotId, traitDbId);
     }
 
+    public java.util.Map<kotlin.Pair<String, String>, ObservationDao.RepeatSummary> getBatchRepeatSummaries(String studyId) {
+
+        open();
+
+        return ObservationDao.Companion.getRepeatSummariesForStudy(studyId);
+    }
+
     public String getObservationUnitPropertyByPlotId(String uniqueName, String column, String uniqueId) {
 
         open();
@@ -1374,6 +1559,13 @@ public class DataHelper {
         open();
 
         ObservationDao.Companion.delete(id);
+    }
+
+    public void deleteAllObservationsForStudy(String studyId) {
+
+        open();
+
+        ObservationDao.Companion.deleteAllForStudy(studyId);
     }
 
     /**
@@ -1679,6 +1871,26 @@ public class DataHelper {
             if (oldVersion <= 16 && newVersion >= 17) {
                 // add field creator configuration columns to studies table (start corner, walking directiop/pattern)
                 Migrator.Companion.migrateToVersion17(db);
+            }
+
+            if (oldVersion <= 17 && newVersion >= 18) {
+                // add trait alias and synonyms column migration
+                Migrator.Companion.migrateToVersion18(db);
+            }
+
+            if (oldVersion <= 18 && newVersion >= 19) {
+
+                Migrator.Companion.migrateToVersion19(db);
+            }
+
+            if (oldVersion <= 19 && newVersion >= 20) {
+
+                Migrator.Companion.migrateToVersion20(db);
+            }
+
+            if (oldVersion <= 20 && newVersion >= 21) {
+
+                Migrator.Companion.migrateToVersion21(db);
             }
         }
     }

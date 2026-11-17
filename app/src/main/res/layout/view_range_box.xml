@@ -5,14 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <ProgressBar
+    <com.fieldbook.tracker.views.ThumbOnlySeekBar
         android:id="@+id/plotsProgressBar"
-        style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
+        android:paddingStart="16dp"
+        android:paddingTop="5dp"
+        android:paddingEnd="16dp"
         android:progressTint="?attr/colorAccent"
+        android:thumb="@drawable/seekbar_thumb"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

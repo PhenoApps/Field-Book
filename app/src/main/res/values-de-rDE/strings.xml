@@ -14,6 +14,7 @@
     <string name="dialog_import">Import</string>
     <string name="dialog_warning">Warnung</string>
     <string name="dialog_save">Speichern</string>
+    <!-- Toolbar -->
     <!-- Startup  -->
     <!-- App Intro -->
     <!-- Storage Definer -->
@@ -74,9 +75,13 @@
     <string name="traits_create_true">Wahr</string>
     <string name="traits_create_false">Falsch</string>
     <string name="traits_create_categories_text">Separieren Sie Begriffe mit /</string>
+    <string name="traits_attach_media_photo_label">Foto</string>
     <string name="traits_create_warning_name_blank">Merkmalsname muss definiert sein</string>
     <string name="traits_create_warning_duplicate">Merkmal ist bereits vorhanden</string>
     <string name="traits_create_warning_numeric_required">Vorgegeben, Minimum und Maximum muessen numerisch sein</string>
+    <!-- Decimal Places Radio Options -->
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">Der Wert ist kleiner als das vorgegebene Minimum</string>
@@ -110,6 +115,7 @@
     <string name="activity_collect_dialog_verify_no_button">Nein</string>
     <string name="activity_collect_dialog_verify_yes_button">Ja</string>
     <!--- Datagrid -->
+    <string name="dialog_data_grid_header_picker_ok">OK</string>
     <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Ihr Gerät verfüget nicht über die notwendige Hardware um diese Funktion auszuführen</string>
@@ -125,6 +131,7 @@
     <!--- Text to Speech Strings -->
     <!--- Summary -->
     <!--- Repeated measures -->
+    <!--- Save failure -->
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
@@ -177,12 +184,16 @@
     <!-- BrAPI preferences -->
     <string name="brapi_choice_to_make_default_negative">Abbrechen</string>
     <string name="brapi_choice_to_make_default_positive">Speichern</string>
-    <!-- Community Servers -->
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_field_book">Fieldbuch</string>
     <!-- Authorization -->
+    <!-- Multi-account management -->
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->
     <string name="brapi_export_button">Export</string>
     <string name="brapi_close_button">Schliessen</string>
+    <string name="brapi_export_complete">Export komplett</string>
+    <string name="cancel">Abbrechen</string>
     <!-- Pagination -->
     <!-- General -->
     <!-- APP INTRO  -->
@@ -201,14 +212,21 @@
     <string name="act_brapi_filter_import">Import</string>
     <string name="act_brapi_filter_clear">Löschen</string>
     <!-- base camera strings -->
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="view_trait_photo_settings_camera_custom">Vorgegeben</string>
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
     <!-- spectral trait strings -->
+    <!-- inno spectra -->
+    <!-- stages reported while the inno spectra device is connecting -->
     <string name="brapi_traits_filter_title">Merkmale</string>
     <string name="traits_sort_default">Vorgegeben</string>
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">Speichern</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
+    <!-- InnoSpectra settings layout -->
 </resources>

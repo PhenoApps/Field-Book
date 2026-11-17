@@ -21,9 +21,23 @@ class BrapiFilterCache {
 
         private const val JSON_FILE_NAME = "com.fieldbook.tracker.activities.filters.json"
 
-        enum class CacheClearInterval {
-            EVERY, DAILY, WEEKLY, NEVER
+        enum class CacheClearInterval(val value: String) {
+            EVERY("0"),
+            DAILY("1"),
+            WEEKLY("2"),
+            NEVER("3");
+
+            companion object {
+                @JvmField
+                val DEFAULT = NEVER
+
+                fun fromValue(value: String?): CacheClearInterval =
+                    entries.find { it.value == value } ?: DEFAULT
+            }
         }
+
+        private const val ONE_DAY_MILLIS = 24 * 60 * 60 * 1000L
+        private const val ONE_WEEK_MILLIS = 7 * ONE_DAY_MILLIS
 
         fun saveVariables(context: Context, models: List<BrAPIObservationVariable>) {
             saveToStorage(context,
@@ -37,26 +51,30 @@ class BrapiFilterCache {
         fun checkClearCache(context: Context) {
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
             val currentTime = System.currentTimeMillis()
-            when (prefs.getString(
-                PreferenceKeys.BRAPI_INVALIDATE_CACHE_INTERVAL,
-                CacheClearInterval.NEVER.ordinal.toString()
+            when (CacheClearInterval.fromValue(
+                prefs.getString(
+                    PreferenceKeys.BRAPI_INVALIDATE_CACHE_INTERVAL,
+                    CacheClearInterval.DEFAULT.value
+                )
             )) {
-                CacheClearInterval.EVERY.ordinal.toString() -> delete(context, false)
-                CacheClearInterval.DAILY.ordinal.toString() -> {
+                CacheClearInterval.EVERY -> delete(context, false)
+                CacheClearInterval.DAILY -> {
                     val lastCleared =
                         prefs.getLong(PreferenceKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, 0)
-                    if (currentTime - lastCleared > 24 * 60 * 60 * 1000) {
+                    if (currentTime - lastCleared > ONE_DAY_MILLIS) {
                         delete(context, false)
                     }
                 }
 
-                CacheClearInterval.WEEKLY.ordinal.toString() -> {
+                CacheClearInterval.WEEKLY -> {
                     val lastCleared =
                         prefs.getLong(PreferenceKeys.BRAPI_INVALIDATE_CACHE_LAST_CLEAR, 0)
-                    if (currentTime - lastCleared > 7 * 24 * 60 * 60 * 1000) {
+                    if (currentTime - lastCleared > ONE_WEEK_MILLIS) {
                         delete(context, false)
                     }
                 }
+
+                CacheClearInterval.NEVER -> Unit
             }
         }
 

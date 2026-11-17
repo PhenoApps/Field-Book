@@ -1,11 +1,15 @@
 package com.fieldbook.tracker.traits;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
+import android.text.InputType;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -14,27 +18,32 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
+import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.google.android.flexbox.AlignItems;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 public class CategoricalTraitLayout extends BaseTraitLayout {
 
-    //todo this can eventually be merged with multicattraitlayout when we can support a switch in traits on how many categories to allow user to select
-
     public static String[] POSSIBLE_VALUES = new String[]{ "qualitative", "categorical" };
+    private static final String CATEGORY_SEPARATOR = ":";
 
     //private StaggeredGridView gridMultiCat;
     private RecyclerView gridMultiCat;
+    private FloatingActionButton otherButton;
+    private ArrayList<BrAPIScaleValidValuesCategories> categoryList;
+    private final BrAPIScaleValidValuesCategories defaultNaCategory = new BrAPIScaleValidValuesCategories().label("NA").value("NA");
 
     public CategoricalTraitLayout(Context context) {
         super(context);
@@ -55,10 +64,47 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         return false;
     }
 
+    private boolean shouldDisplayValues() {
+        return getCurrentTrait().getCategoryDisplayValue();
+    }
+
+    private boolean isMulticatEnabled() {
+        return getCurrentTrait().getAllowMulticat();
+    }
+
+    private boolean isAllowOtherEnabled() {
+        return getCurrentTrait().getAllowOther() && getCurrentTrait().isLocalTrait();
+    }
+
+    private String getDisplayText(BrAPIScaleValidValuesCategories category) {
+        return shouldDisplayValues() ? category.getValue() : category.getLabel();
+    }
+
+    private BrAPIScaleValidValuesCategories resolveCategoryForDisplay(
+            BrAPIScaleValidValuesCategories category,
+            ArrayList<BrAPIScaleValidValuesCategories> categories
+    ) {
+        if (category == null) return null;
+        for (BrAPIScaleValidValuesCategories defined : categories) {
+            if (defined == null) continue;
+            if (Objects.equals(defined.getValue(), category.getValue())
+                    || Objects.equals(defined.getLabel(), category.getValue())
+                    || Objects.equals(defined.getValue(), category.getLabel())
+                    || Objects.equals(defined.getLabel(), category.getLabel())) {
+                return defined;
+            }
+        }
+        return category;
+    }
+
     @Override
     public void setNaTraitsText() {
         getCollectInputView().setText("NA");
-        setAdapter(getCategories());
+        if (isMulticatEnabled()) {
+            categoryList = new ArrayList<>();
+            categoryList.add(defaultNaCategory);
+        }
+        setAdapter();
     }
 
     @Override
@@ -79,6 +125,11 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     public void init(Activity act) {
 
         gridMultiCat = act.findViewById(R.id.catGrid);
+        otherButton = act.findViewById(R.id.otherCatButton);
+
+        if (isMulticatEnabled()) {
+            categoryList = new ArrayList<>();
+        }
 
         gridMultiCat.requestFocus();
     }
@@ -86,69 +137,132 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     @Override
     public void afterLoadNotExists(CollectActivity act) {
         super.afterLoadNotExists(act);
-        setAdapter(getCategories());
+        if (isMulticatEnabled()) {
+            categoryList = new ArrayList<>();
+        }
+        setAdapter();
     }
 
     @Override
     public void afterLoadDefault(CollectActivity act) {
         super.afterLoadDefault(act);
-        setAdapter(getCategories());
+        if (isMulticatEnabled()) {
+            categoryList = new ArrayList<>();
+            loadMulticatScale();
+        }
+        setAdapter();
     }
 
     @Override
     public void afterLoadExists(CollectActivity act, @Nullable String value) {
         super.afterLoadExists(act, value);
 
-        //read the preferences, default to displaying values instead of labels
-        String labelValPref = getPrefs().getString(PreferenceKeys.LABELVAL_CUSTOMIZE,"value");
-
         //read the json object stored in additional info of the trait object (only in BrAPI imported traits)
-        ArrayList<BrAPIScaleValidValuesCategories> cats = getCategories();
+        if (isMulticatEnabled()) {
+            categoryList = new ArrayList<>();
+            loadMulticatScale();
+            if (value != null && value.equals("NA")) getCollectInputView().setText("NA");
+        } else {
+            loadCategoryValue(value);
+        }
 
-        if (value != null && !value.isEmpty()) {
+        refreshLock();
+        setAdapter();
+    }
 
-            //check if its the new json
-            try {
+    private void loadCategoryValue(@Nullable String value) {
+        ArrayList<BrAPIScaleValidValuesCategories> categories = getCategories();
 
-                ArrayList<BrAPIScaleValidValuesCategories> c = CategoryJsonUtil.Companion.decode(value);
+        if (value == null || value.isEmpty()) return;
 
-                if (!c.isEmpty()) {
+        //check if its the new json
+        try {
 
-                    //get the value from the single-sized array
-                    BrAPIScaleValidValuesCategories labelVal = c.get(0);
+            ArrayList<BrAPIScaleValidValuesCategories> cat = CategoryJsonUtil.Companion.decode(value);
 
-                    //check that this pair is a valid label/val pair in the category,
-                    //if it is then set the text based on the preference
-                    if (CategoryJsonUtil.Companion.contains(cats, labelVal)) {
+            if (!cat.isEmpty()) {
 
-                        //display the category based on preferences
-                        if (labelValPref.equals("value")) {
-
-                            getCollectInputView().setText(labelVal.getValue());
-
-                        } else {
-
-                            getCollectInputView().setText(labelVal.getLabel());
-
+                // if the trait was set to allowMulticat previously
+                // make sure to validate if the observation had multiple categories recorded
+                if (cat.size() > 1) {
+                    StringJoiner joiner = new StringJoiner(CATEGORY_SEPARATOR);
+                    for (BrAPIScaleValidValuesCategories c : cat) {
+                        BrAPIScaleValidValuesCategories resolved = resolveCategoryForDisplay(c, categories);
+                        if (resolved != null) {
+                            joiner.add(getDisplayText(resolved));
                         }
-
                     }
+                    getCollectInputView().setText(joiner.toString());
+                    return;
                 }
 
-            } catch (Exception e) {
+                //get the value from the single-sized array
+                BrAPIScaleValidValuesCategories category = resolveCategoryForDisplay(cat.get(0), categories);
 
-                e.printStackTrace(); //if it fails to decode, assume its an old string
-
-                if (CategoryJsonUtil.Companion.contains(cats, value)) {
-
-                    getCollectInputView().setText(value);
-
-                    getCollectInputView().setTextColor(Color.parseColor(getDisplayColor()));
+                //display the category based on preferences
+                if (category != null) {
+                    getCollectInputView().setText(getDisplayText(category));
                 }
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace(); //if it fails to decode, assume its an old string
+
+            BrAPIScaleValidValuesCategories rawCategory = new BrAPIScaleValidValuesCategories();
+            rawCategory.setLabel(value);
+            rawCategory.setValue(value);
+            BrAPIScaleValidValuesCategories resolved = resolveCategoryForDisplay(rawCategory, categories);
+
+            if (resolved != null) {
+                getCollectInputView().setText(getDisplayText(resolved));
+                getCollectInputView().setTextColor(Color.parseColor(getDisplayColor()));
+            }
+        }
+    }
+
+    private void loadMulticatScale() {
+        refreshMultiCatList();
+        refreshMultiCatText();
+    }
+
+    private void refreshMultiCatList() {
+        if (categoryList == null) categoryList = new ArrayList<>();
+        categoryList.clear();
+
+        String value = (getCurrentObservation() != null) ? getCurrentObservation().getValue() : getCollectInputView().getText();
+
+        ArrayList<BrAPIScaleValidValuesCategories> scale = new ArrayList<>();
+
+        try {
+            scale = CategoryJsonUtil.Companion.decodeCategories(value);
+        } catch (Exception e) {
+            String[] tokens = value.split(CATEGORY_SEPARATOR);
+            for (String token : tokens) {
+                BrAPIScaleValidValuesCategories c = new BrAPIScaleValidValuesCategories();
+                c.setLabel(token);
+                c.setValue(token);
+                scale.add(c);
             }
         }
 
-        setAdapter(cats);
+        ArrayList<BrAPIScaleValidValuesCategories> categories = getCategories();
+        ArrayList<BrAPIScaleValidValuesCategories> resolvedScale = new ArrayList<>();
+        for (BrAPIScaleValidValuesCategories observed : scale) {
+            BrAPIScaleValidValuesCategories resolved = resolveCategoryForDisplay(observed, categories);
+            if (resolved != null) {
+                resolvedScale.add(resolved);
+            }
+        }
+        scale = resolvedScale;
+
+        //only filter if it's not NA
+        if (!value.equals("NA")) {
+            BrAPIScaleValidValuesCategories[] categoriesArray = categories.toArray(new BrAPIScaleValidValuesCategories[0]);
+            scale = CategoryJsonUtil.Companion.filterExists(categoriesArray, scale);
+        }
+
+        categoryList.addAll(scale);
     }
 
     private ArrayList<BrAPIScaleValidValuesCategories> getCategories() {
@@ -175,64 +289,50 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         return cats;
     }
 
-    private void setAdapter(ArrayList<BrAPIScaleValidValuesCategories> cats) {
-
-        String labelValPref = getPrefs().getString(PreferenceKeys.LABELVAL_CUSTOMIZE,"value");
-
+    private void setAdapter() {
         FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(getContext());
         layoutManager.setFlexWrap(FlexWrap.WRAP);
         layoutManager.setFlexDirection(FlexDirection.ROW);
         layoutManager.setAlignItems(AlignItems.STRETCH);
         gridMultiCat.setLayoutManager(layoutManager);
 
-        gridMultiCat.setAdapter(new CategoryTraitAdapter(getContext()) {
+        ArrayList<BrAPIScaleValidValuesCategories> categories = getCategories();
 
+        gridMultiCat.setAdapter(new CategoryTraitAdapter(getContext()) {
             @Override
             public void onBindViewHolder(CategoryTraitViewHolder holder, int position) {
-                holder.bindTo();
 
-                //get the label for this position
-                BrAPIScaleValidValuesCategories pair = cats.get(position);
+                BrAPIScaleValidValuesCategories category = categories.get(position);
 
-                //update button with the preference based text
-                if (labelValPref.equals("value")) {
+                holder.bindTo(category);
 
-                    holder.mButton.setText(pair.getValue());
+                holder.mButton.setText(getDisplayText(category));
 
-                } else {
+                if (isMulticatEnabled()) {
+                    holder.mButton.setOnClickListener(createMultiCatClickListener(holder.mButton));
 
-                    holder.mButton.setText(pair.getLabel());
-
-                }
-
-                //set the buttons tag to the json, when clicked this is updated in db
-                holder.mButton.setTag(pair);
-                holder.mButton.setOnClickListener(createClickListener(holder.mButton, position));
-
-                //update the button's state if this category is selected
-                String currentText = getCollectInputView().getText();
-
-                if (labelValPref.equals("value")) {
-
-                    if (currentText.equals(pair.getValue())) {
-
+                    if (hasCategory(category)) {
                         pressOnButton(holder.mButton);
-
-                    } else pressOffButton(holder.mButton);
-
+                    } else {
+                        pressOffButton(holder.mButton);
+                    }
                 } else {
+                    holder.mButton.setOnClickListener(createCategoryClickListener(holder.mButton));
+                    String currentText = getCollectInputView().getText();
 
-                    if (currentText.equals(pair.getLabel())) {
+                    boolean isSelected = currentText.equals(getDisplayText(category));
 
+                    if (isSelected) {
                         pressOnButton(holder.mButton);
-
-                    } else pressOffButton(holder.mButton);
+                    } else {
+                        pressOffButton(holder.mButton);
+                    }
                 }
             }
 
             @Override
             public int getItemCount() {
-                return cats.size();
+                return categories.size();
             }
         });
 
@@ -246,6 +346,83 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                 gridMultiCat.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
             }
         });
+
+        if (otherButton != null) {
+            if (isAllowOtherEnabled()) {
+                otherButton.setVisibility(View.VISIBLE);
+                otherButton.setOnClickListener(v -> showAddOtherDialog());
+            } else {
+                otherButton.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    private void showAddOtherDialog() {
+        if (((CollectActivity) getContext()).isDataLocked()) return;
+
+        EditText input = new EditText(getContext());
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        input.setHint(getContext().getString(R.string.trait_other_dialog_hint));
+
+        LinearLayout container = new LinearLayout(getContext());
+        int padding = (int) (16 * getContext().getResources().getDisplayMetrics().density);
+        container.setPadding(padding, 0, padding, 0);
+        container.addView(input, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        new AlertDialog.Builder(getContext())
+                .setTitle(R.string.trait_other_dialog_title)
+                .setView(container)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    String newLabel = input.getText().toString().trim();
+
+                    if (newLabel.isEmpty()) {
+                        Utils.makeToast(getContext(), getContext().getString(R.string.trait_other_empty));
+                        return;
+                    }
+
+                    ArrayList<BrAPIScaleValidValuesCategories> existingCategories = getCategories();
+                    BrAPIScaleValidValuesCategories newCategory = new BrAPIScaleValidValuesCategories()
+                            .label(newLabel)
+                            .value(newLabel);
+
+                    if (CategoryJsonUtil.Companion.contains(existingCategories, newCategory)) {
+                        Utils.makeToast(getContext(), getContext().getString(R.string.trait_other_duplicate));
+                        return;
+                    }
+
+                    TraitObject trait = getCurrentTrait();
+                    if (trait == null) return;
+
+                    existingCategories.add(newCategory);
+                    String newCategoriesJson = CategoryJsonUtil.Companion.encode(existingCategories);
+
+                    // Update in-memory trait object
+                    trait.setCategories(newCategoriesJson);
+
+                    controller.getViewModel().updateAttributes(trait);
+
+                    // Refresh buttons
+                    setAdapter();
+
+                    // Select the new category
+                    if (isMulticatEnabled()) {
+                        if (categoryList == null) categoryList = new ArrayList<>();
+                        removeCategory(defaultNaCategory);
+                        addCategory(newCategory);
+                        String json = CategoryJsonUtil.Companion.encode(categoryList);
+                        updateObservation(trait, json);
+                        triggerTts(getDisplayText(newCategory));
+                    } else {
+                        ArrayList<BrAPIScaleValidValuesCategories> scale = new ArrayList<>();
+                        scale.add(newCategory);
+                        getCollectInputView().setText(getDisplayText(newCategory));
+                        updateObservation(trait, CategoryJsonUtil.Companion.encode(scale));
+                        triggerTts(getDisplayText(newCategory));
+                        refreshLayout(false);
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     /**
@@ -255,13 +432,18 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     @Override
     public void refreshLayout(Boolean onNew) {
         super.refreshLayout(onNew);
+
+        if (isMulticatEnabled()) {
+            refreshMultiCatList();
+        }
+
         RecyclerView.Adapter<?> adapter = gridMultiCat.getAdapter();
         if (adapter != null) {
             adapter.notifyItemRangeChanged(0, adapter.getItemCount());
         }
     }
 
-    private OnClickListener createClickListener(final Button button, int position) {
+    private OnClickListener createCategoryClickListener(final Button button) {
         return v -> {
 
             if (!((CollectActivity) getContext()).isDataLocked()) {
@@ -276,6 +458,10 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                     pressOffButton(button);
                     currentCat = "";
                 } else {
+                    for (int i = 0; i < gridMultiCat.getChildCount(); i++) {
+                        Button btn = gridMultiCat.getChildAt(i).findViewById(R.id.multicatButton);
+                        if (btn != null) pressOffButton(btn);
+                    }
                     pressOnButton(button);
                     currentCat = category;
                     scale.add(pair);
@@ -283,14 +469,69 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
                 getCollectInputView().setText(currentCat);
 
-                updateObservation(getCurrentTrait(),
-                        CategoryJsonUtil.Companion.encode(scale));
+                updateObservation(getCurrentTrait(), CategoryJsonUtil.Companion.encode(scale));
 
                 triggerTts(category);
-
-                refreshLayout(false);
             }
         };
+    }
+
+    private OnClickListener createMultiCatClickListener(final Button button) {
+        return v -> {
+            if (!((CollectActivity) getContext()).isDataLocked()) {
+                removeCategory(defaultNaCategory);
+                BrAPIScaleValidValuesCategories cat = (BrAPIScaleValidValuesCategories) button.getTag();
+
+                if (hasCategory(cat)) {
+                    pressOffButton(button);
+                    removeCategory(cat);
+                } else {
+                    pressOnButton(button);
+                    addCategory(cat);
+                }
+
+                StringJoiner joiner = new StringJoiner(CATEGORY_SEPARATOR);
+                for (BrAPIScaleValidValuesCategories c : categoryList) {
+                    joiner.add(getDisplayText(c));
+                }
+
+                getCollectInputView().setText(joiner.toString());
+                String json = CategoryJsonUtil.Companion.encode(categoryList);
+                updateObservation(getCurrentTrait(), json);
+
+                triggerTts(getDisplayText(cat));
+            }
+        };
+    }
+
+    private boolean hasCategory(final BrAPIScaleValidValuesCategories category) {
+        if (categoryList == null) return false;
+        for (final BrAPIScaleValidValuesCategories cat : categoryList) {
+            if (cat.getLabel().equals(category.getLabel())
+                    && cat.getValue().equals(category.getValue())) return true;
+        }
+        return false;
+    }
+
+    private void addCategory(final BrAPIScaleValidValuesCategories category) {
+        if (categoryList == null) categoryList = new ArrayList<>();
+        categoryList.add(category);
+        refreshMultiCatText();
+    }
+
+    private void refreshMultiCatText() {
+        StringJoiner joiner = new StringJoiner(CATEGORY_SEPARATOR);
+        for (BrAPIScaleValidValuesCategories c : categoryList) {
+            joiner.add(getDisplayText(c));
+        }
+        getCollectInputView().setText(joiner.toString());
+    }
+
+    private void removeCategory(final BrAPIScaleValidValuesCategories category) {
+        if (categoryList != null) {
+            categoryList.remove(category);
+            refreshMultiCatText();
+        }
     }
 
     private void pressOnButton(Button button) {
@@ -305,32 +546,94 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     public void deleteTraitListener() {
         ((CollectActivity) getContext()).removeTrait();
         super.deleteTraitListener();
-        loadLayout();
+        if (isMulticatEnabled()) {
+            refreshLayout(false);
+        } else {
+            loadLayout();
+        }
     }
 
     @Override
     public String decodeValue(String value) {
-        String labelValPref = getPrefs().getString(PreferenceKeys.LABELVAL_CUSTOMIZE,"value");
-        ArrayList<BrAPIScaleValidValuesCategories> scale = CategoryJsonUtil.Companion.decode(value);
-        if (!scale.isEmpty()) {
-            if (labelValPref.equals("value")) {
-                return scale.get(0).getValue();
-            } else return scale.get(0).getLabel();
-        } else return "";
+        if (isMulticatEnabled()) {
+            StringJoiner joiner = new StringJoiner(CATEGORY_SEPARATOR);
+            ArrayList<BrAPIScaleValidValuesCategories> scale = CategoryJsonUtil.Companion.decode(value);
+            for (BrAPIScaleValidValuesCategories s : scale) {
+                joiner.add(getDisplayText(s));
+            }
+            return joiner.toString();
+        } else {
+            ArrayList<BrAPIScaleValidValuesCategories> scale = CategoryJsonUtil.Companion.decode(value);
+            if (!scale.isEmpty()) {
+                return getDisplayText(scale.get(0));
+            } else return "";
+        }
     }
 
     @NonNull
     @Override
     public Boolean validate(String data) {
+        if (isMulticatEnabled()) {
+            return validateMulticat(data);
+        } else {
+            return validateCategory(data);
+        }
+    }
 
+    public Boolean validateMulticat(String data) {
+        ArrayList<BrAPIScaleValidValuesCategories> cats = getCategories();
+        ArrayList<BrAPIScaleValidValuesCategories> userChosenCats = new ArrayList<>();
+
+        String value = (getCurrentObservation() != null) ? getCurrentObservation().getValue() : data;
+        try {
+            if (JsonUtil.Companion.isJsonValid(value)) {
+                userChosenCats.addAll(CategoryJsonUtil.Companion.decode(value));
+            } else throw new RuntimeException();
+
+        } catch (Exception e) {
+
+            String[] classTokens = value.split(CATEGORY_SEPARATOR);
+
+            for (String token : classTokens) {
+
+                userChosenCats.add(new BrAPIScaleValidValuesCategories()
+                        .label(token)
+                        .value(token));
+            }
+        }
+
+        boolean valid = true;
+        for (BrAPIScaleValidValuesCategories cat : userChosenCats) {
+            valid = CategoryJsonUtil.Companion.contains(cats, cat);
+            if (!valid) break;
+        }
+
+        // check if the data is in the list of categories
+        if (!valid) {
+            getCollectActivity().runOnUiThread(() ->
+                    Utils.makeToast(controller.getContext(),
+                            controller.getContext().getString(R.string.trait_error_invalid_multicat_value)));
+        }
+
+        return valid;
+    }
+
+    public Boolean validateCategory(String data) {
         try {
             ArrayList<BrAPIScaleValidValuesCategories> userChosenCats = CategoryJsonUtil.Companion.decode(data);
             if (userChosenCats.isEmpty()) {
                 return true;
-            } else {
-                ArrayList<BrAPIScaleValidValuesCategories> cats = getCategories();
-                return CategoryJsonUtil.Companion.contains(cats, userChosenCats.get(0));
             }
+
+            if (userChosenCats.size() > 1) { // if multicat, invalid
+                getCollectActivity().runOnUiThread(() ->
+                        Utils.makeToast(controller.getContext(),
+                                controller.getContext().getString(R.string.trait_error_multicat_disabled)));
+                return false;
+            }
+
+            ArrayList<BrAPIScaleValidValuesCategories> cats = getCategories();
+            return CategoryJsonUtil.Companion.contains(cats, userChosenCats.get(0));
         } catch (Exception e) {
             return false;
         }

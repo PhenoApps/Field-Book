@@ -1,36 +1,35 @@
 package com.fieldbook.tracker.utilities
 
 import android.content.Context
-import android.graphics.Color
+import android.graphics.Canvas
 import android.graphics.ImageFormat
-import android.graphics.Matrix
-import android.graphics.PorterDuff
-import android.graphics.Rect
+import android.graphics.Paint
+import android.graphics.PixelFormat
 import android.graphics.RectF
-import android.graphics.Region
+import android.graphics.drawable.Drawable
+import android.graphics.ColorFilter
 import android.hardware.camera2.CameraCharacteristics
-import android.os.Build
-import android.os.Handler
 import android.util.Log
 import android.util.Size
 import android.util.TypedValue
+import android.view.View
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
-import androidx.camera.core.CameraEffect.PREVIEW
-import androidx.camera.core.CameraEffect.IMAGE_CAPTURE
-import androidx.camera.core.CameraEffect.VIDEO_CAPTURE
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ExperimentalGetImage
+import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
 import androidx.camera.core.UseCaseGroup
 import androidx.camera.core.resolutionselector.AspectRatioStrategy
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
-import androidx.camera.effects.OverlayEffect
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.video.Recorder
+import androidx.camera.video.VideoCapture
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
@@ -44,10 +43,10 @@ import java.util.concurrent.Executors
 import javax.inject.Inject
 
 @OptIn(ExperimentalCamera2Interop::class)
-class CameraXFacade @Inject constructor(@ActivityContext private val context: Context) {
+class CameraXFacade @Inject constructor(@param:ActivityContext private val context: Context) {
 
     companion object {
-        val TAG = CameraXFacade::class.java.simpleName
+        val TAG: String = CameraXFacade::class.java.simpleName
     }
 
     val cameraXInstance by lazy {
@@ -62,7 +61,13 @@ class CameraXFacade @Inject constructor(@ActivityContext private val context: Co
 
     }
 
-    val executor by lazy {
+    // track current lens facing and allow toggling between back and front selectors
+    private var isBackFacing = true
+
+    val currentSelector: CameraSelector
+        get() = if (isBackFacing) frontSelector else CameraSelector.DEFAULT_FRONT_CAMERA
+
+    val executor: ExecutorService? by lazy {
         Executors.newSingleThreadExecutor()
     }
 
@@ -75,6 +80,11 @@ class CameraXFacade @Inject constructor(@ActivityContext private val context: Co
 
     fun unbind() {
         cameraXInstance.get().unbindAll()
+    }
+
+    /** Toggle between back and front camera selectors. */
+    fun toggleCameraSelector() {
+        isBackFacing = !isBackFacing
     }
 
     fun bindIdentity(
@@ -116,7 +126,7 @@ class CameraXFacade @Inject constructor(@ActivityContext private val context: Co
 
     fun bindFrontCapture(
         targetResolution: Size?,
-        onBind: (Camera, ExecutorService, ImageCapture) -> Unit,
+        onBind: (Camera, ExecutorService?, ImageCapture) -> Unit,
     ) {
 
         unbind()
@@ -146,7 +156,7 @@ class CameraXFacade @Inject constructor(@ActivityContext private val context: Co
 
             val camera = cameraXInstance.get().bindToLifecycle(
                 context as LifecycleOwner,
-                frontSelector,
+                currentSelector,
                 imageCapture
             )
 
@@ -159,14 +169,106 @@ class CameraXFacade @Inject constructor(@ActivityContext private val context: Co
         }
     }
 
-    private var cropEffect: OverlayEffect? = null
+    // previously used an OverlayEffect; replaced with a Drawable that is added to PreviewView.overlay
+    private var cropDrawable: CropOverlayDrawable? = null
 
+    // the view and coordinates the current overlay was built for, used to skip redundant updates
+    private var cropDrawableHost: PreviewView? = null
+    private var cropDrawableCoordinates: String? = null
+
+    private val cropLayoutListener = View.OnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
+        cropDrawable?.setBounds(0, 0, v.width, v.height)
+        v.invalidate()
+    }
+
+    fun updateCropRegion(
+        previewView: PreviewView?,
+        traitId: String?,
+        showCropRegion: Boolean = true
+    ) {
+        if (previewView == null) return
+
+        // parse crop from prefs
+        val cropCoordinates = (context as? ThemedActivity)?.prefs?.getString(
+            GeneralKeys.getCropCoordinatesKey(traitId?.toIntOrNull() ?: -1), ""
+        )
+
+        val rect = if (showCropRegion && !cropCoordinates.isNullOrEmpty() && cropCoordinates != CropImageView.DEFAULT_CROP_COORDINATES) {
+            CropImageView.parseRectCoordinates(cropCoordinates)
+        } else null
+
+        val desiredCoordinates = if (rect != null) cropCoordinates else null
+
+        // nothing changed (e.g. navigating between entries of the same trait), keep the current overlay to avoid flicker
+        if (previewView === cropDrawableHost && desiredCoordinates == cropDrawableCoordinates) return
+
+        // remove previous drawable overlay if present
+        val oldDrawable = cropDrawable
+        val oldHost = cropDrawableHost
+        try {
+            oldHost?.removeOnLayoutChangeListener(cropLayoutListener)
+            if (oldHost != null && oldDrawable != null && oldHost !== previewView) {
+                oldHost.overlay.remove(oldDrawable)
+                oldHost.invalidate()
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Error removing previous crop drawable: ${e.message}")
+        }
+
+        cropDrawable = null
+        cropDrawableHost = previewView
+        cropDrawableCoordinates = desiredCoordinates
+
+        // If crop coordinates are valid, add a drawable to the PreviewView overlay that dims outside the crop rect
+        if (rect != null) {
+            val typedValue = TypedValue()
+            context.theme?.resolveAttribute(
+                R.attr.fb_inverse_crop_region_color,
+                typedValue,
+                true
+            )
+            val color = typedValue.data
+
+            val drawable = CropOverlayDrawable(previewView, rect, color)
+            cropDrawable = drawable
+
+            // swap old and new drawables in the same frame so the overlay never disappears
+            val attach = {
+                try {
+                    if (oldHost === previewView) oldDrawable?.let { previewView.overlay.remove(it) }
+                    if (cropDrawable === drawable) {
+                        drawable.setBounds(0, 0, previewView.width, previewView.height)
+                        previewView.overlay.add(drawable)
+                    }
+                    previewView.invalidate()
+                } catch (e: Exception) {
+                    Log.w(TAG, "Error adding crop drawable: ${e.message}")
+                }
+            }
+
+            // Add overlay after layout if width/height are not yet known
+            if (previewView.width > 0 && previewView.height > 0) attach() else previewView.post { attach() }
+
+            // listen for layout changes to update bounds
+            previewView.addOnLayoutChangeListener(cropLayoutListener)
+        } else {
+            try {
+                if (oldHost === previewView) oldDrawable?.let { previewView.overlay.remove(it) }
+            } catch (e: Exception) {
+                Log.w(TAG, "Error removing previous crop drawable: ${e.message}")
+            }
+            previewView.invalidate()
+        }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
     fun bindPreview(
         previewView: PreviewView?,
         targetResolution: Size?,
         traitId: String? = null,
-        handler: Handler,
-        onBind: (Camera, ExecutorService, ImageCapture) -> Unit
+        analysis: ImageAnalysis?,
+        showCropRegion: Boolean,
+        onBind: (Camera, ExecutorService?, ImageCapture) -> Unit
     ) {
 
         unbind()
@@ -198,100 +300,160 @@ class CameraXFacade @Inject constructor(@ActivityContext private val context: Co
 
         p.surfaceProvider = previewView?.surfaceProvider
 
-        //close previous crop effect or else EGL leak
-        cropEffect?.close()
+        updateCropRegion(previewView, traitId, showCropRegion)
 
-        //create an overlay effect to draw a rectangle on the preview
-        cropEffect = OverlayEffect(VIDEO_CAPTURE or PREVIEW or IMAGE_CAPTURE, 0, handler) { e ->
-            Log.e(TAG, "OverlayEffect error: $e")
+        val useCaseGroupBuilder = UseCaseGroup.Builder()
+
+        useCaseGroupBuilder.addUseCase(p)
+
+        useCaseGroupBuilder.addUseCase(imageCapture)
+
+        analysis?.let { a -> useCaseGroupBuilder.addUseCase(a) }
+
+        val useCaseGroup = useCaseGroupBuilder.build()
+
+        try {
+            val camera = cameraXInstance.get().bindToLifecycle(
+                context as LifecycleOwner,
+                currentSelector,
+                useCaseGroup
+            )
+
+            Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
+
+            onBind.invoke(camera, executor, imageCapture)
+        } catch (e: Exception) {
+            Log.e(TAG, "bindPreview: failed to bind camera lifecycle", e)
+            throw e
+        }
+    }
+
+    @OptIn(ExperimentalGetImage::class)
+    fun bindPreviewForVideo(
+        previewView: PreviewView?,
+        targetResolution: Size?,
+        traitId: String? = null,
+        analysis: ImageAnalysis? = null,
+        showCropRegion: Boolean = false,
+        onBind: (Camera, ExecutorService?, VideoCapture<Recorder>) -> Unit
+    ) {
+
+        unbind()
+
+        val prevBuilder = Preview.Builder()
+
+        if (targetResolution != null) {
+
+            val resolutionStrategy = ResolutionStrategy(targetResolution, ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER)
+
+            val aspectRatioStrategy = AspectRatioStrategy(
+                AspectRatio.RATIO_4_3,
+                AspectRatioStrategy.FALLBACK_RULE_NONE
+            )
+
+            val resolutionSelector = ResolutionSelector.Builder()
+                .setResolutionStrategy(resolutionStrategy)
+                .setAspectRatioStrategy(aspectRatioStrategy)
+                .build()
+
+            prevBuilder.setResolutionSelector(resolutionSelector)
         }
 
-        //parse crop from prefs
-        val cropCoordinates = (context as? ThemedActivity)?.prefs?.getString(GeneralKeys.getCropCoordinatesKey(
-            traitId?.toInt() ?: -1), "")
+        val p = prevBuilder.build()
 
-        //overlay effect gives a frame that has an 'overlayCanvas'
-        cropEffect?.setOnDrawListener { frame ->
-            try {
-                //check that coordinates are correct, parse and draw the rect
-                if (!cropCoordinates.isNullOrEmpty() && cropCoordinates != CropImageView.DEFAULT_CROP_COORDINATES) {
-                    //convert the camera sensor coordinates to local preview view coordinates
-                    val sensorToUi = previewView!!.sensorToViewTransform
-                    if (sensorToUi != null) {
-                        val sensorToEffect = frame.sensorToBufferTransform
-                        val uiToSensor = Matrix()
-                        sensorToUi.invert(uiToSensor)
-                        uiToSensor.postConcat(sensorToEffect)
+        p.surfaceProvider = previewView?.surfaceProvider
 
-                        //get canvas and clear color, apply affine transformation
-                        val canvas = frame.overlayCanvas
-                        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
-                        canvas.setMatrix(uiToSensor)
+        updateCropRegion(previewView, traitId, showCropRegion)
 
-                        val rect = CropImageView.parseRectCoordinates(cropCoordinates)
-                        //check if rect is null or matches the default
-                        if (rect != null) {
-                            //draw a rectangle on the left of the canvas
-                            //converts normalized coordinates to previewView-relative
-                            val left = rect.left * previewView.width
-                            val top = (rect.top * previewView.height) - 8f
-                            val right = rect.right * previewView.width
-                            val bottom = (rect.bottom * previewView.height) + 8f
-
-                            //newer APIs allow clipping a rect in two commands, earlier is a little more complex
-                            val clipRect = RectF(left, top, right, bottom)
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                canvas.clipOutRect(clipRect)
-                            } else {
-                                canvas.clipRect(clipRect, Region.Op.DIFFERENCE)
-                            }
-
-                            val typedValue = TypedValue()
-                            context.theme?.resolveAttribute(
-                                R.attr.fb_inverse_crop_region_color,
-                                typedValue,
-                                true
-                            )
-
-                            canvas.drawARGB(
-                                Color.alpha(typedValue.data),
-                                Color.red(typedValue.data),
-                                Color.green(typedValue.data),
-                                Color.blue(typedValue.data)
-                            )
-
-                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                                canvas.clipRect(
-                                    Rect(0, 0, previewView.width, previewView.height),
-                                    Region.Op.REPLACE
-                                )
-                            }
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                //skip invalid region exceptions
-                if ("Region.Op" !in e.message.orEmpty())
-                    e.printStackTrace()
-            }
-
-            true
-        }
-
-        val useCaseGroup = UseCaseGroup.Builder()
-            .addUseCase(p)
-            .addUseCase(imageCapture)
-            .addEffect(cropEffect!!)
+        // create Recorder and VideoCapture use case
+        val exec = executor ?: Executors.newSingleThreadExecutor()
+        val recorder = Recorder.Builder().setExecutor(exec)
+            .setAspectRatio(AspectRatio.RATIO_4_3)
             .build()
+        val videoCapture = VideoCapture.withOutput(recorder)
 
-        val camera = cameraXInstance.get().bindToLifecycle(
-            context as LifecycleOwner,
-            frontSelector,
-            useCaseGroup
-        )
+        val useCaseGroupBuilder = UseCaseGroup.Builder()
+        useCaseGroupBuilder.addUseCase(p)
+        useCaseGroupBuilder.addUseCase(videoCapture)
+        analysis?.let { a -> useCaseGroupBuilder.addUseCase(a) }
 
-        Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
+        val useCaseGroup = useCaseGroupBuilder.build()
 
-        onBind.invoke(camera, executor, imageCapture)
+        try {
+            val camera = cameraXInstance.get().bindToLifecycle(
+                context as LifecycleOwner,
+                currentSelector,
+                useCaseGroup
+            )
+
+            Log.d(TAG, "Camera lifecycle bound for video: ${camera.cameraInfo}")
+
+            onBind.invoke(camera, executor, videoCapture)
+        } catch (e: Exception) {
+            Log.e(TAG, "bindPreviewForVideo: failed to bind camera lifecycle", e)
+            throw e
+        }
+    }
+
+    // Drawable that dims the area outside of a normalized crop rect (values 0..1)
+    private class CropOverlayDrawable(
+        private val previewView: PreviewView,
+        private val normalizedRect: RectF,
+        private val dimColor: Int
+    ) : Drawable() {
+
+        private val paint = Paint().apply {
+            style = Paint.Style.FILL
+            isAntiAlias = true
+        }
+
+        override fun draw(canvas: Canvas) {
+            try {
+                // full canvas dims
+                val w = previewView.width.toFloat()
+                val h = previewView.height.toFloat()
+
+                if (w <= 0f || h <= 0f) return
+
+                // compute crop rect in view coordinates
+                val left = normalizedRect.left * w
+                val top = normalizedRect.top * h
+                val right = normalizedRect.right * w
+                val bottom = normalizedRect.bottom * h
+
+                // add a small padding to the crop rect visually
+                val pad = 8f
+                val topAdj = (top - pad).coerceAtLeast(0f)
+                val bottomAdj = (bottom + pad).coerceAtMost(h)
+                val leftAdj = (left - pad).coerceAtLeast(0f)
+                val rightAdj = (right + pad).coerceAtMost(w)
+
+                // draw four rectangles around the crop area (top, left, right, bottom)
+                paint.color = dimColor
+                // top
+                canvas.drawRect(0f, 0f, w, topAdj, paint)
+                // left
+                canvas.drawRect(0f, topAdj, leftAdj, bottomAdj, paint)
+                // right
+                canvas.drawRect(rightAdj, topAdj, w, bottomAdj, paint)
+                // bottom
+                canvas.drawRect(0f, bottomAdj, w, h, paint)
+
+            } catch (e: Exception) {
+                // swallow layout/draw errors
+                Log.w(TAG, "CropOverlayDrawable draw error: ${e.message}")
+            }
+        }
+
+        override fun setAlpha(alpha: Int) {
+            paint.alpha = alpha
+        }
+
+        override fun setColorFilter(colorFilter: ColorFilter?) {
+            paint.colorFilter = colorFilter
+        }
+
+        @Suppress("DEPRECATION")
+        override fun getOpacity(): Int = PixelFormat.TRANSLUCENT
     }
 }

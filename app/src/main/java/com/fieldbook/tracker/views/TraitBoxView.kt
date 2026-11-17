@@ -14,7 +14,7 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.TraitEditorActivity
+import com.fieldbook.tracker.activities.TraitActivity
 import com.fieldbook.tracker.adapters.TraitsStatusAdapter
 import com.fieldbook.tracker.interfaces.CollectTraitController
 import com.fieldbook.tracker.objects.TraitObject
@@ -114,6 +114,9 @@ class TraitBoxView : ConstraintLayout {
         if (controller.getPreferences().getBoolean(PreferenceKeys.TRAITS_PROGRESS_BAR, true)) {
             traitsStatusBarRv?.adapter = TraitsStatusAdapter(this)
             traitsStatusBarRv?.layoutManager = getCenteredLayoutManager()
+            // overlapping notifyItemChanged/submitList calls during change animations
+            // crash with "Tmp detached view should be removed"; the status dots don't need animating
+            traitsStatusBarRv?.itemAnimator = null
             traitsStatusBarRv?.visibility = VISIBLE
         } else {
             traitsStatusBarRv?.visibility = GONE
@@ -203,6 +206,17 @@ class TraitBoxView : ConstraintLayout {
     }
 
     private var previousSelection = 0
+    private var lastInflatedFormat: String? = null
+
+    /**
+     * Forces the next [loadLayout] to re-inflate even if the format is unchanged.
+     *
+     * Needed when the underlying data changes out from under the layout, such as a field switch,
+     * where reusing the inflated layout would leave it bound to the previous field.
+     */
+    fun resetInflatedFormat() {
+        lastInflatedFormat = null
+    }
 
     private fun getSelectedItemPosition(): Int {
         return visibleTraitsList.indexOf(currentTrait)
@@ -223,7 +237,7 @@ class TraitBoxView : ConstraintLayout {
 
         previousSelection = traitPosition
 
-        traitTypeTv.text = currentTrait?.name
+        traitTypeTv.text = currentTrait?.alias
         traitDetails.text = currentTrait?.details ?: ""
 
         handleTraitTypeWrapping()
@@ -233,10 +247,17 @@ class TraitBoxView : ConstraintLayout {
 
         val currentTraitLayout: BaseTraitLayout = layoutCollections.getTraitLayout(currentTrait?.format)
 
-        controller.inflateTrait(currentTraitLayout)
-
-        //Call specific load layout code for the current trait layout
-        currentTraitLayout.loadLayout()
+        val currentFormat = currentTrait?.format
+        if (currentFormat != null && currentFormat == lastInflatedFormat) {
+            // Same format already inflated — skip re-inflation and just reload data
+            // to avoid flickering (e.g. camera preview restart) when navigating plots
+            currentTraitLayout.onRefresh()
+        } else {
+            controller.inflateTrait(currentTraitLayout)
+            //Call specific load layout code for the current trait layout
+            currentTraitLayout.loadLayout()
+            lastInflatedFormat = currentFormat
+        }
     }
 
     private fun showTraitPickerDialog(visibleTraits: Array<TraitObject>) {
@@ -244,7 +265,7 @@ class TraitBoxView : ConstraintLayout {
 
         builder.setTitle(R.string.select_trait)
             .setCancelable(true)
-            .setSingleChoiceItems(visibleTraits.map { it.name }.toTypedArray(), getSelectedItemPosition()) { dialog, index ->
+            .setSingleChoiceItems(visibleTraits.map { it.alias }.toTypedArray(), getSelectedItemPosition()) { dialog, index ->
                 // Update selected trait
                 currentTrait = visibleTraits[index]
                 loadLayout()
@@ -259,7 +280,7 @@ class TraitBoxView : ConstraintLayout {
                 R.string.edit_traits
             ) {
                     _: DialogInterface, _: Int ->
-                    val intent = Intent(context, TraitEditorActivity::class.java)
+                    val intent = Intent(context, TraitActivity::class.java)
                     startActivity(context, intent, null)
             }
         val dialog = builder.create()
@@ -367,40 +388,43 @@ class TraitBoxView : ConstraintLayout {
 
     fun moveTrait(direction: MoveDirection) {
 
-        var pos = 0
-        if (!controller.validateData(controller.getCurrentObservation()?.value)) {
-            return
-        }
+        controller.navigateIfDataIsValid(controller.getCurrentObservation()?.value) {
+            var pos = 0
 
-        val rangeBox = controller.getRangeBox()
-        if (direction == MoveDirection.LEFT) {
-            pos = getSelectedItemPosition() - 1
-            if (pos < 0) {
-                pos = visibleTraitsList.count() - 1
-                if (controller.isCyclingTraitsAdvances()) {
-                    rangeBox.clickLeft()
+            val rangeBox = controller.getRangeBox()
+            if (direction == MoveDirection.LEFT) {
+                pos = getSelectedItemPosition() - 1
+                if (pos < 0) {
+                    pos = visibleTraitsList.count() - 1
+                    if (controller.isCyclingTraitsAdvances()) {
+                        rangeBox.clickLeft()
+                    }
+                    if (controller.getPreferences()
+                            .getBoolean(PreferenceKeys.CYCLE_TRAITS_SOUND, false)
+                    ) {
+                        controller.getSoundHelper().playCycle()
+                    }
                 }
-                if (controller.getPreferences().getBoolean(PreferenceKeys.CYCLE_TRAITS_SOUND, false)) {
-                    controller.getSoundHelper().playCycle()
+            } else if (direction == MoveDirection.RIGHT) {
+                pos = getSelectedItemPosition() + 1
+                if (pos > visibleTraitsList.count() - 1) {
+                    pos = 0
+                    if (controller.isCyclingTraitsAdvances()) {
+                        rangeBox.clickRight()
+                    }
+                    if (controller.getPreferences()
+                            .getBoolean(PreferenceKeys.CYCLE_TRAITS_SOUND, false)
+                    ) {
+                        controller.getSoundHelper().playCycle()
+                    }
                 }
             }
-        } else if (direction == MoveDirection.RIGHT) {
-            pos = getSelectedItemPosition() + 1
-            if (pos > visibleTraitsList.count() - 1) {
-                pos = 0
-                if (controller.isCyclingTraitsAdvances()) {
-                    rangeBox.clickRight()
-                }
-                if (controller.getPreferences().getBoolean(PreferenceKeys.CYCLE_TRAITS_SOUND, false)) {
-                    controller.getSoundHelper().playCycle()
-                }
-            }
-        }
 
-        setSelection(pos)
-        loadLayout()
-        controller.refreshLock()
-        controller.getCollectInputView().resetInitialIndex()
+            setSelection(pos)
+            loadLayout()
+            controller.refreshLock()
+            controller.getCollectInputView().resetInitialIndex()
+        }
     }
 
     fun returnFirst() {

@@ -8,8 +8,9 @@ import android.net.Uri
 import android.util.AttributeSet
 import android.util.Log
 import android.util.TypedValue
+import android.view.View
 import android.widget.EditText
-import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
@@ -32,11 +33,15 @@ import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.CopyOnWriteArrayList
 
 open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
     LineGraphSelectableAdapter.Listener, ColorAdapter.Listener {
@@ -67,13 +72,33 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
     protected var recycler: RecyclerView? = null
     protected var colorRecycler: RecyclerView? = null
     protected var lineChart: LineChart? = null
-    protected var progressBar: ProgressBar? = null
+    protected var progressBar: CircularProgressIndicator? = null
     protected var settingsButton: FloatingActionButton? = null
 
-    protected val spectralDataList = mutableListOf<SpectralFact?>()
+    //card carrying the busy indicator, raised above the graph so it reads as floating over it
+    protected var progressCard: View? = null
+    protected var progressLabel: TextView? = null
+
+    /**
+     * Samples for the current entry.
+     *
+     * Copy on write because this is touched from both dispatchers: captures add on the main
+     * thread while submitList() iterates on IO, and deletes mutate from IO. A plain ArrayList
+     * throws ConcurrentModificationException on the IO thread when those overlap, which is an
+     * uncaught crash rather than a dropped frame. The list holds a handful of samples per entry,
+     * so copying on each mutation costs nothing.
+     */
+    protected val spectralDataList: MutableList<SpectralFact?> = CopyOnWriteArrayList()
 
     protected var selected: Int = 0
     protected var state: State = State.Spectral
+    private var displayedFrameCount: Int = 0
+
+    //set while onRefresh() reloads entry data, so loadLayout() leaves the connection alone
+    private var skipConnectionSetup = false
+
+    //whether the showing overlay expects progress readings, see toggleProgressBar
+    private var acceptsProgress = false
 
     protected val hapticFeedback by lazy {
         controller.getVibrator()
@@ -107,6 +132,8 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         colorRecycler = act.findViewById(R.id.color_recycler_view)
         lineChart = act.findViewById(R.id.line_chart)
         progressBar = act.findViewById(R.id.progress_bar)
+        progressCard = act.findViewById(R.id.progress_card)
+        progressLabel = act.findViewById(R.id.progress_label)
         settingsButton = act.findViewById(R.id.settings_btn)
 
         recycler?.adapter = LineGraphSelectableAdapter(this)
@@ -128,6 +155,38 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         }
     }
 
+    /**
+     * Reloads the values shown for the current entry without touching the device connection.
+     *
+     * BaseTraitLayout.onRefresh() delegates to loadLayout(), so without this every plot change ran
+     * the connect path: re-running establishConnection() and, whenever the device was not
+     * connected, restarting device discovery and another auto-reconnect attempt. Moving between
+     * entries is not a reason to renegotiate the connection.
+     */
+    override fun onRefresh() {
+        skipConnectionSetup = true
+        try {
+            loadLayout()
+        } finally {
+            skipConnectionSetup = false
+        }
+    }
+
+    /**
+     * Cancels the worker scope so it does not outlive the activity.
+     *
+     * [background] is created per layout and layouts are created per CollectActivity, so without
+     * this every leave-and-re-enter of Collect left another live scope behind, holding this view
+     * and through it the destroyed activity.
+     *
+     * A save still in flight when the user leaves Collect is cancelled with it. That is the
+     * intended trade: the alternative is a scope that never ends.
+     */
+    override fun onDestroy() {
+        super.onDestroy()
+        background.cancel()
+    }
+
     override fun loadLayout() {
         super.loadLayout()
 
@@ -135,7 +194,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
         loadSpectralFactsList(firstLoad = true)
 
-        if (!establishConnection()) {
+        if (!skipConnectionSetup && !establishConnection()) {
             setupConnectUi()
         }
 
@@ -150,7 +209,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         controller.updateNumberOfObservations()
     }
 
-    protected fun setupConnectUi() {
+    open fun setupConnectUi() {
         (context as CollectActivity).getNixSensorHelper().connectedDevice = null
         connectButton?.visibility = VISIBLE
         captureButton?.visibility = GONE
@@ -184,13 +243,11 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
                 if (firstLoad) {
 
-                    val index = spectralDataList.size - 1
-
-                    selected = index
+                    selected = spectralDataList.size - 1
 
                     listOf(recycler, colorRecycler).forEachIndexed { i, r ->
                         r?.postDelayed({
-                            r.scrollToPosition(index)
+                            r.scrollToPosition(0)
                         }, i*50L)
                     }
                 }
@@ -238,7 +295,12 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         color: String,
         uri: String,
         entryId: String,
-        traitId: String
+        traitId: String,
+        studyId: String?,
+        person: String?,
+        location: String?,
+        deviceAddress: String?,
+        deviceName: String?
     ) {
         TODO("Not yet implemented")
     }
@@ -264,7 +326,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
             listOf(recycler, colorRecycler).forEachIndexed { i, r ->
                 r?.postDelayed({
-                    r.scrollToPosition(index)
+                    r.scrollToPosition(0)
                 }, i*50L)
             }
 
@@ -378,7 +440,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
             withContext(Dispatchers.Main) {
 
-                progressBar?.visibility = GONE
+                toggleProgressBar(false)
 
                 connectButton?.setOnClickListener {
                     if (isLocked) return@setOnClickListener
@@ -410,7 +472,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         }
     }
 
-    protected fun enableCapture(device: Device) {
+    protected open fun enableCapture(device: Device) {
         connectButton?.visibility = INVISIBLE
         captureButton?.visibility = VISIBLE
         disconnectButton?.visibility = VISIBLE
@@ -451,12 +513,14 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
     }
 
     private fun submitLinesList(frames: List<SpectralFrame>) {
-        val lineData = frames
+        displayedFrameCount = frames.size
+        val reversedFrames = frames.reversed()
+        val lineData = reversedFrames
             .mapIndexed { index, data ->
                 if (data.traitId.isEmpty()) LineGraphSelectableAdapter.LineColorData.placeholder()
                 else LineGraphSelectableAdapter.LineColorData(
                     index,
-                    if (index == selected) getColor(R.attr.fb_graph_item_selected_color) else getColor(
+                    if (frames.size - 1 - index == selected) getColor(R.attr.fb_graph_item_selected_color) else getColor(
                         R.attr.fb_graph_item_unselected_color
                     ),
                     data.timestamp
@@ -472,20 +536,25 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         return colorResValue.data
     }
 
-    private fun submitList(submitPlaceholder: Boolean = false) {
+    protected fun submitList(submitPlaceholder: Boolean = false) {
 
-        background.launch(Dispatchers.Main) {
+        background.launch {
 
+            val traitId = currentTrait.id
+            val entryId = currentRange.uniqueId
+
+            //one query and one Base64 decode per saved sample, kept off the main thread
             val frames = spectralDataList.filterNotNull()
-                .map {
-                    val observation = database.getObservationById(it.observationId.toString())
-                    it.toSpectralFrame(
-                        observation!!.observation_unit_id,
+                .mapNotNull { fact ->
+                    val observation = database.getObservationById(fact.observationId.toString())
+                        ?: return@mapNotNull null
+                    fact.toSpectralFrame(
+                        observation.observation_unit_id,
                         observation.observation_variable_db_id.toString()
                     )
                 }
                 .filter {
-                    it.traitId == currentTrait.id && it.entryId == currentRange.uniqueId
+                    it.traitId == traitId && it.entryId == entryId
                 }.toMutableList()
 
             if (submitPlaceholder) {
@@ -494,24 +563,24 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
                 frames.removeIf { it.traitId.isEmpty() }
             }
 
-            when (state) {
-                State.Spectral -> submitSpectralList(frames, submitPlaceholder)
-                State.Color -> submitColorList(frames)
-            }
+            withContext(Dispatchers.Main) {
 
-            if (submitPlaceholder) {
-
-                val index = frames.size - 1
-
-                listOf(recycler, colorRecycler).forEachIndexed { i, r ->
-                    r?.postDelayed({
-                        r.scrollToPosition(index)
-                    }, i*50L)
+                when (state) {
+                    State.Spectral -> submitSpectralList(frames, submitPlaceholder)
+                    State.Color -> submitColorList(frames)
                 }
+
+                if (submitPlaceholder) {
+
+                    listOf(recycler, colorRecycler).forEachIndexed { i, r ->
+                        r?.postDelayed({
+                            r.scrollToPosition(0)
+                        }, i*50L)
+                    }
+                }
+
+                controller.updateNumberOfObservations()
             }
-
-            controller.updateNumberOfObservations()
-
         }
     }
 
@@ -520,29 +589,11 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         if (frames.isEmpty() && !submitPlaceholder) {
             lineChart?.visibility = GONE
             recycler?.visibility = GONE
+            (context as CollectActivity).updateCurrentTraitStatus(false)
         } else {
             lineChart?.visibility = VISIBLE
             recycler?.visibility = VISIBLE
-        }
-
-        val frames = spectralDataList.filterNotNull()
-            .map {
-                val observation = database.getObservationById(it.observationId.toString())
-                it.toSpectralFrame(
-                    observation!!.observation_unit_id,
-                    observation.observation_variable_db_id.toString()
-                )
-            }
-            .filter {
-                it.traitId == currentTrait.id && it.entryId == currentRange.uniqueId
-            }
-
-        if (frames.isEmpty() && !submitPlaceholder) {
-            lineChart?.visibility = GONE
-            recycler?.visibility = GONE
-        } else {
-            lineChart?.visibility = VISIBLE
-            recycler?.visibility = VISIBLE
+            (context as CollectActivity).updateCurrentTraitStatus(true)
         }
 
         renderNormal(
@@ -565,15 +616,18 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
         lineChart!!.invalidate()
 
-        submitLinesList(if (submitPlaceholder) frames + SpectralFrame.placeholder() else frames)
+        //frames already carries the placeholder when one was requested
+        submitLinesList(frames)
     }
 
     private fun submitColorList(frames: List<SpectralFrame>) {
 
         if (frames.isEmpty()) {
             colorRecycler?.visibility = GONE
+            (context as CollectActivity).updateCurrentTraitStatus(false)
         } else {
             colorRecycler?.visibility = VISIBLE
+            (context as CollectActivity).updateCurrentTraitStatus(true)
         }
 
         (colorRecycler?.adapter as? ColorAdapter)?.submitList(frames.map { if (it.traitId.isEmpty()) "-1" else it.color })
@@ -614,14 +668,86 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         return y0 + ((y1 - y0) / (x1 - x0)) * (target - x0)
     }
 
-    protected fun toggleProgressBar(flag: Boolean) {
+    /**
+     * Shows or hides the busy overlay.
+     *
+     * The indicator always starts as a spinner. Material's setProgressCompat() finishes the
+     * indeterminate sweep and hands over to the arc on the first real reading, so [determinate]
+     * only says whether readings are expected at all, not how the indicator starts. A stage that
+     * has nothing to report yet keeps spinning instead of parking a bar near zero.
+     *
+     * @param determinate true if [setProgressPercent] will be called for this overlay.
+     * @param label optional text under the indicator, null hides it.
+     */
+    protected fun toggleProgressBar(
+        flag: Boolean,
+        determinate: Boolean = false,
+        label: String? = null
+    ) {
 
         background.launch(Dispatchers.Main) {
 
-            //progressBar?.visibility = if (flag) VISIBLE else INVISIBLE
+            acceptsProgress = flag && determinate
 
+            if (flag) {
+
+                //the mode has to change while the indicator is hidden: Material throws if you
+                //switch to indeterminate on one that is already visible
+                progressCard?.visibility = GONE
+                progressBar?.visibility = INVISIBLE
+
+                progressBar?.let { indicator ->
+                    indicator.isIndeterminate = true
+                    indicator.progress = 0
+                }
+            }
+
+            progressLabel?.let { view ->
+                view.text = label ?: ""
+                view.visibility = if (flag && label != null) VISIBLE else GONE
+            }
+
+            progressBar?.visibility = if (flag) VISIBLE else INVISIBLE
+            progressCard?.visibility = if (flag) VISIBLE else GONE
         }
     }
+
+    /**
+     * Reports a real reading, switching the indicator from spinner to arc on the first call.
+     *
+     * Ignored unless the overlay was opened expecting progress, so a stale reading cannot hijack
+     * an indeterminate overlay raised for something else.
+     */
+    protected fun setProgressPercent(percent: Int, label: String? = null) {
+
+        background.launch(Dispatchers.Main) {
+
+            if (acceptsProgress) {
+                //animated, so Material completes the sweep and transitions rather than snapping
+                progressBar?.setProgressCompat(percent.coerceIn(0, 100), true)
+            }
+
+            label?.let { showProgressLabel(it) }
+        }
+    }
+
+    /**
+     * Updates the text under the indicator without touching the arc, for stages that have no
+     * reading of their own to report.
+     */
+    protected fun setProgressLabel(label: String) {
+
+        background.launch(Dispatchers.Main) {
+
+            showProgressLabel(label)
+        }
+    }
+
+    private fun showProgressLabel(label: String) {
+        progressLabel?.text = label
+        progressLabel?.visibility = VISIBLE
+    }
+
 
     override fun deleteTraitListener() {
         super.deleteTraitListener()
@@ -715,26 +841,26 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         val studyId = collectActivity.studyId
         val plot = (context as? CollectActivity)?.observationUnit
         val traitDbId = currentTrait.id
-        val observations = database.getAllObservations(studyId, plot, traitDbId)
 
-        if (observations.isEmpty()) {
+        background.launch {
 
-            background.launch {
+            val observations = database.getAllObservations(studyId, plot, traitDbId)
+
+            if (observations.isEmpty()) {
 
                 insertAndSetNa()
-            }
 
-        } else {
-
-            if (observations.size == 1 && observations[0].value == "NA") {
+            } else if (observations.size == 1 && observations[0].value == "NA") {
 
                 //already set to NA, do nothing
-                return
 
             } else {
 
-                askUserReplaceObservationsWithNa(observations)
+                withContext(Dispatchers.Main) {
 
+                    askUserReplaceObservationsWithNa(observations)
+
+                }
             }
         }
     }
@@ -800,7 +926,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
     }
 
     override fun onItemSelected(position: Int, onSelect: (() -> Unit)?) {
-        selected = position
+        selected = displayedFrameCount - 1 - position
         submitList()
     }
 
@@ -814,11 +940,12 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
             builder.setTitle(R.string.spectral_trait_insert_note_message)
             val input = EditText(context)
             builder.setView(input)
-            input.setText(spectralDataList[position]?.comment ?: "")
+            val mappedPosition = displayedFrameCount - 1 - position
+            input.setText(spectralDataList[mappedPosition]?.comment ?: "")
             builder.setPositiveButton(android.R.string.ok) { _, _ ->
                 input.text.toString()
                 runCatching {
-                    val fact = spectralDataList[position]
+                    val fact = spectralDataList[mappedPosition]
                     fact?.let {
                         it.comment = input.text.toString()
                         updateDatabaseNote(it)
@@ -850,6 +977,23 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         graph.xAxis.granularity = 1f
         graph.axisLeft.granularity = 0.01f
         graph.axisRight.isEnabled = false
+
+        // Set custom y-axis formatter to scale down large numbers
+        graph.axisLeft.valueFormatter = object : ValueFormatter() {
+            override fun getFormattedValue(value: Float): String {
+                return when {
+                    value >= 1_000_000 -> {
+                        val scaledValue = value / 1_000_000
+                        "%.1f".format(scaledValue).replace(Regex("\\.?0+$"), "") + "M"
+                    }
+                    value >= 1_000 -> {
+                        val scaledValue = value / 1_000
+                        "%.1f".format(scaledValue).replace(Regex("\\.?0+$"), "") + "K"
+                    }
+                    else -> "%.0f".format(value)
+                }
+            }
+        }
 
         graph.data = LineData(
             *entries
@@ -891,8 +1035,11 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
     protected open fun spectralUiMode() {
         state = State.Spectral
-        lineChart?.visibility = VISIBLE
-        recycler?.visibility = VISIBLE
+        // Only show the chart/recycler if data is already loaded; submit list will show them
+        // once the async load completes, preventing a brief "no chart data available" flash.
+        val hasData = spectralDataList.isNotEmpty()
+        lineChart?.visibility = if (hasData) VISIBLE else GONE
+        recycler?.visibility = if (hasData) VISIBLE else GONE
         colorRecycler?.visibility = GONE
     }
 

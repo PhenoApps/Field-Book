@@ -7,7 +7,6 @@ import android.graphics.Rect
 import android.location.Location
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.OpenableColumns
@@ -22,6 +21,8 @@ import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.edit
+import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.BrapiActivity
@@ -41,24 +42,23 @@ import com.fieldbook.tracker.objects.FieldFileObject
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.preferences.enums.TransferSource
+import com.fieldbook.tracker.traits.formats.Formats
+import com.fieldbook.tracker.utilities.BrapiAccountHelper
 import com.fieldbook.tracker.utilities.SnackbarUtils
 import com.fieldbook.tracker.utilities.TapTargetUtil
 import com.fieldbook.tracker.utilities.Utils
 import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetSequence
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.io.IOException
-import java.util.ArrayList
-import java.util.LinkedHashMap
-import java.util.NoSuchElementException
-import java.util.StringJoiner
-import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
-import androidx.core.content.edit
-import androidx.core.net.toUri
+import java.util.StringJoiner
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
@@ -67,6 +67,9 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         private const val TAG = "FieldEditor"
         private const val PERMISSIONS_REQUEST_STORAGE = 998
     }
+
+    @Inject
+    lateinit var brapiAccountHelper: BrapiAccountHelper
 
     private lateinit var fieldFile: FieldFileObject.FieldFileBase
     private lateinit var unique: Spinner
@@ -372,7 +375,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
                 )
             )
 
-        if (fieldExists()) {
+        if (db.allFieldObjects.isNotEmpty()) {
             sequence.target(
                 fieldsTapTargetRect(
                     fieldsListItemLocation(0),
@@ -418,19 +421,14 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         )
     }
 
-    // TODO
-    private fun fieldExists(): Boolean {
-        return false
-    }
-
     private fun handleImportAction() {
-        val importer = mPrefs.getString("IMPORT_SOURCE_DEFAULT", "ask")
-        when (importer) {
-            "ask" -> showFileDialog()
-            "local" -> loadLocal()
-            "brapi" -> loadBrAPI()
-            "cloud" -> loadCloud()
-            else -> showFileDialog()
+        when (TransferSource.fromValue(
+            mPrefs.getString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, TransferSource.DEFAULT.value)
+        )) {
+            TransferSource.ASK -> showFileDialog()
+            TransferSource.LOCAL -> loadLocal()
+            TransferSource.BRAPI -> loadBrAPI()
+            TransferSource.CLOUD -> loadCloud()
         }
     }
 
@@ -465,22 +463,17 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
     }
 
     private fun showFileDialog() {
-        val importArray = arrayOfNulls<String>(
-            if (mPrefs.getBoolean(
-                    PreferenceKeys.BRAPI_ENABLED,
-                    false
-                )
-            ) 4 else 3
-        )
+        val hasBrapi = brapiAccountHelper.hasActiveServer()
+        val importArray = arrayOfNulls<String>(if (hasBrapi) 4 else 3)
         importArray[0] = getString(R.string.import_source_local)
         importArray[1] = getString(R.string.import_source_cloud)
         importArray[2] = getString(R.string.fields_new_create_field)
 
-        if (mPrefs.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
-            val displayName = mPrefs.getString(
-                PreferenceKeys.BRAPI_DISPLAY_NAME,
-                getString(R.string.brapi_edit_display_name_default)
-            )
+        if (hasBrapi) {
+            val activeAccount = brapiAccountHelper.findAccount()
+            val displayName = activeAccount?.let {
+                brapiAccountHelper.accountInfo(it)?.displayName?.takeIf { name -> name.isNotEmpty() }
+            } ?: getString(R.string.brapi_edit_display_name_default)
             importArray[3] = displayName
         }
 
@@ -596,12 +589,33 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
             // find all observation units with a coordinate
             for (model in units) {
                 val latlng = model.geo_coordinates
-                if (latlng != null && latlng.isNotEmpty()) {
+                if (!latlng.isNullOrEmpty()) {
                     val study = db.getFieldObject(model.study_id)
                     if (study != null && !study.archived) { // do not add archived field coordinates
                         coordinates.add(model)
                     }
                 }
+            }
+
+            // find all observations with coordinates by filtering the type of format used in the variable
+            try {
+                db.getAllObservationDetails(false).filter {
+                    Formats.isGeoFormat(it.observation_variable_field_book_format ?: "text")
+                }.mapNotNull {
+                    // convert to obs. unit model with just the study id and geo_coordinates,
+                    // this will allow obs. value coordinate comparison and navigation to the
+                    // nearest field
+                    ObservationUnitModel(
+                        mapOf(
+                            "study_id" to it.study_id,
+                            "geo_coordinates" to it.value,
+                        )
+                    )
+                }.forEach { lngLat ->
+                    coordinates.add(lngLat)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error while getting coordinates", e)
             }
 
             // sort the coordinates based on the distance from the user
@@ -696,21 +710,28 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
 
     fun getFileName(uri: Uri): String? {
         var result: String? = null
-        if (uri.scheme == "content") {
-            contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                if (cursor.moveToFirst()) {
-                    val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                    if (index > -1) {
-                        result = cursor.getString(index)
+        try {
+            if (uri.scheme == "content") {
+                contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                        if (index > -1) {
+                            result = cursor.getString(index)
+                        }
                     }
                 }
             }
-        }
-        if (result == null) {
-            result = uri.path
-            val cut = result?.lastIndexOf('/')
-            if (cut != -1) {
-                result = cut?.let { result.substring(it + 1) }
+            if (result == null) {
+                result = uri.path
+                val cut = result?.lastIndexOf('/')
+                if (cut != -1) {
+                    result = cut?.let { result.substring(it + 1) }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            runOnUiThread {
+                Toast.makeText(this, R.string.failed_to_find_file_name, Toast.LENGTH_SHORT).show()
             }
         }
         return result
@@ -1042,12 +1063,4 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         dialog.show()
     }
 
-    private fun archiveFields(fieldIds: List<Int>) {
-        for (fieldId in fieldIds) {
-            db.setIsArchived(fieldId, true)
-        }
-        queryAndLoadFields()
-        mAdapter.exitSelectionMode()
-        invalidateOptionsMenu()
-    }
 }

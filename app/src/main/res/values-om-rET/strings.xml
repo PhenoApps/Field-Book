@@ -14,6 +14,7 @@
     <string name="dialog_import">kara biraatii galchuu</string>
     <string name="dialog_warning">Ofeegannoo</string>
     <string name="dialog_save">Olkaa\'i</string>
+    <!-- Toolbar -->
     <!-- Startup  -->
     <!-- App Intro -->
     <string name="app_intro_tutorial_title">Ibsa</string>
@@ -79,9 +80,14 @@
     <string name="traits_create_true">Dhugaa</string>
     <string name="traits_create_false">Soba</string>
     <string name="traits_create_categories_text">Wantooota kanaan adda baasi a /</string>
+    <string name="traits_attach_media_photo_label">Footoo</string>
+    <string name="traits_attach_media_audio_label">Sagalee</string>
     <string name="traits_create_warning_name_blank">Maqaan amalaa duwaa hin ta\'u</string>
     <string name="traits_create_warning_duplicate">Amalichi jira</string>
     <string name="traits_create_warning_numeric_required">Xiqaani fi guddaan lakkoofsa ta\'uu qaba</string>
+    <!-- Decimal Places Radio Options -->
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">Gattin isaa kan eegamuu irra xiqqaata.</string>
@@ -115,6 +121,7 @@
     <string name="activity_collect_dialog_verify_no_button">Lakki</string>
     <string name="activity_collect_dialog_verify_yes_button">Eeyee</string>
     <!--- Datagrid -->
+    <string name="dialog_data_grid_header_picker_ok">Eeyyeee</string>
     <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <!-- Trait Layout: GNSS -->
@@ -129,6 +136,7 @@
     <!--- Text to Speech Strings -->
     <!--- Summary -->
     <!--- Repeated measures -->
+    <!--- Save failure -->
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
@@ -182,12 +190,16 @@
     <!-- BrAPI preferences -->
     <string name="brapi_choice_to_make_default_negative">Ballessi</string>
     <string name="brapi_choice_to_make_default_positive">Olkaa\'i</string>
-    <!-- Community Servers -->
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_field_book">Baruule Dirree</string>
     <!-- Authorization -->
+    <!-- Multi-account management -->
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->
     <string name="brapi_export_button">kara biraatti baasuu</string>
     <string name="brapi_close_button">Cufi</string>
+    <string name="brapi_export_complete">Baasun raawwatame</string>
+    <string name="cancel">Ballessi</string>
     <!-- Pagination -->
     <!-- General -->
     <!-- APP INTRO  -->
@@ -207,14 +219,21 @@
     <string name="act_brapi_filter_import">kara biraatii galchuu</string>
     <string name="act_brapi_filter_clear">Balleessi</string>
     <!-- base camera strings -->
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="view_trait_photo_settings_camera_custom">Akkuma jirutti</string>
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
     <!-- spectral trait strings -->
+    <!-- inno spectra -->
+    <!-- stages reported while the inno spectra device is connecting -->
     <string name="brapi_traits_filter_title">Wanta ideefanonn guuramuuf</string>
     <string name="traits_sort_default">Akkuma jirutti</string>
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">Olkaa\'i</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
+    <!-- InnoSpectra settings layout -->
 </resources>

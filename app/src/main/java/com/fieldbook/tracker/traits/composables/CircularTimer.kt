@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.traits.composables
 
 import android.R.attr.label
+import android.os.SystemClock
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -68,11 +69,29 @@ fun CircularTimer(
         label = "SweepAngle"
     )
 
-    //starts asynchronous timer that updates every second
+    val baseMillis = remember { mutableLongStateOf(elapsedMillis.value) }
+    val startUptime = remember { mutableLongStateOf(0L) }
+
     LaunchedEffect(isRunning.value) {
-        while (isRunning.value && elapsedMillis.value < maxTimeSeconds * 1000L) {
-            delay(8) //assuming 1000/60fps
-            elapsedMillis.value += 8
+        if (isRunning.value) {
+
+            startUptime.longValue = SystemClock.elapsedRealtime()
+            baseMillis.longValue = elapsedMillis.value
+
+            while (isRunning.value && elapsedMillis.value < maxTimeSeconds * 1000L) {
+                val now = SystemClock.elapsedRealtime()
+                val computed = baseMillis.longValue + (now - startUptime.longValue)
+                elapsedMillis.value = computed
+                delay(16)
+            }
+        } else {
+            baseMillis.longValue = elapsedMillis.value
+        }
+    }
+
+    LaunchedEffect(elapsedMillis.value) {
+        if (!isRunning.value) {
+            baseMillis.longValue = elapsedMillis.value
         }
     }
 
@@ -185,4 +204,3 @@ fun TimerButton(icon: ImageVector, label: String, iconBackgroundColor: Color = C
         }
     }
 }
-

@@ -1,18 +1,21 @@
 package com.fieldbook.tracker.database.dao
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.core.content.contentValuesOf
 import com.fieldbook.tracker.brapi.model.FieldBookImage
 import com.fieldbook.tracker.database.*
+import com.fieldbook.tracker.database.DataHelper.db
 import com.fieldbook.tracker.database.Migrator.*
 import com.fieldbook.tracker.database.Migrator.Companion.sLocalImageObservationsViewName
 import com.fieldbook.tracker.database.Migrator.Companion.sNonImageObservationsViewName
 import com.fieldbook.tracker.database.Migrator.Companion.sRemoteImageObservationsViewName
+import com.fieldbook.tracker.database.ObservationChangeTracker
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import org.threeten.bp.OffsetDateTime
@@ -20,19 +23,57 @@ import com.fieldbook.tracker.brapi.model.Observation as BrapiObservation
 
 class ObservationDao {
 
+    /**
+     * Repeated-observation summary for a single (plot, trait) pair.
+     *
+     * [latestValue] is the value of the highest-rep observation, which the DataGrid shows for
+     * traits that don't have repeated measures enabled but still accumulated repeats (e.g.
+     * observations imported over BrAPI, or a trait whose repeat parameter was later disabled).
+     */
+    data class RepeatSummary(val count: Int, val latestValue: String?)
+
     companion object {
 
         const val TAG = "ObservationDao"
 
+        /**
+         * Returns null when no observation carries [id].
+         *
+         * toFirst() answers a miss with an empty row rather than nothing, and ObservationModel
+         * reads its columns through map delegates, so handing that row on produced a model that
+         * threw NoSuchElementException on first field access instead of a null callers could
+         * check. Spectral facts whose observation had been deleted crashed the trait that way.
+         */
         fun getById(id: String): ObservationModel? = withDatabase { db ->
 
             db.query(Observation.tableName,
                 where = "${Observation.PK} = ?",
                 whereArgs = arrayOf(id))
                 .toFirst()
-                .let { ObservationModel(it) }
+                .takeIf { it.isNotEmpty() }
+                ?.let { ObservationModel(it) }
 
         }
+
+        fun getAllVariableDetails(includeDeleted: Boolean): Array<ObservationModel> = withDatabase { db ->
+
+            val query = """
+                SELECT *
+                FROM observations
+                JOIN observation_variables
+                    ON observations.observation_variable_db_id = observation_variables.internal_id_observation_variable
+                ${if (includeDeleted) "" else "WHERE CAST(study_id AS INTEGER) > 0"}
+            """.trimIndent()
+
+            db.rawQuery(query, arrayOf()).use { cursor ->
+
+                cursor.toTable()
+                    .map { ObservationModel(it) }
+                    .sortedBy { it.rep.toInt() }
+                    .toTypedArray()
+            }
+
+        } ?: emptyArray()
 
         fun getAll(): Array<ObservationModel> = withDatabase { db ->
 
@@ -82,6 +123,10 @@ class ObservationDao {
 
         } ?: emptyArray()
 
+        /**
+         * Creates a relational object of observation and observation variable rows
+         * TODO: create a new model to differentiate between the relational and individual models
+         */
         fun getAll(studyId: String, obsUnit: String, traitDbId: String): Array<ObservationModel> = withDatabase { db ->
 
             val query = """
@@ -94,7 +139,7 @@ class ObservationDao {
 
             //Log.d(TAG, query)
 
-            db.rawQuery(query, arrayOf(studyId, obsUnit, traitDbId.toString())).use {
+            db.rawQuery(query, arrayOf(studyId, obsUnit, traitDbId)).use {
 
                 it.toTable()
                     .map { ObservationModel(it) }
@@ -119,14 +164,26 @@ class ObservationDao {
 
         fun getAllFromAYear(year: String): Array<ObservationModel> = withDatabase { db ->
 
-            db.query(
-                    Observation.tableName,
-                    where = "observation_time_stamp LIKE ? AND study_id > 0",
-                    whereArgs = arrayOf("$year%")
-            )
-                    .toTable()
+            // Ordered by time rather than by rep. Sorting by repetition number groups every
+            // rep 1 together, then every rep 2, which scrambles the chronology that the
+            // statistics screen measures collection intervals from.
+            val query = """
+                SELECT *
+                FROM observations
+                JOIN observation_variables
+                    ON observations.observation_variable_db_id = observation_variables.internal_id_observation_variable
+                WHERE observation_time_stamp LIKE ? AND study_id > 0
+                ORDER BY observations.observation_time_stamp
+            """.trimIndent()
+
+            //Log.d(TAG, query)
+
+            db.rawQuery(query, arrayOf("$year%")).use {
+
+                it.toTable()
                     .map { ObservationModel(it) }
                     .toTypedArray()
+            }
 
         } ?: emptyArray()
 
@@ -203,6 +260,156 @@ class ObservationDao {
 
         } ?: emptyList()
 
+
+        /**
+        * Get all BrAPI export data categorized by type and status
+        * @param studyId The study ID to get data for
+        * @param hostUrl The BrAPI host URL
+        * @return Map containing categorized observations
+        */
+        fun getBrAPIExportData(fieldId: String, hostUrl: String): Map<String, List<com.fieldbook.tracker.brapi.model.Observation>> = withDatabase { db ->
+            // Create result containers
+            val categories = mutableMapOf(
+                "newObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "syncedObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "editedObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "newImageObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "syncedImageObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "editedImageObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "incompleteImageObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "userCreatedTraitObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "wrongSourceObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "userCreatedImageObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>(),
+                "wrongSourceImageObservations" to mutableListOf<com.fieldbook.tracker.brapi.model.Observation>()
+            )
+            
+            db.rawQuery("""
+                SELECT 
+                    obs.${Observation.PK} AS id,
+                    obs.value,
+                    obs.observation_time_stamp,
+                    obs.observation_unit_id,
+                    obs.observation_db_id,
+                    obs.last_synced_time,
+                    obs.collector,
+                    obs.rep,
+                    obs.${ObservationVariable.FK} AS internalVariableDbId,
+                    study.${Study.PK} AS ${Study.FK},
+                    study.study_db_id,
+                    vars.external_db_id,
+                    vars.observation_variable_name,
+                    vars.observation_variable_field_book_format,
+                    vars.trait_data_source,
+                    vars.observation_variable_details
+                FROM ${Observation.tableName} AS obs
+                JOIN ${ObservationVariable.tableName} AS vars ON obs.${ObservationVariable.FK} = vars.${ObservationVariable.PK}
+                JOIN ${Study.tableName} AS study ON obs.${Study.FK} = study.${Study.PK}
+                WHERE obs.${Study.FK} = ?
+                AND obs.value <> ''
+            """.trimIndent(), arrayOf(fieldId)).use { cursor ->
+                while (cursor.moveToNext()) {
+                    val observation = com.fieldbook.tracker.brapi.model.Observation().apply {
+                        fieldBookDbId = getStringVal(cursor, "id")
+                        value = getStringVal(cursor, "value")
+                        setTimestamp(getStringVal(cursor, "observation_time_stamp"))
+                        unitDbId = getStringVal(cursor, "observation_unit_id")
+                        dbId = getStringVal(cursor, "observation_db_id")
+                        setLastSyncedTime(getStringVal(cursor, "last_synced_time"))
+                        collector = getStringVal(cursor, "collector") ?: ""
+                        studyId = getStringVal(cursor, "study_db_id")
+                        variableDbId = getStringVal(cursor, "external_db_id")
+                        variableName = getStringVal(cursor, "observation_variable_name")
+                        rep = getStringVal(cursor, "rep")
+                        variableDetails = getStringVal(cursor, "observation_variable_details")
+                        internalVariableDbId = getStringVal(cursor, "internalVariableDbId")
+                    }
+                    
+                    val format = getStringVal(cursor, "observation_variable_field_book_format")
+                    val source = getStringVal(cursor, "trait_data_source")
+                    val isPhoto = format == "photo"
+                    
+                    // Determine the category for this observation
+                    val category = when {
+                        // Source-based categories
+                        source == "local" || source == null -> {
+                            if (isPhoto) "userCreatedImageObservations" else "userCreatedTraitObservations"
+                        }
+                        source != hostUrl -> {
+                            if (isPhoto) "wrongSourceImageObservations" else "wrongSourceObservations"
+                        }
+                        // Status-based categories
+                        observation.dbId == null -> {
+                            if (isPhoto) "newImageObservations" else "newObservations"
+                        }
+                        observation.lastSyncedTime == null -> {
+                            if (isPhoto) "incompleteImageObservations" else "editedObservations" // Non-photos without sync time are considered edited
+                        }
+                        else -> {
+                            val obsTimestamp = observation.timestamp
+                            val syncTimestamp = observation.lastSyncedTime
+                            
+                            if (obsTimestamp == null || obsTimestamp <= syncTimestamp) {
+                                if (isPhoto) "syncedImageObservations" else "syncedObservations"
+                            } else {
+                                if (isPhoto) "editedImageObservations" else "editedObservations"
+                            }
+                        }
+                    }
+                    
+                    // Add to the appropriate list
+                    categories[category]?.add(observation)
+                }
+            }
+            
+            categories
+        } ?: mapOf(
+            "newObservations" to emptyList(),
+            "syncedObservations" to emptyList(),
+            "editedObservations" to emptyList(),
+            "newImageObservations" to emptyList(),
+            "syncedImageObservations" to emptyList(),
+            "editedImageObservations" to emptyList(),
+            "incompleteImageObservations" to emptyList(),
+            "userCreatedTraitObservations" to emptyList(),
+            "wrongSourceObservations" to emptyList(),
+            "userCreatedImageObservations" to emptyList(),
+            "wrongSourceImageObservations" to emptyList()
+        )
+
+        /**
+        * Get image details for a list of observations
+        * @param ctx Context for file operations
+        * @param observations List of observations to get image details for
+        * @param missingPhoto Bitmap to use if image is missing
+        * @return List of FieldBookImage objects
+        */
+        fun getImageDetails(ctx: Context, observations: List<com.fieldbook.tracker.brapi.model.Observation>, missingPhoto: Bitmap): List<FieldBookImage> {
+            return observations.mapNotNull { observation ->
+                if (observation.value.isNullOrEmpty()) {
+                    Log.e("ObservationDao", "Empty image path for observation: ${observation.fieldBookDbId}")
+                    return@mapNotNull null
+                }
+                
+                try {
+                    // Create the FieldBookImage object with the missing photo fallback
+                    // The actual image loading will happen later in loadImage()
+                    FieldBookImage(ctx, observation.value, observation.variableName, missingPhoto).apply {
+                        rep = observation.rep
+                        unitDbId = observation.unitDbId
+                        descriptiveOntologyTerms = listOf(observation.variableDbId)
+                        description = observation.variableDetails
+                        setTimestamp(observation.timestamp)
+                        fieldBookDbId = observation.fieldBookDbId
+                        dbId = observation.dbId
+                        setLastSyncedTime(observation.lastSyncedTime)
+                    }
+                } catch (e: Exception) {
+                    Log.e("ObservationDao", "Error creating FieldBookImage for observation: ${observation.fieldBookDbId}", e)
+                    null
+                }
+            }
+        }
+
         /**
          * important note:  observationUnitDbId and observationUnitName are unit attributes that
          * are required to have for brapi fields; otherwise, this query will fail.
@@ -263,6 +470,62 @@ class ObservationDao {
             }
             return null
         }
+
+         /**
+        * Gets the count of missing observations for a trait across all studies
+        * @param traitDbId The trait ID to check
+        * @return The count of observation units that don't have an observation for this trait
+        */
+        fun getMissingObservationsCount(traitDbId: String): Int = withDatabase { db ->
+            // First get all observations for this trait
+            val observations = getAllOfTrait(traitDbId)
+            
+            // Extract the unique study IDs that have observations for this trait
+            val studiesWithObservations = observations.map { it.study_id }.distinct()
+            
+            if (studiesWithObservations.isEmpty()) {
+                // If no studies have observations for this trait, return 0
+                return@withDatabase 0
+            }
+            
+            // Build a query to count all observation units in these studies
+            val placeholders = studiesWithObservations.joinToString(",") { "?" }
+            val studyArgs = studiesWithObservations.toTypedArray()
+
+            // Count total observation units in these studies
+            val totalUnitsQuery = """
+                SELECT COUNT(*) as total_units
+                FROM ${ObservationUnit.tableName}
+                WHERE ${Study.FK} IN ($placeholders)
+            """
+
+            val totalUnits = db.rawQuery(totalUnitsQuery, studyArgs).use { cursor ->
+                if (cursor.moveToFirst()) {
+                    cursor.getInt(cursor.getColumnIndexOrThrow("total_units"))
+                } else {
+                    0
+                }
+            }
+
+            // Count observation units that already have observations for this trait
+            val observedUnitsQuery = """
+                SELECT COUNT(DISTINCT ${ObservationUnit.FK}) as observed_units
+                FROM ${Observation.tableName}
+                WHERE ${Study.FK} IN ($placeholders)
+                AND ${ObservationVariable.FK} = ?
+            """
+
+            val observedUnits = db.rawQuery(observedUnitsQuery, studyArgs + traitDbId).use { cursor ->
+                if (cursor.moveToFirst()) {
+                    cursor.getInt(cursor.getColumnIndexOrThrow("observed_units"))
+                } else {
+                    0
+                }
+            }
+            
+            // Return the difference (missing observations)
+            totalUnits - observedUnits
+        } ?: 0
 
         fun getWrongSourceImageObservations(ctx: Context, hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 
@@ -369,8 +632,11 @@ class ObservationDao {
             notes: String, studyId: String, observationDbId: String?,
             timestamp: OffsetDateTime?,
             lastSyncedTime: OffsetDateTime?,
-            rep: String? = (getRep(studyId, plotId, traitDbId) + 1).toString()
-        ): Long = withDatabase { db ->
+            rep: String? = (getRep(studyId, plotId, traitDbId) + 1).toString(),
+            audioUri: String? = null,
+            videoUri: String? = null,
+            photoUri: String? = null
+         ): Long = withDatabase { db ->
 
             val traitObj = ObservationVariableDao.getTraitById(traitDbId)
             val internalTraitId = if (traitObj == null) {
@@ -388,7 +654,6 @@ class ObservationDao {
             //remove null control characters which are added to strings by some devices (Samsung)
             //when the user pastes clipboard data
             val removeNullCharacters = value.replace("\u0000", "")
-
             db.insert(Observation.tableName, null, contentValuesOf(
                 "observation_db_id" to observationDbId,
                 "value" to removeNullCharacters,
@@ -398,12 +663,15 @@ class ObservationDao {
                 "last_synced_time" to lastSyncedTime?.format(internalTimeFormatter),
                 "rep" to rep,
                 "notes" to notes,
+                "audio_uri" to audioUri,
+                "video_uri" to videoUri,
+                "photo_uri" to photoUri,
                 Study.FK to studyId.toInt(),
                 ObservationUnit.FK to plotId,
                 ObservationVariable.FK to internalTraitId
             ))
 
-        } ?: -1L
+        }.also { ObservationChangeTracker.markChanged() } ?: -1L
 
         fun getUserDetail(studyId: String, plotId: String): HashMap<String, String> =
             withDatabase { db ->
@@ -493,7 +761,7 @@ class ObservationDao {
                     "${Study.FK} = ? AND ${ObservationUnit.FK} = ? AND observation_variable_db_id = ? AND rep = ?",
                     arrayOf(studyId, plotId, traitDbId, rep)
                 )
-            }
+            }.also { ObservationChangeTracker.markChanged() }
 
         fun deleteTraitByValue(studyId: String, plotId: String, traitDbId: String, value: String) =
             withDatabase { db ->
@@ -503,47 +771,110 @@ class ObservationDao {
                     "${Study.FK} = ? AND ${ObservationUnit.FK} = ? AND observation_variable_db_id = ? AND value = ?",
                     arrayOf(studyId, plotId, traitDbId, value)
                 )
-            }
+            }.also { ObservationChangeTracker.markChanged() }
 
         fun delete(id: String) = withDatabase { db ->
             db.delete(Observation.tableName,
                 "${Observation.PK} = ?", arrayOf(id))
+        }.also { ObservationChangeTracker.markChanged() }
+
+        fun deleteAllForStudy(studyId: String) = withDatabase { db ->
+            db.delete(Observation.tableName, "${Study.FK} = ?", arrayOf(studyId))
+        }.also { ObservationChangeTracker.markChanged() }
+
+        /**
+         * Mirrors the null-control-character stripping that [insertObservation] applies, so a value
+         * read back out of the database can be compared against the value that was submitted.
+         */
+        fun sanitizeValue(value: String?): String = (value ?: String()).filterNot { it.code == 0 }
+
+        /**
+         * Reads back the value stored under an observation's primary key.
+         * Returns null when no such row exists, which is how a write that never landed is told
+         * apart from one that saved an empty value.
+         */
+        fun getValueById(id: String): String? = withDatabase { db ->
+
+            db.rawQuery(
+                "SELECT value FROM ${Observation.tableName} WHERE ${Observation.PK} = ? LIMIT 1",
+                arrayOf(id)
+            ).use { cursor ->
+
+                if (cursor.moveToFirst()) cursor.getString(0) ?: String() else null
+            }
         }
 
-        fun updateObservationModels(db: SQLiteDatabase, observations: List<ObservationModel>) {
+        /**
+         * @return the number of rows actually updated, so callers can tell a no-op apart from a save
+         */
+        fun updateObservationModels(db: SQLiteDatabase, observations: List<ObservationModel>): Int {
+
+            var updated = 0
 
             observations.forEach {
 
-                db.update(
+                val content = it.toContentValues()
+                updated += db.update(
                     Observation.tableName,
-                    ContentValues().apply {
-                        put(Observation.PK, it.internal_id_observation)
-                        put("value", it.value)
-                    },
+                    content,
                     "${Observation.PK} = ?", arrayOf(it.internal_id_observation.toString())
                 )
-
             }
+
+            ObservationChangeTracker.markChanged()
+
+            return updated
         }
 
         /**
          * Parameter is a list of BrAPI Observations,
          * any entry in the DB with given observation_db_id will be updated.
          */
-        fun updateObservations(observations: List<BrapiObservation>) = withDatabase { db ->
+        fun updateObservationsByBrapiId(observations: List<BrapiObservation>) = withDatabase { db ->
 
             observations.forEach {
 
                 db.update(
                     Observation.tableName,
                         ContentValues().apply {
+                            put("collector", it.collector)
+                            put("value", it.value)
                             put("observation_db_id", it.dbId)
                             put("last_synced_time", it.lastSyncedTime.format(internalTimeFormatter))
                         },
-                        "${Observation.PK} = ?", arrayOf(it.fieldBookDbId))
+                        "observation_db_id = ?", arrayOf(it.dbId))
 
             }
-        }
+        }.also { ObservationChangeTracker.markChanged() }
+
+        fun updateObservationsByFieldBookId(observations: List<BrapiObservation>) = withDatabase { db ->
+
+            observations.forEach {
+
+                db.update(
+                    Observation.tableName,
+                    ContentValues().apply {
+                        put("collector", it.collector)
+                        put("value", it.value)
+                        put("observation_db_id", it.dbId)
+                        put("last_synced_time", it.lastSyncedTime.format(internalTimeFormatter))
+                    },
+                    "${Observation.PK} = ?", arrayOf(it.fieldBookDbId))
+
+            }
+        }.also { ObservationChangeTracker.markChanged() }
+
+        fun updateObservationMediaUris(observation: ObservationModel) = withDatabase {
+            db.update(Observation.tableName, contentValuesOf().apply {
+                put("value", observation.value)
+                put("rep", observation.rep)
+                put("audio_uri", observation.audio_uri)
+                put("video_uri", observation.video_uri)
+                put("photo_uri", observation.photo_uri)
+            },
+                "${Observation.PK} = ?", arrayOf(observation.internal_id_observation.toString())
+            )
+        }.also { ObservationChangeTracker.markChanged() }
 
         fun updateObservation(observation: ObservationModel) = withDatabase { db ->
 
@@ -555,7 +886,7 @@ class ObservationDao {
                 "internal_id_observation = ?",
                 arrayOf(observation.internal_id_observation.toString())
                 )
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
         fun updateObservationValue(
             id: Int,
@@ -568,22 +899,18 @@ class ObservationDao {
                 "${Observation.PK} = ?",
                 arrayOf(id.toString())
             )
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
-        //TODO
-        fun updateImage(image: FieldBookImage, writeLastSyncedTime: Boolean) = withDatabase {
+        fun updateImage(image: FieldBookImage) = withDatabase {
 
             it.update(Observation.tableName,
 
                     ContentValues().apply {
                         put("observation_db_id", image.dbId)
-                        if (writeLastSyncedTime) {
-                            put("last_synced_time", image.lastSyncedTime.format(internalTimeFormatter))
-                        }
+                        put("last_synced_time", image.lastSyncedTime.format(internalTimeFormatter))
                     },
                     Observation.PK + " = ?", arrayOf(image.fieldBookDbId))
-
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
 
         /**
@@ -606,5 +933,42 @@ class ObservationDao {
             }
 
         } ?: 0
+
+        /**
+         * Returns a map of (plotId, traitDbId) -> [RepeatSummary] for all (plot, trait) pairs in a
+         * study that have more than one observation. Used by DataGridActivity to avoid per-cell
+         * repeated-value queries.
+         */
+        fun getRepeatSummariesForStudy(studyId: String): Map<Pair<String, String>, RepeatSummary> =
+            withDatabase { db ->
+                val map = mutableMapOf<Pair<String, String>, RepeatSummary>()
+                // SQLite guarantees that when a query contains exactly one max() aggregate, bare
+                // columns in the result set (here `value`) are taken from the same input row that
+                // produced that maximum — so `value` is the highest-rep observation's value.
+                val cursor = db.rawQuery(
+                    """
+                    SELECT observation_unit_id,
+                           observation_variable_db_id,
+                           COUNT(*) AS cnt,
+                           MAX(CAST(rep AS INTEGER)) AS max_rep,
+                           value
+                    FROM observations
+                    WHERE study_id = ?
+                    GROUP BY observation_unit_id, observation_variable_db_id
+                    HAVING COUNT(*) > 1
+                    """.trimIndent(),
+                    arrayOf(studyId)
+                )
+                cursor.use {
+                    while (it.moveToNext()) {
+                        val plotId = it.getString(0)
+                        val traitId = it.getString(1)
+                        val count = it.getInt(2)
+                        val latestValue = it.getString(4)
+                        map[Pair(plotId, traitId)] = RepeatSummary(count, latestValue)
+                    }
+                }
+                map
+            } ?: emptyMap()
     }
 }

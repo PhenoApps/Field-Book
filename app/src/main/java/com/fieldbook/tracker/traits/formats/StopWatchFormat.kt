@@ -1,8 +1,13 @@
 package com.fieldbook.tracker.traits.formats
 
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.traits.formats.feature.DisplayValue
+import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
+import com.fieldbook.tracker.traits.formats.parameters.AutoSwitchPlotParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
+import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 
 open class StopWatchFormat : TraitFormat(
     format = Formats.STOP_WATCH,
@@ -13,5 +18,9 @@ open class StopWatchFormat : TraitFormat(
     iconDrawableResourceId = R.drawable.timer,
     stringNameAux = null,
     NameParameter(),
-    DetailsParameter()
-)
+    DetailsParameter(),
+    AutoSwitchPlotParameter(),
+    RepeatedMeasureParameter(),
+    ResourceFileParameter(),
+    AttachMediaParameter()
+), DisplayValue

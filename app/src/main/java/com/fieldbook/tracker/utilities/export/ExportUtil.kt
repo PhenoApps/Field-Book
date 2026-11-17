@@ -15,22 +15,18 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.*
 import androidx.documentfile.provider.DocumentFile
-import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.brapi.BrapiExportActivity
-import com.fieldbook.tracker.brapi.BrapiAuthDialogFragment
-import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.CitationDialog
 import com.fieldbook.tracker.objects.FieldObject
-import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.CSVWriter
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.ZipUtil
+import com.fieldbook.tracker.traits.formats.Formats
 import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,6 +40,8 @@ import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
+import androidx.core.content.edit
+import com.fieldbook.tracker.utilities.DocumentTreeUtil
 
 /**
  * Checks preconditions before collect and export.
@@ -59,6 +57,7 @@ class ExportUtil @Inject constructor(
         private const val PERMISSIONS_REQUEST_EXPORT_DATA = 9990
         private const val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
         const val TAG = "ExportUtil"
+        private const val BUNDLE_MEDIA_WARNING_THRESHOLD = 100
     }
 
     private var fieldIds: List<Int> = listOf()
@@ -84,6 +83,44 @@ class ExportUtil @Inject constructor(
     // this needs to be deleted AFTER zipping is completed
     private var tempDirectory: DocumentFile? = null
 
+    fun exportInnoSpectraFile(studyId: Int, format: Formats) {
+
+        val observations = database.getAllObservations(studyId.toString())
+            .filter { it.observation_variable_field_book_format == format.getDatabaseName() }
+
+        val header = buildList<String> {
+
+            add("sample_name") // entry name
+
+            add("device_id") // device id
+        }
+
+        DocumentTreeUtil.getFieldMediaDirectory(context, format.getDatabaseName())?.uri?.let { fileUri ->
+
+            context.contentResolver.openOutputStream(fileUri).use {
+
+                val writer = OutputStreamWriter(it)
+
+                writer.write(header.joinToString(",") + "\n")
+
+                observations.forEach { observation ->
+
+                    val row = buildList<String> {
+
+                        add(observation.observation_unit_id)
+
+                        //add(observation.)
+                    }
+
+                    writer.write(row.joinToString(",") + "\n")
+                }
+
+                writer.close()
+            }
+        }
+
+    }
+
     fun exportMultipleFields(fieldIds: List<Int>) {
         this.fieldIds = fieldIds
         this.multipleFields = fieldIds.size > 1
@@ -97,28 +134,15 @@ class ExportUtil @Inject constructor(
     }
 
     fun export() {
-        val exporter = preferences.getString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "")
 
-        if (!allFieldsBrAPI() || exporter == "local" || !preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
-            // use local export if any fields aren't all brapi, if brapi is disabled, or if local pref is set
-            exportPermission()
-        } else if (exporter == "brapi") {
-            exportBrAPI(fieldIds)
-        } else {
-            showExportDialog() // provide export type choice if fields are all brapi but pref is not set
+        // without the export directory nothing can be written, so stop before showing the export dialog
+        if (BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export) == null) {
+            Toast.makeText(context, R.string.error_storage_directory, Toast.LENGTH_LONG).show()
+            return
         }
-    }
 
-    fun allFieldsBrAPI(): Boolean {
-        fieldIds.forEach { fieldId ->
-            val field = database.getFieldObject(fieldId)
-            val importFormat = field?.dataSourceFormat
-            if (importFormat != ImportFormat.BRAPI) {
-                Log.d(TAG, "Not all fields are BrAPI fields")
-                return false
-            }
-        }
-        return true
+        exportPermission()
+
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_EXPORT_DATA)
@@ -141,60 +165,6 @@ class ExportUtil @Inject constructor(
                 PERMISSIONS_REQUEST_EXPORT_DATA,
                 *perms
             )
-        }
-    }
-
-    fun showExportDialog() {
-        val inflater = LayoutInflater.from(context)
-        val layout = inflater.inflate(R.layout.dialog_list_buttonless, null)
-        val exportSourceList: ListView = layout.findViewById(R.id.myList)
-
-        val exportArray = arrayOf(
-            context.getString(R.string.export_source_local),
-            preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, context.getString(R.string.brapi_edit_display_name_default))
-        )
-
-        val adapter = ArrayAdapter(context, R.layout.list_item_dialog_list, exportArray)
-        exportSourceList.adapter = adapter
-
-        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
-        builder.setTitle(R.string.export_dialog_title)
-            .setView(layout)
-            .setPositiveButton(context.getString(R.string.dialog_cancel)) { dialog, _ -> dialog.dismiss() }
-
-        val dialog = builder.create()
-        dialog.show()
-        exportSourceList.setOnItemClickListener { _, _, which, _ ->
-            when (which) {
-                0 -> exportPermission()
-                1 -> exportBrAPI(fieldIds)
-            }
-            dialog.dismiss()
-        }
-    }
-
-    fun exportBrAPI(fieldIds: List<Int>) {
-        val activeFields = fieldIds.map { fieldId -> database.getFieldObject(fieldId) }
-        val nonMatchingSourceFields = activeFields.filter { !BrAPIService.checkMatchBrapiUrl(context, it.getDataSource()) }
-
-        if (nonMatchingSourceFields.isNotEmpty()) {
-            val hostURL = BrAPIService.getHostUrl(context)
-            val badSourceMsg = context.resources.getString(
-                R.string.brapi_field_non_matching_sources,
-                nonMatchingSourceFields.joinToString(", ") { it.getDataSource() },
-                hostURL
-            )
-            Toast.makeText(context, badSourceMsg, Toast.LENGTH_LONG).show()
-            return
-        }
-
-        if (BrAPIService.isLoggedIn(context)) {
-            val exportIntent = Intent(context, BrapiExportActivity::class.java)
-            exportIntent.putIntegerArrayListExtra(BrapiExportActivity.FIELD_IDS, ArrayList(fieldIds))
-            context.startActivity(exportIntent)
-        } else {
-            val brapiAuth = BrapiAuthDialogFragment().newInstance()
-            brapiAuth?.show((context as FragmentActivity).supportFragmentManager, "BrapiAuthDialogFragment")
         }
     }
 
@@ -281,7 +251,7 @@ class ExportUtil @Inject constructor(
                 return
             }
 
-            with(preferences.edit()) {
+            preferences.edit {
                 putBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE, isOnlyUniqueChecked)
                 putBoolean(GeneralKeys.EXPORT_COLUMNS_ALL, isAllColumnsChecked)
                 putBoolean(GeneralKeys.EXPORT_TRAITS_ALL, isAllTraitsChecked)
@@ -290,7 +260,6 @@ class ExportUtil @Inject constructor(
                 putBoolean(GeneralKeys.EXPORT_FORMAT_DATABASE, checkDB.isChecked)
                 putBoolean(GeneralKeys.EXPORT_OVERWRITE, checkOverwrite.isChecked)
                 putBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, checkBundle.isChecked)
-                apply()
             }
 
             BaseDocumentTreeUtil.getDirectory(context as Activity, R.string.dir_field_export)
@@ -323,18 +292,34 @@ class ExportUtil @Inject constructor(
 
             val repeatedMeasuresEnabled = preferences.getBoolean(PreferenceKeys.REPEATED_VALUES_PREFERENCE_KEY, false)
 
-            //show a warning if table is selected and repeated measures is enabled
-            if (checkTable.isChecked && repeatedMeasuresEnabled) {
+            fun proceedWithExport() {
+                //show a warning if table is selected and repeated measures is enabled
+                if (checkTable.isChecked && repeatedMeasuresEnabled) {
+                    AlertDialog.Builder(context, R.style.AppAlertDialog)
+                        .setTitle(R.string.export_util_repeated_measures_table_warning_title)
+                        .setMessage(R.string.export_util_repeated_measures_table_warning_message)
+                        .setPositiveButton(android.R.string.ok) { _, _ ->
+                            onOkExportClicked()
+                        }
+                        .show()
+                } else onOkExportClicked()
+            }
 
-                AlertDialog.Builder(context, R.style.AppAlertDialog)
-                    .setTitle(R.string.export_util_repeated_measures_table_warning_title)
-                    .setMessage(R.string.export_util_repeated_measures_table_warning_message)
-                    .setPositiveButton(android.R.string.ok) { _, _ ->
-                        onOkExportClicked()
-                    }
-                    .show()
-
-            } else onOkExportClicked()
+            // show a warning if bundling is checked and media file count exceeds threshold
+            if (checkBundle.isChecked) {
+                val useActiveTraits = activeTraits?.isChecked == true
+                val mediaFileCount = countMediaFiles(fields, useActiveTraits)
+                if (mediaFileCount > BUNDLE_MEDIA_WARNING_THRESHOLD) {
+                    AlertDialog.Builder(context, R.style.AppAlertDialog)
+                        .setTitle(R.string.export_util_bundle_media_warning_title)
+                        .setMessage(context.getString(R.string.export_util_bundle_media_warning_message, mediaFileCount))
+                        .setPositiveButton(R.string.export_util_bundle_media_warning_continue) { _, _ ->
+                            proceedWithExport()
+                        }
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show()
+                } else proceedWithExport()
+            } else proceedWithExport()
         }
     }
 
@@ -467,7 +452,7 @@ class ExportUtil @Inject constructor(
                                 "database" -> csvWriter.writeDatabaseFormat(columns, deviceName)
                                 "table" -> {
                                     val newColumns = columns.toTypedArray()
-                                    val labels = exportTrait.map { it.name }
+                                    val labels = exportTrait.map { it.alias }
 
                                     // Log the arguments
                                     val newColumnsStr = newColumns.joinToString(", ")
@@ -491,6 +476,29 @@ class ExportUtil @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun countMediaFiles(fields: List<FieldObject>, useActiveTraits: Boolean): Int {
+        val traits = database.allTraitObjects
+        val traitNames = if (useActiveTraits) {
+            traits.filter { it.visible }.map { FileUtil.sanitizeFileName(it.name) }
+        } else {
+            traits.map { FileUtil.sanitizeFileName(it.name) }
+        }
+
+        var count = 0
+        for (field in fields) {
+            val mediaDir = BaseDocumentTreeUtil.getFile(context, R.string.dir_plot_data, field.name)
+            if (mediaDir != null && mediaDir.exists() && mediaDir.isDirectory) {
+                mediaDir.listFiles().forEach { traitDir ->
+                    val traitDirName = traitDir.name ?: ""
+                    if (traitDir.isDirectory && traitNames.contains(traitDirName)) {
+                        count += traitDir.listFiles().count { it.isFile }
+                    }
+                }
+            }
+        }
+        return count
     }
 
     private fun handleBundledFiles(fieldId: Int) {
@@ -604,8 +612,13 @@ class ExportUtil @Inject constructor(
                     }
 
                     progressDialog?.dismiss()
-                    finalFile?.let { shareFile(it) }
-                    CitationDialog(context).show()
+                    if (finalFile != null) {
+                        shareFile(finalFile)
+                        CitationDialog(context).show()
+                    } else {
+                        // no file was written (e.g. storage lost mid-export), don't report success
+                        Toast.makeText(context, context.getString(R.string.export_error_general), Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
             is ExportResult.Failure -> {

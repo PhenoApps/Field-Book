@@ -4,6 +4,8 @@ import android.content.Context
 import android.location.Location
 import android.os.Handler
 import com.fieldbook.tracker.database.models.ObservationModel
+import com.fieldbook.tracker.database.repository.TraitRepository
+import com.fieldbook.tracker.database.viewmodels.CollectViewModel
 import com.fieldbook.tracker.devices.camera.UsbCameraApi
 import com.fieldbook.tracker.devices.camera.GoProApi
 import com.fieldbook.tracker.devices.camera.CanonApi
@@ -60,4 +62,5 @@ interface CollectController: FieldController, SpectralController, RepeatedValues
     fun getRotationRelativeToDevice(): SensorHelper.RotationModel?
     fun getDeviceTilt(): SensorHelper.RotationModel?
     fun getNixSensorHelper(): NixSensorHelper
+    fun getViewModel(): CollectViewModel
 }

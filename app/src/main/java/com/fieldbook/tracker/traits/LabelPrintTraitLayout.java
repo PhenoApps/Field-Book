@@ -170,7 +170,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
                 if (numLabels > 0 && plotId != null && traitId != null) {
                     String labelNumber = String.valueOf(numLabels);
                     CollectActivity activity = (CollectActivity) getContext();
-                    activity.insertPrintObservation(plotId, traitId, traitFormat, labelNumber);
+                    activity.insertPrintObservation(plotId, traitId, labelNumber);
                     activity.refreshRepeatedValuesToolbarIndicator();
                 }
 

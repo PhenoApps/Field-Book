@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import androidx.activity.OnBackPressedDispatcher
 import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.io.BrapiCacheModel
@@ -35,6 +34,7 @@ import org.brapi.v2.model.core.BrAPIStudy
 import org.brapi.v2.model.pheno.BrAPIObservationVariable
 import javax.inject.Inject
 import androidx.core.content.edit
+import com.fieldbook.tracker.brapi.service.BrAPIServiceV1
 
 @AndroidEntryPoint
 class BrapiTraitFilterActivity(
@@ -134,20 +134,30 @@ class BrapiTraitFilterActivity(
 
     override fun BrapiCacheModel.mapToUiModel() =
         variables.values
-            .filter { it.observationVariableDbId != null }
-            .map { model ->
-                CheckboxListAdapter.Model(
-                    checked = false,
-                    id = model.observationVariableDbId,
-                    label = model.synonyms?.firstOrNull() ?: model.observationVariableName ?: model.observationVariableDbId,
-                    subLabel = "${model.commonCropName ?: ""} ${model.observationVariableDbId ?: ""}",
-                    searchableTexts = model.observationVariableName?.let { listOf(it) } ?: emptyList()
-                ).also {
-                    model.scale?.dataType?.name?.let { dataType ->
-                        Formats.findTrait(DataTypes.convertBrAPIDataType(dataType))?.iconDrawableResourceId?.let { icon ->
-                            it.iconResId = icon
+            .filter { it.observationVariableDbId != null }.mapNotNull { model ->
+                try {
+                    CheckboxListAdapter.Model(
+                        checked = false,
+                        id = model.observationVariableDbId,
+                        label = model.synonyms?.firstOrNull() ?: model.observationVariableName
+                        ?: model.observationVariableDbId,
+                        subLabel = "${model.commonCropName ?: ""} ${model.observationVariableDbId ?: ""}",
+                        searchableTexts = model.observationVariableName?.let { listOf(it) }
+                            ?: emptyList()
+                    ).also {
+                        model.scale?.dataType?.name?.let { dataType ->
+                            val convertedType = DataTypes.convertBrAPIDataType(dataType)
+                            val finalTraitFormat =
+                                if (convertedType == "multicat") "categorical" else convertedType
+
+                            Formats.findTrait(finalTraitFormat)?.iconDrawableResourceId?.let { icon ->
+                                it.iconResId = icon
+                            }
                         }
                     }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    null
                 }
             }.toList()
 
@@ -204,13 +214,16 @@ class BrapiTraitFilterActivity(
 
             queried = true
 
+            if (brapiService is BrAPIServiceV1)
+                return@launch
+
             (brapiService as BrAPIServiceV2).observationVariableService.fetchAll(
                 VariableQueryParams().also {
                     it.pageSize(pageSize)
                 }
             )
-                .catch {
-                    onApiException()
+                .catch { e ->
+                    onApiException(e)
                     queryVariablesJob?.cancel()
                 }
                 .collect {

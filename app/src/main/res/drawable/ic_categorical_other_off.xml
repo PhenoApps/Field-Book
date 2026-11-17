@@ -1,0 +1,16 @@
+<!-- drawable/view_grid_plus.xml -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <clip-path
+        android:fillColor="#000000"
+        android:pathData="M0 0 24 0 24 24 0 24 0 0M2.39 1.73 22.11 21.46 23.2 20 3.9.73Z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M13 3V11H21V3H13M3 21H11V13H3V21M3 3V11H11V3H3M13 16H16V13H18V16H21V18H18V21H16V18H13V16Z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M2.39,1.73L22.11,21.46L20.84,22.73L1.11,3Z" />
+</vector>

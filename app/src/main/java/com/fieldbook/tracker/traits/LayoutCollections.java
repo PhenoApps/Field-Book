@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.traits;
 
 import android.app.Activity;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -22,18 +23,20 @@ public class LayoutCollections {
         traitLayouts.add(new GNSSTraitLayout(_activity));
         traitLayouts.add(new LabelPrintTraitLayout(_activity));
         traitLayouts.add(new LocationTraitLayout(_activity));
-        traitLayouts.add(new MultiCatTraitLayout(_activity));
         traitLayouts.add(new PercentTraitLayout(_activity));
         traitLayouts.add(new PhotoTraitLayout(_activity));
         traitLayouts.add(new UsbCameraTraitLayout(_activity));
         traitLayouts.add(new GoProTraitLayout(_activity));
         traitLayouts.add(new CanonTraitLayout(_activity));
+        traitLayouts.add(new VideoTraitLayout(_activity));
         traitLayouts.add(new SpectralTraitLayout(_activity));
         traitLayouts.add(new NixTraitLayout(_activity));
         traitLayouts.add(new InnoSpectraTraitLayout(_activity));
         traitLayouts.add(new StopWatchTraitLayout(_activity));
         traitLayouts.add(new GreenSeekerTraitLayout(_activity));
         traitLayouts.add(new ScaleTraitLayout(_activity));
+        traitLayouts.add(new CanopyCoverTraitLayout(_activity));
+        traitLayouts.add(new PollinatorTraitLayout(_activity));
     }
 
     /**
@@ -49,14 +52,6 @@ public class LayoutCollections {
         return getTraitLayout("text");
     }
 
-    public AbstractCameraTrait getPhotoTrait(String format) {
-        switch (format) {
-            case "photo":
-                return (PhotoTraitLayout) getTraitLayout("photo");
-        }
-        return (PhotoTraitLayout) getTraitLayout("photo");
-    }
-
     public void deleteTraitListener(String format) {
         getTraitLayout(format).deleteTraitListener();
     }
@@ -65,34 +60,6 @@ public class LayoutCollections {
         getTraitLayout(format).setNaTraitsText();
         getTraitLayout(format).setCurrentValueAsEdited();
     }
-
-//    Deprecated - simpler to disable/enable data collection using lockOverlay instead
-//
-//    public void enableViews() {
-//        for (LinearLayout traitLayout : traitLayouts) {
-//            enableViews(true, traitLayout);
-//        }
-//    }
-//
-//    public void disableViews() {
-//        for (BaseTraitLayout traitLayout : traitLayouts) {
-//            String type = traitLayout.type();
-//            if (!type.equals("photo") && !type.equals("audio") && !type.equals("percent"))
-//                enableViews(false, traitLayout);
-//        }
-//    }
-//
-//    public void enableViews(Boolean toggle, ViewGroup layout) {
-//        layout.setEnabled(false);
-//        for (int i = 0; i < layout.getChildCount(); i++) {
-//            View child = layout.getChildAt(i);
-//            if (child instanceof ViewGroup) {
-//                enableViews(toggle, (ViewGroup) child);
-//            } else {
-//                child.setEnabled(toggle);
-//            }
-//        }
-//    }
 
     public void registerAllReceivers() {
         for (BaseTraitLayout layout : this.traitLayouts) {
@@ -106,6 +73,23 @@ public class LayoutCollections {
         for (BaseTraitLayout layout : this.traitLayouts) {
             if (layout instanceof LabelPrintTraitLayout) {
                 ((LabelPrintTraitLayout) layout).unregisterReceiver();
+            }
+        }
+    }
+
+    /**
+     * Releases resources held by every layout, not just the one currently showing.
+     *
+     * A layout the user never opened still holds whatever it allocated at construction, so this
+     * has to walk the whole list.
+     */
+    public void onDestroy() {
+        for (BaseTraitLayout layout : this.traitLayouts) {
+            try {
+                layout.onDestroy();
+            } catch (Exception e) {
+                //one layout failing to tear down must not stop the rest
+                Log.e("LayoutCollections", "Error destroying " + layout.getClass().getSimpleName(), e);
             }
         }
     }

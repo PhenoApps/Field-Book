@@ -8,13 +8,12 @@ import android.util.Patterns;
 import android.widget.Toast;
 
 import androidx.arch.core.util.Function;
-import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.ApiError;
+import com.fieldbook.tracker.utilities.BrapiAccountHelper;
 import com.fieldbook.tracker.brapi.ApiErrorCode;
-import com.fieldbook.tracker.brapi.BrapiAuthDialogFragment;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
 import com.fieldbook.tracker.brapi.model.BrapiProgram;
@@ -47,10 +46,9 @@ public interface BrAPIService {
 
     // Helper functions for brapi configurations
     static Boolean isLoggedIn(Context context) {
-
-        String token = getPreferences(context).getString(PreferenceKeys.BRAPI_TOKEN, "");
-
-        return token != null && token != "";
+        SharedPreferences prefs = getPreferences(context);
+        BrapiAccountHelper helper = new BrapiAccountHelper(context, prefs);
+        return helper.hasActiveAccount();
     }
 
     static Boolean hasValidBaseUrl(Context context) {
@@ -86,6 +84,9 @@ public interface BrAPIService {
 
     static String getBrapiUrl(Context context) {
         String baseURL = getPreferences(context).getString(PreferenceKeys.BRAPI_BASE_URL, "");
+        // Mirrored from the active account by BrapiAccountRepository.setActiveAccount(); it has to
+        // agree with the version BrAPIServiceFactory picks the client from, or a V2 client ends up
+        // issuing V2 calls against the /brapi/v1 path.
         String version = getPreferences(context).getString(PreferenceKeys.BRAPI_VERSION, "");
         String path;
         if (version.equals("V2"))
@@ -138,6 +139,8 @@ public interface BrAPIService {
             case UNAUTHORIZED:
                 toastMsg = context.getString(R.string.brapi_auth_deny);
                 returnVal = true;
+                // Invalidate the cached token so hasActiveAccount() returns false until re-auth
+                invalidateActiveToken(context);
                 break;
             case FORBIDDEN:
                 toastMsg = context.getString(R.string.brapi_auth_permission_deny);
@@ -154,6 +157,30 @@ public interface BrAPIService {
         });
 
         return returnVal;
+    }
+
+    /**
+     * Invalidates the cached auth token for the active BrAPI account in AccountManager,
+     * so that subsequent hasActiveAccount() checks (which require a valid token) return false.
+     */
+    static void invalidateActiveToken(Context context) {
+        try {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            com.fieldbook.tracker.utilities.BrapiAccountHelper helper =
+                    new com.fieldbook.tracker.utilities.BrapiAccountHelper(context, prefs);
+            android.accounts.Account active = helper.findAccount();
+            if (active != null) {
+                android.accounts.AccountManager am = android.accounts.AccountManager.get(context);
+                String token = helper.peekToken();
+                if (token != null) {
+                    am.invalidateAuthToken(active.type, token);
+                }
+            }
+            // Also clear SharedPreferences token for legacy compatibility
+            prefs.edit().remove(com.fieldbook.tracker.preferences.PreferenceKeys.BRAPI_TOKEN).apply();
+        } catch (Exception e) {
+            Log.e("BrAPIService", "Error invalidating token", e);
+        }
     }
 
     void postImageMetaData(FieldBookImage image, final Function<FieldBookImage, Void> function, final Function<Integer, Void> failFunction);
@@ -174,6 +201,8 @@ public interface BrAPIService {
 
     void getObservations(final String studyDbId, final List<String> observationVariableDbIds, BrapiPaginationManager paginationManager, final Function<List<Observation>, Void> function, final Function<Integer, Void> failFunction);
 
+    default void getObservationsByPage(final String studyDbId, final List<String> observationVariableDbIds, BrapiPaginationManager paginationManager, final Function<List<Observation>, Void> function, final Function<Integer, Void> failFunction) {}
+
     void getOntology(BrapiPaginationManager paginationManager, final BiFunction<List<TraitObject>, Integer, Void> function, final Function<Integer, Void> failFunction);
 
     void createObservations(List<Observation> observations,
@@ -184,8 +213,8 @@ public interface BrAPIService {
                             final Function<List<Observation>, Void> function,
                             final Function<Integer, Void> failFunction);
 
-    void createObservationsChunked(int chunkSize, List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn);
-    void updateObservationsChunked(int chunkSize, List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn);
+    void createObservationsChunked(int chunkSize, List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, BrAPIChunkedUploadProgressFailedCallback<Observation> failFn);
+    void updateObservationsChunked(int chunkSize, List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, BrAPIChunkedUploadProgressFailedCallback<Observation> failFn);
 
     /*
     public void postObservations(List<Observation> observations,

@@ -10,12 +10,14 @@ import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
+import com.fieldbook.tracker.utilities.MediaKeyCodeActionHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,7 +46,9 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
         try {
             preferences.getString(PreferenceKeys.VOLUME_NAVIGATION, "");
         } catch (ClassCastException e) {
-            preferences.edit().putString(PreferenceKeys.VOLUME_NAVIGATION, "0").apply();
+            preferences.edit()
+                    .putString(PreferenceKeys.VOLUME_NAVIGATION, MediaKeyCodeActionHelper.VolumeNavigation.DEFAULT.getValue())
+                    .apply();
             Log.d(TAG, "Stagnant Deprecated preference data found, fixing.");
         }
 
@@ -63,7 +67,22 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
             });
         }
 
-        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_behavior_title));
+        if (this.getActivity() != null) {
+            ActionBar bar = ((PreferencesActivity) this.getActivity()).getSupportActionBar();
+            if (bar != null) {
+                bar.setTitle(getString(R.string.preferences_behavior_title));
+            }
+        }
+
+        Bundle arguments = getArguments();
+        if (arguments == null || !arguments.getBoolean(GeneralKeys.BARCODE_SCANNING_OPTIONS_EDIT, false)) {
+            return;
+        }
+
+        Preference scanningOptionsPref = findPreference(PreferenceKeys.BARCODE_SCANNING_OPTIONS);
+        if (scanningOptionsPref != null) {
+            onDisplayPreferenceDialog(scanningOptionsPref);
+        }
     }
 
     @Override

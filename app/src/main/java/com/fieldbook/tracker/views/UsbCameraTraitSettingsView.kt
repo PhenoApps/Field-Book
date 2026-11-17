@@ -71,25 +71,25 @@ open class UsbCameraTraitSettingsView: ConstraintLayout {
 
         lastAutoFocus?.let { flag ->
 
-            prefs.edit().putBoolean(GeneralKeys.USB_CAMERA_AUTO_FOCUS, flag).apply()
+            prefs.edit().putBoolean(GeneralKeys.USB_CAMERA_AUTO_FOCUS, flag).commit()
 
         }
 
         lastWhiteBalance?.let { flag ->
 
-            prefs.edit().putBoolean(GeneralKeys.USB_CAMERA_AUTO_WHITE_BALANCE, flag).apply()
+            prefs.edit().putBoolean(GeneralKeys.USB_CAMERA_AUTO_WHITE_BALANCE, flag).commit()
 
         }
 
         lastPreview?.let { flag ->
 
-            prefs.edit().putBoolean(GeneralKeys.USB_CAMERA_PREVIEW, flag).apply()
+            prefs.edit().putBoolean(GeneralKeys.USB_CAMERA_PREVIEW, flag).commit()
 
         }
 
         lastResolutionIndex?.let { index ->
 
-            prefs.edit().putInt(GeneralKeys.USB_CAMERA_RESOLUTION_INDEX, index).apply()
+            prefs.edit().putInt(GeneralKeys.USB_CAMERA_RESOLUTION_INDEX, index).commit()
 
         }
     }

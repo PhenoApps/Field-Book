@@ -14,6 +14,7 @@
     <string name="dialog_import">প্রবেশ করানো</string>
     <string name="dialog_warning">সতর্কতা</string>
     <string name="dialog_save">সঞ্চিত করা</string>
+    <!-- Toolbar -->
     <!-- Startup  -->
     <string name="startup_sample_data_title">নমুনা উপাত্ত</string>
     <string name="startup_sample_data_message">সরবরাহকৃত নমুনা উপাত্ত কি লোড করতে চান ?</string>
@@ -97,10 +98,15 @@
     <string name="traits_create_true">সঠিক</string>
     <string name="traits_create_false">মিথ্যা</string>
     <string name="traits_create_categories_text">শ্রেনিসমুহকে আলাদা কারুন</string>
+    <string name="traits_attach_media_photo_label">ছবি</string>
+    <string name="traits_attach_media_audio_label">শ্রবণ সংক্রান্ত</string>
     <string name="traits_create_warning_name_blank">বৈশিষ্ট্যের নাম ফাকা থাকতে পারে না</string>
     <string name="traits_create_warning_duplicate">বৈশিষ্ট্যটি আগে থেকেই উপাস্থিত</string>
     <string name="traits_create_warning_numeric_required">নির্দিষ্টতা, সর্বনিম্ন, এবং সরবুচ্চ এগুলো অবশ্যই নম্বর হতে হবে</string>
+    <!-- Decimal Places Radio Options -->
     <string name="edit_traits">সংস্করণ</string>
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">অনুমোদিত নিম্নমানের চেয়ে ছোট মান</string>
@@ -136,6 +142,7 @@
     <string name="activity_collect_dialog_verify_no_button">না</string>
     <string name="activity_collect_dialog_verify_yes_button">হ্যাঁ</string>
     <!--- Datagrid -->
+    <string name="dialog_data_grid_header_picker_ok">ঠিক আছে</string>
     <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">এই চরিত্রের জন্য আপনার যন্ত্র প্রয়োজনীয় হার্ডওয়্যার ধারণ করে না</string>
@@ -152,6 +159,7 @@
     <!--- Text to Speech Strings -->
     <!--- Summary -->
     <!--- Repeated measures -->
+    <!--- Save failure -->
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
@@ -216,12 +224,17 @@
     <!-- BrAPI preferences -->
     <string name="brapi_choice_to_make_default_negative">বাতিল</string>
     <string name="brapi_choice_to_make_default_positive">সঞ্চিত করা</string>
-    <!-- Community Servers -->
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_field_book">মাঠ বহি</string>
     <!-- Authorization -->
+    <!-- Multi-account management -->
+    <string name="brapi_chip_edit">সংস্করণ</string>
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->
     <string name="brapi_export_button">দিয়ে দেয়া</string>
     <string name="brapi_close_button">বন্ধ</string>
+    <string name="brapi_export_complete">পাঠানো সম্পন্ন</string>
+    <string name="cancel">বাতিল</string>
     <!-- Pagination -->
     <!-- General -->
     <!-- APP INTRO  -->
@@ -242,15 +255,23 @@
     <string name="act_brapi_filter_import">প্রবেশ করানো</string>
     <string name="act_brapi_filter_clear">পরিষ্কার করুন</string>
     <!-- base camera strings -->
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="view_trait_photo_settings_camera_custom">নির্দিষ্ট</string>
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
     <!-- spectral trait strings -->
+    <!-- inno spectra -->
+    <!-- stages reported while the inno spectra device is connecting -->
     <string name="brapi_traits_filter_title">বৈশিষ্ট্য</string>
     <string name="dialog_quick_goto_title">দ্রুত গমন করুন</string>
     <string name="traits_sort_default">নির্দিষ্ট</string>
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">সঞ্চিত করা</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
+    <string name="edit">সংস্করণ</string>
+    <!-- InnoSpectra settings layout -->
 </resources>

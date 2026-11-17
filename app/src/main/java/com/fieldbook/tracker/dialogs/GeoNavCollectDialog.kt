@@ -51,7 +51,7 @@ class GeoNavCollectDialog(private val activity: CollectActivity) :
                 return AttributeModel(geoNavPopupAttribute)
             } else {
                 val trait = activity.getDatabase().getTraitById(geoNavPopupTrait)
-                return AttributeModel(trait.name, trait = trait)
+                return AttributeModel(trait.alias, trait = trait)
             }
         }
         set(value) {

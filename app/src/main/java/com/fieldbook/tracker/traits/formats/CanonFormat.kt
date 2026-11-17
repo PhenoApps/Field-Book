@@ -7,5 +7,4 @@ class CanonFormat : BasePhotoFormat(
     nameStringResourceId = R.string.traits_format_canon,
     databaseName = "canon",
     iconDrawableResourceId = R.drawable.camera_24px,
-    stringNameAux = { ctx -> "${ctx.getString(R.string.traits_format_canon)} (Beta)" }
 )

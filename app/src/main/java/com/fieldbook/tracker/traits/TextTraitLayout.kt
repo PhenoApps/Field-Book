@@ -14,6 +14,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.preferences.models.ReturnCharacterMode
 import com.fieldbook.tracker.views.TraitBoxView
 import org.phenoapps.utils.SoftKeyboardUtil.Companion.closeKeyboard
 import org.phenoapps.utils.SoftKeyboardUtil.Companion.showKeyboard
@@ -148,13 +149,14 @@ class TextTraitLayout : BaseTraitLayout {
 
                     //check system setting to navigate to next plot/trait
                     val actionOnScanLineFeed =
-                        prefs.getString(PreferenceKeys.RETURN_CHARACTER, "0") ?: "0"
+                        prefs.getString(PreferenceKeys.RETURN_CHARACTER, ReturnCharacterMode.Default.mode)
+                            ?: ReturnCharacterMode.Default.mode
 
-                    if (actionOnScanLineFeed == "1") {
+                    if (actionOnScanLineFeed == ReturnCharacterMode.NextPlot.mode) {
                         controller.getRangeBox().moveEntryRight()
                     }
 
-                    if (actionOnScanLineFeed == "2") {
+                    if (actionOnScanLineFeed == ReturnCharacterMode.NextTrait.mode) {
                         controller.getTraitBox().moveTrait(TraitBoxView.MoveDirection.RIGHT)
                     }
 
@@ -227,13 +229,16 @@ class TextTraitLayout : BaseTraitLayout {
     }
 
     override fun refreshLayout(onNew: Boolean) {
-        super.refreshLayout(false)
+        super.refreshLayout(false) // updates isLocked for frozen+repeated measure state
         inputEditText?.removeTextChangedListener(textWatcher)
         inputEditText?.text?.clear()
         if (currentObservation != null) {
             inputEditText?.setText(currentObservation.value)
             inputEditText?.setSelection(currentObservation.value.length)
         }
+        // Re-apply lock state to the edit text after per-rep isLocked update
+        inputEditText?.isEnabled = !isLocked
+        inputEditText?.inputType = if (isLocked) EditorInfo.TYPE_NULL else EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS
         selectEditText()
     }
 

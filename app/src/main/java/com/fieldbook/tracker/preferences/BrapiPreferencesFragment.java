@@ -2,6 +2,8 @@ package com.fieldbook.tracker.preferences;
 
 import static android.app.Activity.RESULT_OK;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -9,72 +11,69 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.StyleSpan;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
 import android.view.WindowMetrics;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
-import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.preference.CheckBoxPreference;
-import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceManager;
-import androidx.preference.PreferenceScreen;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
-import com.fieldbook.tracker.activities.ScannerActivity;
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
-import com.fieldbook.tracker.objects.BrAPIConfig;
-import com.fieldbook.tracker.utilities.JsonUtil;
+import com.fieldbook.tracker.brapi.BrapiAuthenticator;
+import com.fieldbook.tracker.brapi.dialogs.BrapiManualAccountDialogFragment;
+import com.fieldbook.tracker.brapi.dialogs.BrapiStepperAccountDialogFragment;
+import com.fieldbook.tracker.preferences.enums.TransferSource;
+import com.fieldbook.tracker.utilities.BrapiAccountHelper;
 import com.fieldbook.tracker.utilities.OpenAuthConfigurationUtil;
+import com.fieldbook.tracker.utilities.Utils;
 import com.google.gson.Gson;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.EndSessionRequest;
 
-import org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog;
-import org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialogFragmentCompat;
+import org.jetbrains.annotations.NotNull;
+import org.phenoapps.brapi.BrapiAccountConstants;
+import org.phenoapps.brapi.account.BrapiMigrationResult;
+import org.phenoapps.brapi.config.BrapiAccountInfo;
+import org.phenoapps.brapi.ui.BrapiAccountConfig;
 
-import java.util.Arrays;
 import java.util.List;
-import java.net.URL;
-import java.net.MalformedURLException;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import kotlin.Unit;
 
 /**
- * This preference fragment handles all BrAPI related shared preferences.
- * <p>
- * If using oidc flow, changing the base url will change the oidc url to match. If the user
- * explicitly changes the oidc url, then the automatic change will not occur anymore.
- * <p>
- * This will call the BrAPI Authentication activity to handle authentication s.a OIDC or basic.
- * Auth token is saved in the preferences, or set to null when logging out.
+ * Multi-account BrAPI preferences screen.
+ * Accounts are stored in Android AccountManager with type "org.phenoapps.brapi".
+ * The active account URL is persisted in BRAPI_BASE_URL SharedPreference.
  */
 @AndroidEntryPoint
-public class BrapiPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
+public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
+
+    @Inject
+    BrapiAccountHelper accountHelper;
 
     @Inject
     SharedPreferences preferences;
@@ -83,288 +82,661 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     OpenAuthConfigurationUtil authUtil;
 
     private static final String TAG = BrapiPreferencesFragment.class.getSimpleName();
-    private static final int REQUEST_BARCODE_SCAN_BASE_URL = 99;
-    private static final int REQUEST_BARCODE_SCAN_OIDC_URL = 98;
-    private static final int REQUEST_BARCODE_SCAN_BRAPI_CONFIG = 97;
     private static final int AUTH_REQUEST_CODE = 123;
-    private static final String DIALOG_FRAGMENT_TAG = "com.tracker.fieldbook.preferences.BRAPI_DIALOG_FRAGMENT";
+    private static final int CHOOSE_ACCOUNT_REQUEST_CODE = 124;
+
+    // The logout flow spans a trip to the browser, so its pending state has to survive the
+    // fragment being recreated while that browser is in front (rotation, low memory).
+    private static final String STATE_PENDING_AUTH_ACCOUNT = "pending_auth_account";
+    private static final String STATE_PENDING_REMOVE_AFTER_LOGOUT = "pending_remove_after_logout";
 
     private Context context;
-    private PreferenceCategory brapiServerPrefCategory;
-    private Preference brapiLogoutButton;
-    private Menu mMenu;
-    private NeutralButtonEditTextDialog brapiURLPreference;
-    private NeutralButtonEditTextDialog brapiDisplayName;
-    private NeutralButtonEditTextDialog brapiOIDCURLPreference;
-    private NeutralButtonEditTextDialog brapiClientIdPreference;
+    private PreferenceCategory activeServerCategory;
+    private PreferenceCategory availableServersCategory;
+    private PreferenceCategory sharedAccountsCategory;
 
-    private ListPreference brapiOIDCFlow;
+    // Tracks which account triggered the auth flow for re-auth
+    private Account pendingAuthAccount = null;
 
-    //old base url must be in memory now, since NeutralEditText preference updates preferences
-    private String oldBaseUrl = "";
+    // Tracks whether to remove the account after logout completes
+    private boolean pendingRemoveAfterLogout = false;
 
-    //alert dialog displays messages when oidc or brapi urls have http
-    private AlertDialog mBrapiHttpWarningDialog = null;
-    private boolean mlkitEnabled;
+    // Tracks the shared account awaiting explicit user selection in AccountManager.
+    private Account pendingChooseAccount = null;
+
+    // Set when the pre-AccountManager config could not be migrated yet, so the retry in onResume
+    // knows to run and the user is told once why their servers are missing.
+    private boolean migrationDeferred = false;
+    private boolean migrationNoticeShown = false;
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        // Occurs before onCreate function. We get the context this way.
-        BrapiPreferencesFragment.this.context = context;
+        this.context = context;
+    }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(STATE_PENDING_AUTH_ACCOUNT, pendingAuthAccount);
+        outState.putBoolean(STATE_PENDING_REMOVE_AFTER_LOGOUT, pendingRemoveAfterLogout);
     }
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-
-        mBrapiHttpWarningDialog = new AlertDialog.Builder(context, R.style.AppAlertDialog)
-                .setTitle(R.string.act_brapi_auth_http_warning_title)
-                .setMessage(R.string.act_brapi_auth_http_warning_message)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    startAuth();
-                    dialog.dismiss();
-                }).create();
-
-        //remove old custom fb auth if it is being used
-        if (preferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
-                .equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
-
-            preferences.edit().putString(PreferenceKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)).apply();
-
-        }
-
         setPreferencesFromResource(R.xml.preferences_brapi, rootKey);
 
-        // Show/hide preferences and category titles based on the BRAPI_ENABLED value
+        if (savedInstanceState != null) {
+            pendingAuthAccount = savedInstanceState.getParcelable(STATE_PENDING_AUTH_ACCOUNT);
+            pendingRemoveAfterLogout = savedInstanceState.getBoolean(STATE_PENDING_REMOVE_AFTER_LOGOUT, false);
+        }
+
         CheckBoxPreference brapiEnabledPref = findPreference(PreferenceKeys.BRAPI_ENABLED);
         if (brapiEnabledPref != null) {
-            brapiEnabledPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    boolean isChecked = (Boolean) newValue;
-                    if (!isChecked) { // on disable, reset default sources if they were set to brapi
-                        if (preferences.getString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, "").equals("brapi")) {
-                            preferences.edit().putString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, "ask").apply();
-                        }
-                        if (preferences.getString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "").equals("brapi")) {
-                            preferences.edit().putString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "ask").apply();
-                        }
-                        // remove brapi auth token when brapi is disabled
-                        preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
+            brapiEnabledPref.setOnPreferenceChangeListener((pref, newValue) -> {
+                boolean isChecked = (Boolean) newValue;
+                if (!isChecked) { // on disable, reset default sources if they were set to brapi
+                    if (TransferSource.BRAPI.INSTANCE.getValue().equals(preferences.getString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, ""))) {
+                        preferences.edit().putString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, TransferSource.ASK.INSTANCE.getValue()).apply();
                     }
-                    updatePreferencesVisibility(isChecked);
-                    return true;
-                }
-            });
-            updatePreferencesVisibility(brapiEnabledPref.isChecked());
-        }
-
-        setupToolbar();
-        setHasOptionsMenu(true);
-
-        brapiServerPrefCategory = findPreference("brapi_server");
-        brapiLogoutButton = findPreference("revokeBrapiAuth");
-
-        brapiClientIdPreference = findPreference(PreferenceKeys.BRAPI_OIDC_CLIENT_ID);
-        brapiURLPreference = findPreference(PreferenceKeys.BRAPI_BASE_URL);
-        brapiDisplayName = findPreference(PreferenceKeys.BRAPI_DISPLAY_NAME);
-        if (brapiURLPreference != null) {
-            brapiURLPreference.setOnPreferenceChangeListener(this);
-        }
-        if (brapiDisplayName != null) {
-            brapiDisplayName.setOnPreferenceChangeListener(this);
-        }
-
-        brapiOIDCURLPreference = findPreference(PreferenceKeys.BRAPI_OIDC_URL);
-        brapiOIDCFlow = findPreference(PreferenceKeys.BRAPI_OIDC_FLOW);
-        if (brapiOIDCFlow != null) {
-            brapiOIDCFlow.setOnPreferenceChangeListener(this);
-        }
-
-        //set saved urls, default to the test server
-        String url = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default));
-        String displayName = preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, getString(R.string.brapi_edit_display_name_default));
-        String oidcUrl = preferences.getString(PreferenceKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default));
-        oldBaseUrl = url;
-        brapiURLPreference.setText(url);
-        brapiDisplayName.setText(displayName);
-        brapiOIDCURLPreference.setText(oidcUrl);
-
-        //set logout button
-        if (brapiLogoutButton != null) {
-            brapiLogoutButton.setOnPreferenceClickListener(preference -> {
-
-                String idToken = preferences.getString(PreferenceKeys.BRAPI_ID_TOKEN, null);
-
-                if (idToken != null) {
-
-                    Toast.makeText(context, R.string.logging_out_please_wait, Toast.LENGTH_SHORT).show();
-
-                    authUtil.getAuthServiceConfiguration((config, ex) -> {
-
-                        EndSessionRequest endSessionRequest =
-                                new EndSessionRequest.Builder(config)
-                                        .setIdTokenHint(idToken)
-                                        .setPostLogoutRedirectUri(Uri.parse(BrapiAuthActivity.REDIRECT_URI))
-                                        .build();
-
-                        AuthorizationService authService = new AuthorizationService(context);
-                        Intent endSessionIntent = authService.getEndSessionRequestIntent(endSessionRequest);
-                        startActivityForResult(endSessionIntent, BrapiAuthActivity.END_SESSION_REQUEST_CODE);
-
-                        return null;
-
-                    });
-
-                } else {
-
+                    if (TransferSource.BRAPI.INSTANCE.getValue().equals(preferences.getString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, ""))) {
+                        preferences.edit().putString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, TransferSource.ASK.INSTANCE.getValue()).apply();
+                    }
+                    // remove brapi auth token when brapi is disabled
                     preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
-
-                    setButtonView();
-
                 }
-
-
+                updateServerSectionsVisibility(isChecked);
                 return true;
             });
         }
 
-        //set barcode click listener to start zxing intent
-        mlkitEnabled = PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(PreferenceKeys.MLKIT_PREFERENCE_KEY, false);
-        Preference brapiServerBarcode = findPreference("brapi_server_barcode");
-        if (brapiServerBarcode != null) {
-            brapiServerBarcode.setOnPreferenceClickListener(preference -> {
-                startBarcodeScan(IntentIntegrator.REQUEST_CODE);
+        Preference addAccountPref = findPreference("brapi_add_account");
+        if (addAccountPref != null) {
+            addAccountPref.setOnPreferenceClickListener(pref -> {
+                showAddAccountDialog();
                 return true;
             });
         }
-      
-        //set barcode click listener to start zxing intent
-        Preference brapiConfigBarcode = findPreference("brapi_config_barcode");
-        if (brapiConfigBarcode != null) {
-            brapiConfigBarcode.setOnPreferenceClickListener(preference -> {
-                String title = getString(R.string.qr_code_share_choose_action_title);
-                new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
-                        .setTitle(title)
-                        .setItems(new String[]{getString(R.string.preferences_brapi_barcode_config_scan), getString(R.string.preferences_brapi_barcode_config_share)}, (dialog, which) -> {
-                            switch (which) {
-                                case 0: // Scan QR Code to import settings
-                                    startBarcodeScan(REQUEST_BARCODE_SCAN_BRAPI_CONFIG);
-                                    break;
-                                case 1: // Generate QR Code for sharing settings
-                                    if (getActivity() != null) {
-                                        generateQRCodeFromPreferences(getActivity());
-                                    }
-                                    break;
-                            }
-                        })
-                        .show();
+
+        Preference sharedServersPref = findPreference("brapi_shared_servers");
+        if (sharedServersPref != null) {
+            sharedServersPref.setOnPreferenceClickListener(pref -> {
+                showSharedServersChooser();
                 return true;
             });
         }
-        setOidcFlowUi();
+
+        runPrefMigration();
+
+        activeServerCategory = findPreference("brapi_active_server_category");
+        availableServersCategory = findPreference("brapi_available_servers_category");
+        sharedAccountsCategory = findPreference("brapi_shared_accounts_category");
+
+        // Refresh cards when an account edit is saved from BrapiManualAccountDialogFragment
+        getParentFragmentManager().setFragmentResultListener(
+                BrapiManualAccountDialogFragment.REQUEST_KEY_EDIT_SAVED,
+                this,
+                (key, result) -> refreshServerCards()
+        );
+
+        // Set initial visibility before the view is shown to avoid a flash of hidden preferences
+        boolean brapiEnabled = preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false);
+        updateServerSectionsVisibility(brapiEnabled);
     }
 
-    private void barcodeAutoConfigure() {
-        String title = getString(R.string.qr_code_share_choose_action_title);
-        new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
-            .setTitle(title)
-            .setItems(new String[]{getString(R.string.preferences_brapi_barcode_config_scan), getString(R.string.preferences_brapi_barcode_config_share)}, (dialog, which) -> {
-                switch (which) {
-                    case 0: // Scan QR Code to import settings
-                        startBarcodeScan(REQUEST_BARCODE_SCAN_BRAPI_CONFIG);
-                        break;
-                    case 1: // Generate QR Code for sharing settings
-                        if (getActivity() != null) {
-                            generateQRCodeFromPreferences(getActivity());
-                        }
-                        break;
-                }
-            })
-            .show();
+    @Override
+    public void onResume() {
+        super.onResume();
+        setupToolbar();
+        if (migrationDeferred && !migrationNoticeShown) {
+            runPrefMigration();
+        }
+        accountHelper.refreshOwnedAccountVisibility();
+        accountHelper.pruneStaleGrants();
+        boolean brapiEnabled = preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false);
+        updateServerSectionsVisibility(brapiEnabled);
     }
 
-    private void updatePreferencesVisibility(boolean isChecked) {
-        PreferenceScreen preferenceScreen = getPreferenceScreen();
-        for (int i = 0; i < preferenceScreen.getPreferenceCount(); i++) {
-            Preference preferenceItem = preferenceScreen.getPreference(i);
-            if (preferenceItem.getKey().equals(PreferenceKeys.BRAPI_ENABLED)) { // Skip the checkbox preference itself
+    /**
+     * Moves a pre-7.3 BrAPI server config into AccountManager.
+     * <p>
+     * Either way the old preferences stay put, but the two failures need different answers. A
+     * deferred write is the brief post-update window before the platform attributes the BrAPI
+     * account type to Field Book, and retrying clears it. A blocked one means another installed
+     * app is registered as the authenticator for that type — Android permits only one — and no
+     * amount of retrying will ever get past it, so it is worth interrupting the user for.
+     */
+    private void runPrefMigration() {
+        migrationDeferred = accountHelper.migrateFromPrefsIfNeeded() == BrapiMigrationResult.DEFERRED;
+
+        if (migrationDeferred && !migrationNoticeShown) {
+            migrationNoticeShown = true;
+            Toast.makeText(context, R.string.brapi_account_migration_deferred, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // ─── Account cards ──────────────────────────────────────────────────────────
+
+    private void refreshServerCards() {
+        if (activeServerCategory == null || availableServersCategory == null) return;
+
+        activeServerCategory.removeAll();
+        availableServersCategory.removeAll();
+        if (sharedAccountsCategory != null) sharedAccountsCategory.removeAll();
+
+        String activeUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
+
+        List<Account> allAccounts = accountHelper.getAllAccounts();
+        boolean hasActive = false;
+
+        for (Account account : allAccounts) {
+            BrapiAccountInfo info = accountHelper.accountInfoOrEmpty(account);
+            boolean isOwnAccount = accountHelper.isOwnAccount(account);
+            boolean isActive = activeUrl.equals(info.getServerUrl());
+
+            if (!isOwnAccount) {
+                BrapiServerCardPreference card = buildSharedCard(account, info, isActive);
+                if (isActive) {
+                    activeServerCategory.addPreference(card);
+                    hasActive = true;
+                } else if (sharedAccountsCategory != null) {
+                    sharedAccountsCategory.addPreference(card);
+                }
                 continue;
             }
-            preferenceItem.setVisible(isChecked);
+
+            BrapiServerCardPreference card = buildCard(account, info, isActive);
+
+            if (isActive) {
+                activeServerCategory.addPreference(card);
+                hasActive = true;
+            } else {
+                availableServersCategory.addPreference(card);
+            }
         }
 
-        // Also show/hide the BrAPI toolbar authentication option
-        if (mMenu != null) {
-            MenuItem brapiAutoConfigureItem = mMenu.findItem(R.id.action_menu_brapi_auto_configure);
-            if (brapiAutoConfigureItem != null) {
-                brapiAutoConfigureItem.setVisible(isChecked);
-            }
-            MenuItem brapiPrefAuthItem = mMenu.findItem(R.id.action_menu_brapi_pref_auth);
-            if (brapiPrefAuthItem != null) {
-                brapiPrefAuthItem.setVisible(isChecked);
-            }
+        // Hide empty categories
+        if (activeServerCategory != null) {
+            activeServerCategory.setVisible(hasActive);
+        }
+        if (availableServersCategory != null) {
+            availableServersCategory.setVisible(availableServersCategory.getPreferenceCount() > 0);
+        }
+        if (sharedAccountsCategory != null) {
+            sharedAccountsCategory.setVisible(sharedAccountsCategory.getPreferenceCount() > 0);
         }
     }
 
-    private void startBarcodeScan(int requestCode) {
-        if (mlkitEnabled) {
-            if (getActivity() != null) {
-                ScannerActivity.Companion.requestCameraAndStartScanner(getActivity(), requestCode, null, null, null);
-            }
+    private BrapiServerCardPreference buildSharedCard(Account account, BrapiAccountInfo info, boolean isActive) {
+        String ownerName = BrapiAccountConstants.INSTANCE.displayNameForPackage(info.getOwnerPackage());
+        String ownerLabel = ownerName.isEmpty()
+                ? ""
+                : getString(org.phenoapps.brapi.R.string.pheno_brapi_shared_account_from, ownerName);
+
+        BrapiServerCardPreference card = new BrapiServerCardPreference(context);
+        card.setAccount(account);
+        card.setActive(isActive);
+        card.setExpanded(isActive);
+        card.setKey("shared_" + account.name + "_" + (isActive ? "active" : "available"));
+        card.setOrder(0);
+        card.setOwnerLabel(ownerLabel);
+        card.setDisplayName(info.getLabel());
+        card.setServerUrl(info.getServerUrl());
+        // A shared account's token lives in the owning app, out of reach of peekAuthToken, so its
+        // sign-in state comes from what that app published about it.
+        card.setHasToken(info.getHasToken());
+        configureCardActions(card, false);
+        return card;
+    }
+
+    private BrapiServerCardPreference buildCard(Account account, BrapiAccountInfo info, boolean isActive) {
+        BrapiServerCardPreference card = new BrapiServerCardPreference(context);
+        card.setAccount(account);
+        card.setActive(isActive);
+        card.setExpanded(isActive); // active card starts expanded; inactive cards start collapsed
+        card.setKey(account.name + "_" + (isActive ? "active" : "available"));
+        card.setOrder(0);
+        card.setDisplayName(info.getLabel());
+        card.setServerUrl(info.getServerUrl());
+        card.setHasToken(accountHelper.peekTokenForAccount(account) != null);
+
+        configureCardActions(card, true);
+
+        return card;
+    }
+
+    /**
+     * Wires the card's actions, limiting a shared account to the ones Field Book may actually
+     * perform on an account another app owns.
+     * <p>
+     * Signing in, editing and removing are the owner's to do. Authorizing here would run Field
+     * Book's own OAuth and store the result against a new Field Book account, leaving the same
+     * server listed twice in the system account settings; its token is borrowed from the owner
+     * instead. Logging out stays available, since that only drops the borrowed token locally.
+     */
+    private void configureCardActions(BrapiServerCardPreference card, boolean isOwnAccount) {
+        card.setOnLogOut(this::logOutAccount);
+        card.setOnEnable(this::enableAccount);
+        card.setOnCheckCompatibility(this::checkServerCompatibility);
+        card.setOnShareSettings(this::shareAccountSettings);
+        card.setOnSwitchServer(this::showSwitchServerDialog);
+
+        card.setOnAuthorize(isOwnAccount ? this::authorizeAccount : null);
+        card.setOnEdit(isOwnAccount ? this::editAccount : null);
+        card.setOnRemove(isOwnAccount ? this::removeAccount : null);
+    }
+
+    // ─── Account actions ────────────────────────────────────────────────────────
+
+    private @NotNull Unit showSwitchServerDialog(Account account) {
+        new AlertDialog.Builder(context, R.style.AppAlertDialog)
+                .setTitle(R.string.brapi_switch_server_title)
+                .setMessage(R.string.brapi_switch_server_unauthenticated_message)
+                .setPositiveButton(R.string.dialog_yes, (d, w) -> authorizeAccount(account))
+                .setNegativeButton(R.string.dialog_no, (d, w) -> enableAccount(account))
+                .show();
+        return Unit.INSTANCE;
+    }
+
+    private @NotNull Unit logOutAccount(Account account) {
+        final String finalDisplayName = accountHelper.accountInfoOrEmpty(account).getLabel();
+
+        String messageTemplate = getString(R.string.brapi_logout_manage_message, finalDisplayName);
+        SpannableString styledMessage = new SpannableString(messageTemplate);
+        int nameStart = messageTemplate.indexOf(finalDisplayName);
+        if (nameStart >= 0) {
+            styledMessage.setSpan(new StyleSpan(Typeface.BOLD),
+                    nameStart, nameStart + finalDisplayName.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog)
+                .setTitle(R.string.brapi_logout_manage_title)
+                .setMessage(styledMessage)
+                .setNeutralButton(R.string.brapi_logout_only, (d, w) -> {
+                    pendingRemoveAfterLogout = false;
+                    doLogout(account);
+                })
+                .setNegativeButton(android.R.string.cancel, null);
+
+        // Removal is the owner's to do. Offering it for a shared account promises something
+        // removeAccount() cannot deliver — it only touches accounts this app owns — so the entry
+        // would appear to do nothing.
+        if (accountHelper.isOwnAccount(account)) {
+            builder.setPositiveButton(R.string.brapi_logout_and_remove, (d, w) -> {
+                pendingRemoveAfterLogout = true;
+                doLogout(account);
+            });
+        }
+
+        builder.show();
+        return Unit.INSTANCE;
+    }
+
+    private void doLogout(Account account) {
+        BrapiAccountInfo info = accountHelper.accountInfoOrEmpty(account);
+        // Only the owning app holds an id token, so a shared account has no OIDC session for
+        // Field Book to end — signing out locally is all there is to do.
+        String idToken = accountHelper.peekIdTokenForAccount(account);
+
+        if (idToken != null) {
+            Toast.makeText(context, R.string.logging_out_please_wait, Toast.LENGTH_SHORT).show();
+            pendingAuthAccount = account;
+            String accountOidcUrl = info.getOidcUrl();
+            // Resolved up front: getAuthServiceConfiguration() calls back asynchronously, by which
+            // point the fragment may be detached and getString() would throw.
+            final Uri postLogoutRedirect = Uri.parse(getString(R.string.brapi_redirect_uri));
+            authUtil.getAuthServiceConfiguration((config, ex) -> {
+                EndSessionRequest endSessionRequest =
+                        new EndSessionRequest.Builder(config)
+                                .setIdTokenHint(idToken)
+                                .setPostLogoutRedirectUri(postLogoutRedirect)
+                                .build();
+                AuthorizationService authService = new AuthorizationService(context);
+                Intent endSessionIntent = authService.getEndSessionRequestIntent(endSessionRequest);
+                startActivityForResult(endSessionIntent, BrapiAuthActivity.END_SESSION_REQUEST_CODE);
+                return null;
+            }, accountOidcUrl);
         } else {
-            new IntentIntegrator(getActivity())
-                    .setPrompt(getString(R.string.barcode_scanner_text))
-                    .setBeepEnabled(true)
-                    .setRequestCode(requestCode)
-                    .initiateScan();
+            String serverUrl = info.getServerUrl();
+            accountHelper.clearToken(serverUrl);
+
+            String activeUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
+            if (!serverUrl.isEmpty() && serverUrl.equals(activeUrl)) {
+                preferences.edit().putString(PreferenceKeys.BRAPI_BASE_URL, "").apply();
+                BrapiFilterCache.Companion.delete(context, true);
+            }
+            if (pendingRemoveAfterLogout) {
+                pendingRemoveAfterLogout = false;
+                if (!serverUrl.isEmpty()) {
+                    accountHelper.removeAccount(serverUrl);
+                }
+            }
+            refreshServerCards();
         }
     }
 
-    private void generateQRCodeFromPreferences(Activity act) {
+    private @NotNull Unit enableAccount(Account account) {
+        if (!accountHelper.canUseToken(account)) {
+            pendingChooseAccount = account;
+            startActivityForResult(accountHelper.buildChooseAccountIntent(account), CHOOSE_ACCOUNT_REQUEST_CODE);
+            return Unit.INSTANCE;
+        }
+
+        activateAccount(account);
+        return Unit.INSTANCE;
+    }
+
+    private void activateAccount(Account account) {
+        makeAccountActive(account);
+
+        if (!accountHelper.isOwnAccount(account)) {
+            // Selecting a shared server is not enough to use it: its token belongs to the app that
+            // owns the account, so fetch it now and mirror it locally. Without this the server
+            // looks signed out no matter how many times it is selected.
+            if (isAdded()) {
+                accountHelper.borrowToken(account, getActivity(), token -> {
+                    if (token == null) {
+                        Toast.makeText(context, R.string.brapi_shared_account_not_signed_in,
+                                Toast.LENGTH_LONG).show();
+                    }
+                    refreshServerCards();
+                    return Unit.INSTANCE;
+                });
+            }
+            return;
+        }
+
+        refreshServerCards();
+    }
+
+    /**
+     * Makes {@code account} the active one, updating the legacy SharedPreference mirrors that
+     * BrAPIService and the re-authorization flow still read, and dropping cached field/trait data
+     * when this is a switch to a different server.
+     *
+     * @return the account's server URL
+     */
+    private String makeAccountActive(Account account) {
+        String serverUrl = accountHelper.serverUrlOf(account);
+        if (accountHelper.setActiveAccount(serverUrl)) {
+            BrapiFilterCache.Companion.delete(context, true);
+        }
+        return serverUrl;
+    }
+
+    private @NotNull Unit authorizeAccount(Account account) {
+        BrapiAccountInfo info = accountHelper.accountInfoOrEmpty(account);
+        // Make this account active so BrapiAuthActivity picks up its config
+        String serverUrl = makeAccountActive(account);
+        pendingAuthAccount = account;
+        Intent authIntent = new Intent(context, BrapiAuthActivity.class);
+        authIntent.putExtra(BrapiAuthActivity.EXTRA_SERVER_URL, serverUrl);
+        authIntent.putExtra(BrapiAuthActivity.EXTRA_OIDC_URL, info.getOidcUrl());
+        authIntent.putExtra(BrapiAuthActivity.EXTRA_OIDC_FLOW, info.getOidcFlow());
+        authIntent.putExtra(BrapiAuthActivity.EXTRA_OIDC_CLIENT_ID, info.getOidcClientId());
+        authIntent.putExtra(BrapiAuthActivity.EXTRA_OIDC_SCOPE, info.getOidcScope());
+        startActivityForResult(authIntent, AUTH_REQUEST_CODE);
+        return Unit.INSTANCE;
+    }
+
+    private @NotNull Unit checkServerCompatibility(Account account) {
+        String serverUrl = accountHelper.serverUrlOf(account);
+
+        FragmentActivity act = getActivity();
+        if (act != null) {
+            if (Utils.isConnected(act)) {
+                act.getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.prefs_container, BrapiServerInfoFragment.Companion.newInstance(serverUrl))
+                        .addToBackStack(null)
+                        .commit();
+            } else {
+                Toast.makeText(act, R.string.device_offline_warning, Toast.LENGTH_SHORT).show();
+            }
+        }
+        return Unit.INSTANCE;
+    }
+
+    private @NotNull Unit shareAccountSettings(Account account) {
+        Activity act = getActivity();
+        if (act == null) return Unit.INSTANCE;
+
         try {
-            BrAPIConfig config = new BrAPIConfig();
-            config.setUrl(preferences.getString(PreferenceKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default)));
-            config.setName(preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, getString(R.string.brapi_edit_display_name_default)));
-            config.setVersion(preferences.getString(PreferenceKeys.BRAPI_VERSION, "V2"));
-            config.setPageSize(preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
-            config.setChunkSize(preferences.getString(PreferenceKeys.BRAPI_CHUNK_SIZE, "500"));
-            config.setServerTimeoutMilli(preferences.getString(PreferenceKeys.BRAPI_TIMEOUT, "120"));
-            config.setAuthFlow(preferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)));
-            config.setOidcUrl(preferences.getString(PreferenceKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default)));
-            config.setCatDisplay(preferences.getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "value"));
-            config.setClientId(preferences.getString(PreferenceKeys.BRAPI_OIDC_CLIENT_ID, getString(R.string.brapi_oidc_clientid_default)));
-            config.setScope(preferences.getString(PreferenceKeys.BRAPI_OIDC_SCOPE, getString(R.string.brapi_oidc_scope_default)));
+            BrapiAccountInfo info = accountHelper.accountInfoOrEmpty(account);
+            BrapiAccountConfig config = new BrapiAccountConfig(
+                    info.getServerUrl(),
+                    info.getDisplayName(),
+                    info.getBrapiVersion(),
+                    // Published as the portable "code"/"implicit" spelling so that installs which
+                    // predate the stable flow identifiers still read this config correctly.
+                    BrapiAccountConstants.INSTANCE.toSharedConfigOidcFlow(info.getOidcFlow()),
+                    info.getOidcUrl(),
+                    info.getOidcClientId(),
+                    info.getOidcScope()
+            );
 
-            Gson gson = new Gson();
-            String jsonConfig = gson.toJson(config);
+            String jsonConfig = new Gson().toJson(config);
+            generateQRCode(act, jsonConfig);
+        } catch (Exception e) {
+            Toast.makeText(context, R.string.preferences_brapi_server_scan_error, Toast.LENGTH_SHORT).show();
+        }
+        return Unit.INSTANCE;
+    }
 
+    private @NotNull Unit editAccount(Account account) {
+        BrapiAccountInfo info = accountHelper.accountInfoOrEmpty(account);
+        BrapiAccountConfig config = new BrapiAccountConfig(
+                info.getServerUrl(),
+                info.getDisplayName(),
+                info.getBrapiVersion(),
+                info.getOidcFlow(),
+                info.getOidcUrl(),
+                info.getOidcClientId(),
+                info.getOidcScope()
+        );
+
+        BrapiManualAccountDialogFragment frag = BrapiManualAccountDialogFragment.Companion.newInstance(
+                null, false, config, true
+        );
+        frag.show(getParentFragmentManager(), BrapiManualAccountDialogFragment.TAG);
+        return Unit.INSTANCE;
+    }
+
+    private @NotNull Unit removeAccount(Account account) {
+        BrapiAccountInfo info = accountHelper.accountInfoOrEmpty(account);
+        String serverUrl = info.getServerUrl();
+        String displayName = info.getLabel();
+
+        String removeMessageTemplate = getString(R.string.brapi_logout_manage_message, displayName);
+        SpannableString removeStyledMessage = new SpannableString(removeMessageTemplate);
+        int removeNameStart = removeMessageTemplate.indexOf(displayName);
+        if (removeNameStart >= 0) {
+            removeStyledMessage.setSpan(new StyleSpan(Typeface.BOLD),
+                    removeNameStart, removeNameStart + displayName.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        new AlertDialog.Builder(context, R.style.AppAlertDialog)
+                .setTitle(R.string.brapi_logout_manage_title)
+                .setMessage(removeStyledMessage)
+                .setPositiveButton(R.string.brapi_logout_and_remove, (dialog, which) -> {
+                    if (!serverUrl.isEmpty()) {
+                        accountHelper.removeAccount(serverUrl);
+                        String activeUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
+                        if (serverUrl.equals(activeUrl)) {
+                            preferences.edit().putString(PreferenceKeys.BRAPI_BASE_URL, "").apply();
+                        }
+                    }
+                    refreshServerCards();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+        return Unit.INSTANCE;
+    }
+
+    // ─── Add Account ────────────────────────────────────────────────────────────
+
+    private void showAddAccountDialog() {
+        BrapiStepperAccountDialogFragment frag =
+                BrapiStepperAccountDialogFragment.Companion.newInstance(null);
+        frag.show(getParentFragmentManager(), BrapiStepperAccountDialogFragment.TAG);
+    }
+
+    private void showSharedServersChooser() {
+        pendingChooseAccount = null;
+        startActivityForResult(accountHelper.buildChooseAccountIntent(null), CHOOSE_ACCOUNT_REQUEST_CODE);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CHOOSE_ACCOUNT_REQUEST_CODE) {
+            Account pending = pendingChooseAccount;
+            pendingChooseAccount = null;
+            if (resultCode == RESULT_OK && pending != null && data != null) {
+                String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                String accountType = data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
+                if (pending.name.equals(accountName) &&
+                        pending.type.equals(accountType) &&
+                        accountHelper.canAccessAccount(pending)) {
+                    accountHelper.grantSelectedAccount(pending);
+                    if (accountHelper.canUseToken(pending)) {
+                        activateAccount(pending);
+                    }
+                }
+            } else if (resultCode == RESULT_OK && data != null) {
+                String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                String accountType = data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
+                if (accountName != null && BrapiAuthenticator.isBrapiAccountType(accountType)) {
+                    Account selected = new Account(accountName, accountType);
+                    if (accountHelper.canAccessAccount(selected)) {
+                        accountHelper.grantSelectedAccount(selected);
+                        if (accountHelper.canUseToken(selected)) {
+                            activateAccount(selected);
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
+        // Handled ahead of the RESULT_OK gate below: a cancelled end-session still has to clear
+        // the pending logout state, otherwise it stays armed for whatever consumes it next.
+        if (requestCode == BrapiAuthActivity.END_SESSION_REQUEST_CODE) {
+            Account loggedOutAccount = pendingAuthAccount;
+            boolean removeAfterLogout = pendingRemoveAfterLogout;
+            pendingAuthAccount = null;
+            pendingRemoveAfterLogout = false;
+
+            if (resultCode != RESULT_OK) {
+                // User backed out of the provider's sign-out page; the account stays signed in.
+                refreshServerCards();
+                return;
+            }
+
+            // OIDC end-session completed — clear token for the pending account
+            if (loggedOutAccount != null) {
+                String serverUrl = accountHelper.accountInfoOrEmpty(loggedOutAccount).getServerUrl();
+                accountHelper.clearToken(serverUrl);
+
+                String activeUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
+                boolean wasActiveAccount = !serverUrl.isEmpty() && serverUrl.equals(activeUrl);
+
+                if (wasActiveAccount) {
+                    // The legacy BRAPI_TOKEN/BRAPI_ID_TOKEN prefs mirror the *active* account, so
+                    // they may only be cleared when it is the one being signed out. Clearing them
+                    // while logging out some other account would sign the active account out of
+                    // every code path that still reads the mirrors.
+                    // clearToken() above already does this; repeating it here keeps the result
+                    // correct regardless of the order these two edits run in.
+                    preferences.edit()
+                            .putString(PreferenceKeys.BRAPI_BASE_URL, "")
+                            .remove(PreferenceKeys.BRAPI_ID_TOKEN)
+                            .remove(PreferenceKeys.BRAPI_TOKEN)
+                            .apply();
+                    BrapiFilterCache.Companion.delete(context, true);
+                }
+                if (removeAfterLogout && !serverUrl.isEmpty()) {
+                    accountHelper.removeAccount(serverUrl);
+                }
+            } else {
+                // Lost track of which account this result belongs to; clear the legacy pref
+                // mirrors so nothing keeps using a token the provider has just invalidated.
+                preferences.edit()
+                        .remove(PreferenceKeys.BRAPI_ID_TOKEN)
+                        .remove(PreferenceKeys.BRAPI_TOKEN)
+                        .apply();
+            }
+            refreshServerCards();
+            return;
+        }
+
+        if (resultCode != RESULT_OK) return;
+
+        if (requestCode == AUTH_REQUEST_CODE) {
+            // Re-authorization completed — refresh cards to reflect new token state
+            pendingAuthAccount = null;
+            refreshServerCards();
+        }
+    }
+
+    // ─── Visibility ─────────────────────────────────────────────────────────────
+
+    private void updateServerSectionsVisibility(boolean brapiEnabled) {
+        Preference addAccount = findPreference("brapi_add_account");
+        Preference sharedServers = findPreference("brapi_shared_servers");
+        Preference advancedSettings = findPreference("brapi_advanced_settings");
+
+        if (addAccount != null) addAccount.setVisible(brapiEnabled);
+        if (sharedServers != null) sharedServers.setVisible(brapiEnabled);
+        if (advancedSettings != null) advancedSettings.setVisible(brapiEnabled);
+
+        if (brapiEnabled) {
+            refreshServerCards();
+        } else {
+            if (activeServerCategory != null) activeServerCategory.setVisible(false);
+            if (availableServersCategory != null) availableServersCategory.setVisible(false);
+            if (sharedAccountsCategory != null) sharedAccountsCategory.setVisible(false);
+        }
+
+    }
+
+    // ─── Toolbar ────────────────────────────────────────────────────────────────
+
+    private void setupToolbar() {
+        Activity act = getActivity();
+        if (act instanceof PreferencesActivity) {
+            ActionBar bar = ((PreferencesActivity) act).getSupportActionBar();
+            if (bar != null) bar.setTitle(getString(R.string.brapi_info_title));
+        }
+    }
+
+    // ─── QR Code generation ─────────────────────────────────────────────────────
+
+    private void generateQRCode(Activity act, String jsonConfig) {
+        try {
             int screenWidth;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                WindowMetrics windowMetrics = act.getWindowManager().getCurrentWindowMetrics();
-                screenWidth = windowMetrics.getBounds().width();
+                WindowMetrics wm = act.getWindowManager().getCurrentWindowMetrics();
+                screenWidth = wm.getBounds().width();
             } else {
-                DisplayMetrics displayMetrics = new DisplayMetrics();
-                act.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                screenWidth = displayMetrics.widthPixels;
+                DisplayMetrics dm = new DisplayMetrics();
+                act.getWindowManager().getDefaultDisplay().getMetrics(dm);
+                screenWidth = dm.widthPixels;
             }
+            int size = (int) (screenWidth * 0.8);
 
-            // Set the QR Code size to be 80% of the screen width
-            int qrCodeSize = (int) (screenWidth * 0.8);
-
-            BitMatrix bitMatrix = new MultiFormatWriter().encode(jsonConfig, BarcodeFormat.QR_CODE, qrCodeSize, qrCodeSize);
-
-            int width = bitMatrix.getWidth();
-            int height = bitMatrix.getHeight();
-            Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
+            BitMatrix bitMatrix = new MultiFormatWriter().encode(jsonConfig, BarcodeFormat.QR_CODE, size, size);
+            int w = bitMatrix.getWidth(), h = bitMatrix.getHeight();
+            Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
+            for (int x = 0; x < w; x++) {
+                for (int y = 0; y < h; y++) {
                     bmp.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
                 }
             }
 
-            ImageView imageView = new ImageView(getContext());
+            ImageView imageView = new ImageView(context);
             imageView.setImageBitmap(bmp);
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             imageView.setAdjustViewBounds(true);
@@ -374,475 +746,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     .setView(imageView)
                     .setPositiveButton(getString(R.string.dialog_close), null)
                     .show();
-
         } catch (WriterException e) {
-            Toast.makeText(getContext(), "Error generating QR code", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        menu.clear();
-        inflater.inflate(R.menu.menu_brapi_pref, menu);
-        mMenu = menu; // Store a reference to the menu
-        CheckBoxPreference brapiEnabledPref = findPreference(PreferenceKeys.BRAPI_ENABLED);
-        updatePreferencesVisibility(brapiEnabledPref.isChecked());
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public void onPrepareOptionsMenu(@NonNull Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-
-        // Ensure the menu has been fully inflated before longpress listener setup
-        getView().post(() -> setupLongPressListener());
-    }
-
-    private void setupLongPressListener() {
-        final View menuItemView = getActivity().findViewById(R.id.action_menu_brapi_auto_configure);
-        if (menuItemView != null) {
-            menuItemView.setOnLongClickListener(v -> {
-                showCommunityServerListDialog();
-                return true;
-            });
-        }
-    }
-
-    private void showCommunityServerListDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
-        builder.setTitle(R.string.preferences_brapi_servers_title);
-
-        String[] serverNames = getResources().getStringArray(R.array.community_servers_names);
-        String[] serverUrls = getResources().getStringArray(R.array.community_servers_urls);
-        String[] serverOidcUrls = getResources().getStringArray(R.array.community_servers_oidc_urls);
-        String[] serverGrantTypes = getResources().getStringArray(R.array.community_servers_grant_types);
-
-        // Add "Submit a server" option
-        String[] extendedServerNames = new String[serverNames.length + 1];
-        System.arraycopy(serverNames, 0, extendedServerNames, 0, serverNames.length);
-        extendedServerNames[serverNames.length] = getString(R.string.preferences_brapi_server_add);
-
-        builder.setItems(extendedServerNames, (dialog, which) -> {
-            if (which == serverNames.length) {
-                // Handle the "Submit a server" option
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/PhenoApps/Field-Book/issues/new?assignees=&labels=enhancement,feature+request&template=feature_request.md&title=[REQUEST]"));
-                startActivity(browserIntent);
-            } else {
-                String selectedServerUrl = serverUrls[which];
-                String selectedServerName = serverNames[which];
-                String selectedOidcUrl = serverOidcUrls[which];
-                String selectedGrantType = serverGrantTypes[which];
-                setServer(selectedServerUrl, selectedServerName, selectedOidcUrl, selectedGrantType);
-            }
-        });
-
-        builder.setNegativeButton(android.R.string.cancel, null);
-        builder.create().show();
-    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_menu_brapi_auto_configure) {
-            barcodeAutoConfigure();
-            return true;
-        }
-        if (item.getItemId() == R.id.action_menu_brapi_pref_auth) {
-            brapiAuth();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        setBaseURLSummary();
-        setButtonView();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mBrapiHttpWarningDialog.isShowing()) mBrapiHttpWarningDialog.cancel();
-    }
-
-    @Override
-    public boolean onPreferenceChange(Preference preference, Object newValue) {
-
-        if (preference.equals(brapiURLPreference)) {
-            updateUrls(newValue.toString());
-
-        }
-
-        if (preference.equals(brapiDisplayName)) {
-            brapiDisplayName.setSummary(newValue.toString());
-
-        }
-
-        if (preference.equals(brapiOIDCFlow)) {
-
-            setOidcFlowUi();
-        }
-
-        return true;
-    }
-
-    /**
-     * This is required to use a dialog as a preference, used to add a barcode scan button to the
-     * url preferences utilizing the NeutralButtonEditTextDialog
-     * @param preference this is the base url or the oidc url preferences
-     */
-    @Override
-    public void onDisplayPreferenceDialog(Preference preference) {
-        // check if dialog is already showing
-        if (getFragmentManager() != null && getFragmentManager().findFragmentByTag(DIALOG_FRAGMENT_TAG) != null) {
-            return;
-        }
-
-        final DialogFragment f;
-
-        if (preference instanceof NeutralButtonEditTextDialog) {
-
-            /*
-             * Takes three callbacks, on neutral (barcode scan), positive (save to prefs), negative (do nothing)
-             */
-            f = NeutralButtonEditTextDialogFragmentCompat.Companion.newInstance(preference.getKey(), (dialog, text) -> {
-
-                //neutral edit text callback
-                //change request code for brapi url vs oidc url
-                if (preference.getKey().equals(brapiURLPreference.getKey())) {
-                    startBarcodeScan(REQUEST_BARCODE_SCAN_BASE_URL);
-                } else if (preference.getKey().equals(brapiDisplayName.getKey())) {
-                    text = oldBaseUrl.replaceAll("https?://(?:www\\.)?(.*?)(?:/.*)?$", "$1");
-                    brapiDisplayName.setText(text);
-                    onPreferenceChange(brapiDisplayName, text);
-                } else {
-                    preferences.edit().putBoolean(PreferenceKeys.BRAPI_EXPLICIT_OIDC_URL, true).apply();
-                    startBarcodeScan(REQUEST_BARCODE_SCAN_OIDC_URL);
-                }
-
-                if (dialog != null)
-                    dialog.dismiss();
-
-                return null;
-            }, (dialog, text) -> {
-
-                //positive edit text callback
-                if (preference.getKey().equals(brapiURLPreference.getKey())) {
-                    brapiURLPreference.setText(text);
-                    if (!oldBaseUrl.equals(text)) { // skip updates if url hasn't actually changed
-                        onPreferenceChange(brapiURLPreference, text);
-                    }
-                    brapiAuth();
-
-                } else if (preference.getKey().equals(brapiDisplayName.getKey())) {
-                    text = (text == null || text.isEmpty()) ? getString(R.string.export_source_brapi) : text;
-                    brapiDisplayName.setText(text);
-                    onPreferenceChange(brapiDisplayName, text);
-                } else if (preference.getKey().equals(brapiClientIdPreference.getKey())) {
-                    //pass to ensure oidc isn't updated as well, client id is automatically handled by xml definition
-                } else {
-                    preferences.edit().putBoolean(PreferenceKeys.BRAPI_EXPLICIT_OIDC_URL, true).apply();
-                    brapiOIDCURLPreference.setText(text);
-                }
-
-                if (dialog != null)
-                    dialog.dismiss();
-
-                return null;
-            }, (dialog, text) -> {
-
-                //negative edit text callback
-                if (dialog != null)
-                    dialog.dismiss();
-
-                return null;
-            });
-
-        } else {
-            f = null;
-        }
-
-        if (f != null) {
-            f.setTargetFragment(this, 0);
-            f.show(getFragmentManager(), DIALOG_FRAGMENT_TAG);
-        } else {
-            super.onDisplayPreferenceDialog(preference);
-        }
-    }
-
-    private void setupToolbar() {
-        Activity act = getActivity();
-        if (act != null) {
-            ActionBar bar = ((PreferencesActivity) this.getActivity()).getSupportActionBar();
-            if (bar != null) {
-                bar.setTitle(getString(R.string.brapi_info_title));
-            }
-        }
-    }
-
-    private void setBaseURLSummary() {
-        String url = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "https://test-server.brapi.org");
-        String displayName = preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, getString(R.string.brapi_edit_display_name_default));
-        brapiURLPreference.setSummary(url);
-        brapiDisplayName.setSummary(displayName);
-    }
-
-    //should only be called from brapi auth or the warning dialog
-    private void startAuth() {
-        String brapiHost = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, null);
-        if (brapiHost != null) {
-            Intent intent = new Intent();
-            intent.setClassName(context, BrapiAuthActivity.class.getName());
-            startActivityForResult(intent, AUTH_REQUEST_CODE);
-        }
-    }
-
-    //checks the uri scheme, uris without http/https causes auth to crash
-    private void brapiAuth() {
-
-        BrapiFilterCache.Companion.delete(context, true);
-
-        if (brapiOIDCURLPreference.getText().startsWith("http://")
-            || brapiURLPreference.getText().startsWith("http://")) {
-
-                if (mBrapiHttpWarningDialog != null
-                    && !mBrapiHttpWarningDialog.isShowing()) {
-                    mBrapiHttpWarningDialog.show();
-                }
-
-        } else if (brapiOIDCURLPreference.getText().startsWith("https://")
-            && brapiURLPreference.getText().startsWith("https://")) {
-
-            //without this check, urls without https:// or http:// were causing brapi auth to crash
-            startAuth();
-
-        }
-    }
-
-    // shows a dialog to set newly authorized brapi server as the default import/export option
-    private void displaySuccessDialog() {
-        final String[] options = new String[]{
-                getString(R.string.brapi_choice_to_make_default_import),
-                getString(R.string.brapi_choice_to_make_default_export)
-        };
-        final boolean[] checkedOptions = new boolean[options.length];
-
-        final List<String> selectedItems = Arrays.asList(options);
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
-        builder.setTitle(R.string.brapi_choice_to_make_default_dialog_title);
-        builder.setMultiChoiceItems(options, checkedOptions, (dialog, which, isChecked) -> {
-            checkedOptions[which] = isChecked;
-        });
-        builder.setPositiveButton(getString(R.string.brapi_choice_to_make_default_positive), (dialog, which) -> {
-            for (int i = 0; i < checkedOptions.length; i++) {
-                if (checkedOptions[i]) {
-                    if (selectedItems.get(i).equals(getString(R.string.brapi_choice_to_make_default_import))) {
-                        preferences.edit().putString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, "brapi").apply();
-                    } else if (selectedItems.get(i).equals(getString(R.string.brapi_choice_to_make_default_export))) {
-                        preferences.edit().putString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "brapi").apply();
-                    }
-                }
-            }
-        });
-        builder.setNegativeButton(getString(R.string.brapi_choice_to_make_default_negative), (dialog, which) -> {});
-        builder.create().show();
-    }
-
-    private void setServer(String url, String displayName, String oidcUrl, String oidcFlow) {
-        oldBaseUrl = url;
-        brapiURLPreference.setText(url);
-        brapiDisplayName.setText(displayName);
-        brapiOIDCURLPreference.setText(oidcUrl);
-        preferences.edit().putString(PreferenceKeys.BRAPI_OIDC_URL, oidcUrl).apply();
-        if(oidcFlow != null)
-            brapiOIDCFlow.setValue(oidcFlow);
-
-        setOidcFlowUi();
-        brapiAuth();
-    }
-
-    /**
-     * Check the explicit flag.
-     * @param newValue the newly changed url
-     */
-    private void updateUrls(String newValue) {
-        String oldOidcUrl = preferences.getString(PreferenceKeys.BRAPI_OIDC_URL, "");
-
-        // remove scheme and subdomain for initial display name
-        String displayName = newValue.replaceAll("https?://(?:www\\.)?(.*?)(?:/.*)?$", "$1");
-
-        Log.d(TAG, oldBaseUrl + " to " + oldOidcUrl);
-
-        if (!preferences.getBoolean(PreferenceKeys.BRAPI_EXPLICIT_OIDC_URL, false)) {
-
-            //regex replace old base within oidc to new value
-            //this might lead to invalid urls if the user forgets a '/' and other cases
-            //where oidc is explicitly changed first (fixed with preference flag)
-            String newOidcUrl = oldOidcUrl.replaceFirst(oldBaseUrl, newValue);
-
-            Log.d(TAG, newOidcUrl);
-
-            setServer(newValue, displayName, newOidcUrl, null);
-        }
-
-        oldBaseUrl = newValue;
-    }
-
-    /**
-     * Handles the UI state for authorize button.
-     * When there is a valid host, the authorize button is visible.
-     * If there is a token, the logout and reauthorize buttons appear.
-     */
-    public void setButtonView() {
-
-        String brapiToken = preferences.getString(PreferenceKeys.BRAPI_TOKEN, null);
-        String brapiHost = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, null);
-
-        if (brapiHost != null) {  // && !brapiHost.equals(getString(R.string.brapi_base_url_default))) {
-
-            if (brapiToken != null) {
-                // Show if our logout button if it is not shown already
-                brapiServerPrefCategory.addPreference(brapiLogoutButton);
-            } else {
-                brapiServerPrefCategory.removePreference(brapiLogoutButton);
-            }
-
-        } else {
-            brapiServerPrefCategory.removePreference(brapiLogoutButton);
-        }
-    }
-
-    private void setOidcFlowUi() {
-
-        PreferenceCategory preferenceCategory = findPreference("brapi_oidc_settings");
-
-        if (preferenceCategory != null) {
-
-            if (!preferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
-                    .equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))
-            ) {
-
-                preferenceCategory.addPreference(brapiOIDCURLPreference);
-
-            } else {
-
-                preferenceCategory.removePreference(brapiOIDCURLPreference);
-
-            }
-        }
-
-        if (brapiOIDCFlow != null) {
-
-            Log.d(TAG, brapiOIDCFlow.getValue());
-
-        }
-    }
-
-    private boolean isValidUrl(String url) {
-        try {
-            URL obj = new URL(url);
-            return obj.getProtocol().equals("http") || obj.getProtocol().equals("https");
-        } catch (MalformedURLException e) {
-            Log.e(TAG, "Invalid URL: " + url, e);
-            return false;
-        }
-    }
-
-    private void handleScannedData(String scannedData) {
-        if (JsonUtil.Companion.isJsonValid(scannedData)) {
-            // Process as JSON config
-            Log.d(TAG, "onActivityResult: config data received: " + scannedData);
-            BrAPIConfig brAPIConfig = new Gson().fromJson(scannedData, BrAPIConfig.class);
-
-            String brapiVersion = getString(R.string.preferences_brapi_version_v2);
-            if("v1".equalsIgnoreCase(brAPIConfig.getVersion())) {
-                brapiVersion = getString(R.string.preferences_brapi_version_v1);
-            }
-            ((ListPreference)findPreference(PreferenceKeys.BRAPI_VERSION)).setValue(brapiVersion);
-            ((BetterEditTextPreference)findPreference(PreferenceKeys.BRAPI_PAGE_SIZE)).setText(brAPIConfig.getPageSize());
-            ((BetterEditTextPreference)findPreference(PreferenceKeys.BRAPI_CHUNK_SIZE)).setText(brAPIConfig.getChunkSize());
-            ((BetterEditTextPreference)findPreference(PreferenceKeys.BRAPI_TIMEOUT)).setText(brAPIConfig.getServerTimeoutMilli());
-            ((ListPreference)findPreference(PreferenceKeys.LABELVAL_CUSTOMIZE)).setValue(brAPIConfig.getCatDisplay());
-
-            String clientId = brAPIConfig.getClientId();
-            String scope = brAPIConfig.getScope();
-
-            if (clientId != null) {
-                ((NeutralButtonEditTextDialog)findPreference(PreferenceKeys.BRAPI_OIDC_CLIENT_ID)).setText(clientId);
-            }
-
-            if (scope != null) {
-                ((NeutralButtonEditTextDialog)findPreference(PreferenceKeys.BRAPI_OIDC_SCOPE)).setText(scope);
-            }
-            String oidcFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_implicit);
-            String codeFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_code);
-            if(codeFlow.equalsIgnoreCase(brAPIConfig.getAuthFlow())) {
-                oidcFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_code);
-            }
-
-            setServer(brAPIConfig.getUrl(), brAPIConfig.getName(), brAPIConfig.getOidcUrl(), oidcFlow);
-        } else if (isValidUrl(scannedData)) {
-            updateUrls(scannedData);
-            brapiAuth();
-        } else {
-            // Neither JSON nor valid URL, show error message
-            showErrorDialog("Scanned data "+scannedData+" is neither a valid URL nor a valid QR-encoded BrAPI config object.");
-        }
-    }
-
-    private void showErrorDialog(String message) {
-        new AlertDialog.Builder(this.getActivity(), R.style.AppAlertDialog)
-                .setTitle(R.string.preferences_brapi_server_scan_error)
-                .setMessage(message)
-                .setPositiveButton(android.R.string.ok, null)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .show();
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            String scannedData = null;
-            // Check if the result is from a barcode scan
-            if (requestCode == REQUEST_BARCODE_SCAN_BASE_URL ||
-                    requestCode == REQUEST_BARCODE_SCAN_OIDC_URL ||
-                    requestCode == REQUEST_BARCODE_SCAN_BRAPI_CONFIG ||
-                    requestCode == IntentIntegrator.REQUEST_CODE) {
-                if (mlkitEnabled) {
-                    scannedData = data.getStringExtra("barcode");
-                } else {
-                    IntentResult result = IntentIntegrator.parseActivityResult(resultCode, data);
-                    scannedData = result.getContents();
-                }
-            } else if (requestCode == BrapiAuthActivity.END_SESSION_REQUEST_CODE) {
-                preferences.edit().remove(PreferenceKeys.BRAPI_ID_TOKEN).apply();
-                preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
-                setButtonView();
-            }
-
-            switch (requestCode) {
-                case REQUEST_BARCODE_SCAN_BASE_URL:
-                    if (isValidUrl(scannedData)) {
-                        updateUrls(scannedData);
-                        brapiAuth();
-                    } else {
-                        showErrorDialog("Scanned data "+scannedData+" is not a valid URL.");
-                    }
-                    break;
-                case REQUEST_BARCODE_SCAN_OIDC_URL:
-                    brapiOIDCURLPreference.setText(scannedData);
-                    break;
-                case REQUEST_BARCODE_SCAN_BRAPI_CONFIG:
-                case IntentIntegrator.REQUEST_CODE:
-                    handleScannedData(scannedData);
-                    break;
-                case AUTH_REQUEST_CODE:
-                    displaySuccessDialog();
-                    break;
-            }
+            Toast.makeText(context, R.string.preferences_brapi_server_scan_error, Toast.LENGTH_SHORT).show();
         }
     }
 }

@@ -22,6 +22,8 @@
     <string name="dialog_delete">Radera</string>
     <string name="dialog_accept">Godkänn</string>
     <string name="barcode_scanner_text">Skanna en streckkod</string>
+    <!-- Toolbar -->
+    <string name="appbar_back">Bakåt</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Exempeldata</string>
     <string name="startup_sample_data_message">Ladda exempeldata?</string>
@@ -143,10 +145,15 @@
     <string name="traits_create_true">Sant</string>
     <string name="traits_create_false">Falskt </string>
     <string name="traits_create_categories_text">Använd / för att separera kategorier</string>
+    <string name="traits_attach_media_photo_label">Foto</string>
+    <string name="traits_attach_media_audio_label">Ljud</string>
     <string name="traits_create_warning_name_blank">Karaktärsnamn får inte vara tomt</string>
     <string name="traits_create_warning_duplicate">Karaktären finns redan </string>
     <string name="traits_create_warning_numeric_required">Standardvärde samt minsta och största krävs och måste vara tal.</string>
+    <!-- Decimal Places Radio Options -->
     <string name="edit_traits">Redigera</string>
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">Värdet är mindre än det minsta tillåtna</string>
@@ -171,6 +178,7 @@
     <string name="activity_collect_dialog_verify_no_button">Nej</string>
     <string name="activity_collect_dialog_verify_yes_button">Ja</string>
     <!--- Datagrid -->
+    <string name="dialog_data_grid_header_picker_ok">OK</string>
     <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Din enhet saknar nödvändig hårdvara för denna funktion.</string>
@@ -191,6 +199,7 @@
     <!--- Summary -->
     <!--- Repeated measures -->
     <string name="dialog_multi_measure_delete">Radera</string>
+    <!--- Save failure -->
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
@@ -269,8 +278,11 @@
     <string name="brapi_info_title">Information om BrAPI-synkning</string>
     <string name="brapi_choice_to_make_default_negative">Avbryt</string>
     <string name="brapi_choice_to_make_default_positive">Spara</string>
-    <!-- Community Servers -->
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_field_book">FieldBook</string>
     <!-- Authorization -->
+    <!-- Multi-account management -->
+    <string name="brapi_chip_edit">Redigera</string>
     <string name="brapi_auth_btn">Logga in på sida</string>
     <string name="brapi_auth_needed_title">Inloggning krävs</string>
     <!-- BrAPI Import -->
@@ -278,6 +290,8 @@
     <!-- BrAPI Export -->
     <string name="brapi_export_button">Exportera </string>
     <string name="brapi_close_button">Stäng</string>
+    <string name="brapi_export_complete">Exporten är klar</string>
+    <string name="cancel">Avbryt</string>
     <!-- Pagination -->
     <string name="prev">Föreg.</string>
     <string name="page_one_of_one">Sida 1 av 1</string>
@@ -333,15 +347,24 @@ Karaktärer och fält som skapats manuellt eller importerats via CSV kommer beh�
     <string name="tutorial_main_datagrid_title">Tabell</string>
     <string name="act_brapi_filter_import">Importera</string>
     <!-- base camera strings -->
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="view_trait_photo_settings_camera_custom">Standard</string>
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
     <!-- spectral trait strings -->
+    <!-- inno spectra -->
+    <!-- stages reported while the inno spectra device is connecting -->
     <string name="brapi_traits_filter_title">Karaktärer</string>
     <string name="dialog_quick_goto_title">Snabbhopp</string>
     <string name="traits_sort_default">Standard</string>
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">Spara</string>
+    <string name="delete">Radera</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
+    <string name="edit">Redigera</string>
+    <!-- InnoSpectra settings layout -->
 </resources>

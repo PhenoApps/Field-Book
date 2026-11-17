@@ -10,7 +10,7 @@ class SharedPreferenceUtils {
 
     companion object {
 
-        fun getThemeResource(prefs: SharedPreferences) = when ((getTheme(prefs) ?: "0").toInt()) {
+        fun getThemeResource(prefs: SharedPreferences) = when ((getTheme(prefs) ?: ThemedActivity.DEFAULT.toString()).toInt()) {
             ThemedActivity.DEFAULT -> R.style.BaseAppTheme
             ThemedActivity.BLUE -> R.style.BaseAppTheme_Blue
             else -> R.style.BaseAppTheme_HighContrast

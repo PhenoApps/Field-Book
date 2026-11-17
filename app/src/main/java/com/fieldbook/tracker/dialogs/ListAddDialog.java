@@ -33,6 +33,25 @@ public class ListAddDialog extends DialogFragment {
         this.onItemClickListener = onItemClickListener;
     }
 
+    /**
+     * Required by the FragmentManager to recreate this dialog after a configuration change
+     * or process death. The recreated instance has no items or listener, so it is dismissed in onCreate.
+     */
+    public ListAddDialog() {
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // items and the click listener can't be saved in the instance state,
+        // so a dialog restored by the system has nothing to show
+        if (activity == null || items == null || onItemClickListener == null) {
+            setShowsDialog(false);
+            dismissAllowingStateLoss();
+        }
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         LinearLayout layout = new LinearLayout(activity);

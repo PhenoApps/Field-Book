@@ -86,9 +86,9 @@ class SearchQueryBuilder(
                     .append("OUP.\"$column\"")
             } else {
                 currentSubQuery.append(traitSelectStatement).append(" AND ")
-                    .append("V.observation_variable_name = \"$column\"")
+                    .append("V.observation_variable_name = ${DatabaseUtils.sqlEscapeString(column)}")
 
-                if (traitObject.format == "categorical" || traitObject.format == "multicat" || traitObject.format == "qualitative") {
+                if (traitObject.format == "categorical" || traitObject.format == "qualitative") {
                     isCategorical = true
                     searchText = encodeCategorical(searchText)
                 }

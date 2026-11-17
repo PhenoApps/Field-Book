@@ -15,13 +15,25 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.charts.HorizontalBarChartHelper
 import com.fieldbook.tracker.charts.HistogramChartHelper
 import com.fieldbook.tracker.charts.PieChartHelper
+import com.fieldbook.tracker.traits.formats.feature.ChartableData
+import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.utilities.DateJsonUtil
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.HorizontalBarChart
 import com.github.mikephil.charting.charts.PieChart
 import java.math.BigDecimal
 
 class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : RecyclerView.Adapter<FieldDetailAdapter.ViewHolder>() {
+
+    companion object {
+        /**
+         * Date labels are far wider than the numbers a histogram normally carries, so they collide
+         * once a field has more than a few bins. Turning them upright lets each one occupy roughly
+         * a line height of axis instead of its full width. Negative reads bottom to top.
+         */
+        private const val DATE_LABEL_ROTATION = 45f
+    }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val traitNameTextView: TextView = view.findViewById(R.id.traitNameTextView)
@@ -57,7 +69,8 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
             chartTextSize
         )
 
-        val nonChartableFormats = setOf("audio", "gnss", "gopro", "location", "photo", "text", "usb camera")
+        val nonChartableFormats = Formats.entries.filter { it.getTraitFormatDefinition() !is ChartableData }.map { it.getDatabaseName() }.toTypedArray()
+        //val nonChartableFormats = setOf("audio", "gnss", "gopro", "location", "photo", "text", "usb camera")
 
         holder.collapsibleHeader.setOnClickListener {
             toggleCollapse(holder)
@@ -71,10 +84,12 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
         val filteredObservations = item.observations?.filter { it.isNotEmpty() && it != "NA" } ?: emptyList()
 
         if (filteredObservations == null || filteredObservations.isEmpty()) {
-            noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.field_trait_chart_no_data))
+            noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.chart_no_data))
             return
         } else if (item.format in nonChartableFormats) {
-            noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.field_trait_chart_incompatible_format))
+            noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.chart_incompatible_format))
+        } else if (item.format == Formats.DATE.getDatabaseName()) {
+            setupDateHistogram(holder, item, chartTextSize)
         } else {
             try {
                 val numericObservations = filteredObservations.map { BigDecimal(it) }
@@ -94,7 +109,7 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
                 holder.barChart.visibility = View.VISIBLE
                 holder.histogram.visibility = View.GONE
                 holder.noChartAvailableTextView.visibility = View.GONE
-                val parsedCategories = parseCategories(item.categories)
+                val parsedCategories = parseCategories(item.categories, item.showCategoryValue)
                 HorizontalBarChartHelper.setupHorizontalBarChart(
                     holder.itemView.context,
                     holder.barChart,
@@ -104,6 +119,38 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
                 )
             }
         }
+    }
+
+    /**
+     * Charts a date trait as a vertical histogram binned on day of year, putting the dates along
+     * the x axis.
+     *
+     * Only traits with "use day of year" enabled used to reach a histogram, because those emit a
+     * bare number that parses as one. The rest emit a formatted date, failed to parse, and fell
+     * through to the horizontal bar chart, which ran the dates down the y axis as though they
+     * were unordered categories.
+     */
+    private fun setupDateHistogram(holder: ViewHolder, item: FieldDetailItem, chartTextSize: Float) {
+
+        val daysOfYear = item.dayOfYearValues.orEmpty()
+
+        if (daysOfYear.isEmpty()) {
+            // No value yielded a day of year, so there is nothing to place on the axis.
+            noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.chart_no_data))
+            return
+        }
+
+        holder.barChart.visibility = View.GONE
+        holder.histogram.visibility = View.VISIBLE
+        holder.noChartAvailableTextView.visibility = View.GONE
+
+        HistogramChartHelper.setupHistogram(
+            holder.itemView.context,
+            holder.histogram,
+            daysOfYear.map { BigDecimal(it) },
+            chartTextSize,
+            labelRotationAngle = DATE_LABEL_ROTATION
+        ) { binStart -> DateJsonUtil.formatDayOfYear(binStart) }
     }
 
     override fun getItemCount() = items.size
@@ -131,13 +178,19 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
         holder.noChartAvailableTextView.text = message
     }
 
-    private fun parseCategories(categories: String?): List<String> {
+    /**
+     * Category names in trait order, using the same label/value choice as the observations
+     * so the bar chart can match them.
+     */
+    private fun parseCategories(categories: String?, showValue: Boolean): List<String> {
         return try {
             if (categories.isNullOrEmpty()) {
                 emptyList()
             } else if (categories.startsWith("[")) {
                 val parsedCategories = CategoryJsonUtil.decode(categories)
-                parsedCategories.map { it.value }
+                parsedCategories.mapNotNull {
+                    if (showValue) it.value ?: it.label else it.label ?: it.value
+                }
             } else {
                 categories.split("/").map { it.trim() }
             }
@@ -162,5 +215,13 @@ data class FieldDetailItem(
     val subtitle: String,
     val icon: Drawable?,
     val observations: List<String>? = null,
-    val completeness: Float = 0.0f
+    val completeness: Float = 0.0f,
+    /**
+     * Day of year per observation, for date traits only. Held separately because [observations]
+     * has already been flattened to whichever single field the trait is configured to display,
+     * which discards the day of year whenever the trait shows a formatted date.
+     */
+    val dayOfYearValues: List<Int>? = null,
+    /** Categorical traits only: whether [observations] hold category values rather than labels. */
+    val showCategoryValue: Boolean = false
 )

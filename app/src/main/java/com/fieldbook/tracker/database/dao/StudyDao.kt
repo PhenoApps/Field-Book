@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.database.dao
 
 import android.content.ContentValues
+import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteException
 import android.util.Log
 import androidx.core.content.contentValuesOf
@@ -12,6 +13,7 @@ import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.Migrator.Study
 import com.fieldbook.tracker.database.GroupsTable
+import com.fieldbook.tracker.database.ObservationChangeTracker
 import com.fieldbook.tracker.database.getTime
 import com.fieldbook.tracker.database.models.StudyModel
 import com.fieldbook.tracker.database.query
@@ -19,12 +21,13 @@ import com.fieldbook.tracker.database.toFirst
 import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
-import com.fieldbook.tracker.utilities.CategoryJsonUtil
 
 
 class StudyDao {
 
     companion object {
+
+        const val TAG = "StudyDao"
 
         fun getPossibleUniqueAttributes(studyId: Int): List<String> = withDatabase { db ->
             val query = """
@@ -39,14 +42,14 @@ class StudyDao {
                 )
             """
 
-            Log.d("StudyDao", "Running query: $query")
+            Log.d(TAG, "Running query: $query")
 
             db.rawQuery(query, arrayOf(studyId.toString())).use { cursor ->
                 val attributes = mutableListOf<String>()
                 while (cursor.moveToNext()) {
                     cursor.getString(0)?.let {
                          attributes.add(it)
-                         Log.d("StudyDao", "Found unique attribute: $it")
+                         Log.d(TAG, "Found unique attribute: $it")
                     }
                 }
                 attributes
@@ -82,13 +85,13 @@ class StudyDao {
                 WHERE observation_unit_attribute_name = ?
             """
 
-            Log.d("StudyDao", "Finding studies with attribute: $newSearchAttribute")
+            Log.d(TAG, "Finding studies with attribute: $newSearchAttribute")
 
             db.rawQuery(query, arrayOf(newSearchAttribute)).use { cursor ->
                 while (cursor.moveToNext()) {
                     cursor.getInt(0).let { studyId ->
                         studiesWithAttribute.add(studyId)
-                        Log.d("StudyDao", "Found study with matching attribute: $studyId")
+                        Log.d(TAG, "Found study with matching attribute: $studyId")
                     }
                 }
             }
@@ -103,7 +106,7 @@ class StudyDao {
                 }
             }
 
-            Log.d("StudyDao", "Updated search attribute for $updatedCount studies")
+            Log.d(TAG, "Updated search attribute for $updatedCount studies")
             updatedCount
         } ?: 0
 
@@ -119,7 +122,7 @@ class StudyDao {
             //create a select statement based on the saved plot attribute names
             val select = headers.map { col ->
 
-                "MAX(CASE WHEN attr.observation_unit_attribute_name = \"$col\" THEN vals.observation_unit_value_name ELSE NULL END) AS \"$col\""
+                "MAX(CASE WHEN attr.observation_unit_attribute_name = ${DatabaseUtils.sqlEscapeString(col)} THEN vals.observation_unit_value_name ELSE NULL END) AS \"${col.replace("\"", "\"\"")}\""
 
             }
 
@@ -142,6 +145,8 @@ class StudyDao {
             GROUP BY units.${ObservationUnit.PK}
         """.trimMargin()
 
+            Log.d(TAG, query)
+
             db.execSQL(query)
         }
 
@@ -155,13 +160,17 @@ class StudyDao {
                 //db.delete(ObservationUnitAttribute.tableName, "${Study.FK} = ?", arrayOf(exp_id.toString()))
                 db.update(Observation.tableName, contentValuesOf(Study.FK to Integer.parseInt("-$studyId")), "${Study.FK} = ?", arrayOf(studyId.toString()))
                 db.delete(Study.tableName, "${Study.PK} = ?", arrayOf(studyId.toString()))
-                db.rawQuery("PRAGMA foreign_keys=ON", null)
 
             } catch (e: SQLiteException) {
 
                 e.printStackTrace()
 
-                Log.d("StudyDao", "error during field deletion")
+                Log.d(TAG, "error during field deletion")
+
+            } finally {
+
+                db.rawQuery("PRAGMA foreign_keys=ON", null)
+                ObservationChangeTracker.markChanged()
 
             }
 
@@ -232,18 +241,31 @@ class StudyDao {
             val studies = ArrayList<FieldObject>()
             val isDateSort = sortOrder.startsWith("date_")
 
+            // counts are aggregated once per table and joined, rather than as correlated
+            // subqueries per study; study_id is unindexed so those scanned whole tables per study (ANR)
+            // LEFT JOIN on observation_variables keeps observation_count including unmatched variables
             val query = """
-                SELECT 
+                SELECT
                     Studies.*,
-                    (SELECT COUNT(DISTINCT observation_unit_attribute_name) FROM observation_units_attributes AS A
-                        JOIN observation_units_values as V ON V.${ObservationUnitValue.OBSERVATION_UNIT_ATTRIBUTE_DB_ID} = A.${ObservationUnitAttribute.INTERNAL_ID_OBSERVATION_UNIT_ATTRIBUTE}
-                        WHERE V.study_id = Studies.${Study.PK}) AS attribute_count,
-                    (SELECT COUNT(DISTINCT ov.observation_variable_name) 
-                        FROM observations 
-                        JOIN observation_variables AS ov ON ov.${ObservationVariable.PK} = observations.${ObservationVariable.FK}
-                        WHERE study_id = Studies.${Study.PK} AND observations.observation_variable_db_id > 0) AS trait_count,
-                    (SELECT COUNT(*) FROM observations WHERE study_id = Studies.${Study.PK} AND observations.observation_variable_db_id > 0) AS observation_count
+                    COALESCE(AttributeCounts.attribute_count, 0) AS attribute_count,
+                    COALESCE(ObservationCounts.trait_count, 0) AS trait_count,
+                    COALESCE(ObservationCounts.observation_count, 0) AS observation_count
                 FROM ${Study.tableName} AS Studies
+                LEFT JOIN (
+                    SELECT V.study_id AS study_id, COUNT(DISTINCT A.observation_unit_attribute_name) AS attribute_count
+                    FROM observation_units_attributes AS A
+                    JOIN observation_units_values AS V ON V.${ObservationUnitValue.OBSERVATION_UNIT_ATTRIBUTE_DB_ID} = A.${ObservationUnitAttribute.INTERNAL_ID_OBSERVATION_UNIT_ATTRIBUTE}
+                    GROUP BY V.study_id
+                ) AS AttributeCounts ON AttributeCounts.study_id = Studies.${Study.PK}
+                LEFT JOIN (
+                    SELECT observations.study_id AS study_id,
+                        COUNT(DISTINCT ov.observation_variable_name) AS trait_count,
+                        COUNT(*) AS observation_count
+                    FROM observations
+                    LEFT JOIN observation_variables AS ov ON ov.${ObservationVariable.PK} = observations.${ObservationVariable.FK}
+                    WHERE observations.observation_variable_db_id > 0
+                    GROUP BY observations.study_id
+                ) AS ObservationCounts ON ObservationCounts.study_id = Studies.${Study.PK}
                 ORDER BY ${if (sortOrder == "visible") "position" else sortOrder} COLLATE NOCASE ${if (isDateSort) "DESC" else "ASC"}
             """
             db.rawQuery(query, null).use { cursor ->
@@ -356,14 +378,9 @@ class StudyDao {
                         val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
                         val observationsString = cursor.getString(cursor.getColumnIndexOrThrow("observations"))
                         val rawObservations = observationsString?.split("|") ?: emptyList()
-                        val observations = rawObservations.map { obs ->
-                            CategoryJsonUtil.processValue(
-                                buildMap {
-                                    put("observation_variable_field_book_format", format)
-                                    put("value", obs)
-                                }
-                            )
-                        }
+                        // stored values are returned as-is (categorical JSON included); the field
+                        // detail screen converts them per trait, which knows whether to show label or value
+                        val observations = rawObservations
                         val distinctObsUnits = cursor.getInt(cursor.getColumnIndexOrThrow("distinct_obs_units"))
                         val totalObsUnits = cursor.getInt(cursor.getColumnIndexOrThrow("total_obs_units"))
                         val completeness = distinctObsUnits.toFloat() / totalObsUnits.toFloat()
@@ -623,14 +640,14 @@ class StudyDao {
         /**
          * Returns study by its study_db_id
          */
-        fun getStudyByDbId(studyDbId: String) = withDatabase { db ->
-            StudyModel(
-                db.query(
-                    Study.tableName,
-                    where = "study_db_id = ?",
-                    whereArgs = arrayOf(studyDbId)
-                ).toFirst()
-            )
+        fun getStudyByDbId(studyDbId: String): StudyModel? = withDatabase { db ->
+            db.query(
+                Study.tableName,
+                where = "study_db_id = ?",
+                whereArgs = arrayOf(studyDbId)
+            ).toFirst()
+                .takeIf { it.isNotEmpty() } // no matching study, avoid a StudyModel with no columns
+                ?.let { StudyModel(it) }
         }
 
         /**

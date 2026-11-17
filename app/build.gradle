@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'androidx.navigation.safeargs'
@@ -11,6 +10,7 @@ apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.serialization"
 apply plugin: "kotlin-parcelize"
+apply plugin: "com.mikepenz.aboutlibraries.plugin.android"
 
 Properties props = new Properties()
 props.load(new FileInputStream("$project.rootDir/version.properties"))
@@ -79,6 +79,12 @@ android {
 
         buildConfigField "String", "NIX_LICENSE", "\"${nixLicense.replaceAll("\"", "\\\\\"")}\""
 
+        // The BrAPI account type this app owns, read by res/xml/brapi_authenticator.xml. It has to
+        // stay equal to BrapiAccountConstants.accountTypeFor(applicationId), which is what the code
+        // derives at runtime — and it has to differ per variant, or a debug and a release install
+        // would fight over the same account type on one device.
+        resValue "string", "brapi_account_type", "org.phenoapps.brapi.com.fieldbook.tracker"
+
     }
 
     buildTypes {
@@ -94,6 +100,7 @@ android {
             clean
             debuggable true
             applicationIdSuffix ".debug"
+            resValue "string", "brapi_account_type", "org.phenoapps.brapi.com.fieldbook.tracker.debug"
             //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -138,6 +145,9 @@ tasks.withType(KotlinCompile).configureEach {
 
 dependencies {
 
+    implementation project(':brapi-provider')
+    implementation project(':uvc')
+
     //seven segment display compose ui
     implementation 'com.github.rabross:SegmentedDisplay:0.4.0'
 
@@ -176,7 +186,7 @@ dependencies {
 
     implementation 'com.google.zxing:core:3.5.3'
 
-    implementation('com.github.phenoapps:phenolib:v0.9.54')
+    implementation('com.github.phenoapps:phenolib:v0.9.57')
 
     implementation 'com.google.android.exoplayer:exoplayer:2.19.1'
     implementation 'androidx.media3:media3-exoplayer:1.8.0'
@@ -187,7 +197,6 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 
     //uvc camera java native libs
-    implementation("com.serenegiant:common:2.12.4")
 
     //ffmpeg 16kb
     implementation("com.arthenica:smart-exception-java:0.2.1")
@@ -207,12 +216,10 @@ dependencies {
     //noinspection GradleDependency
     implementation 'com.github.MFlisar:changelog:1.1.6'
     implementation 'com.github.daniel-stoneuk:material-about-library:2.4.2'
-    //noinspection GradleDependency
-    implementation "com.mikepenz:aboutlibraries:6.2.3"
+    implementation "com.mikepenz:aboutlibraries-compose-m3:13.2.1"
     implementation 'com.getkeepsafe.taptargetview:taptargetview:1.15.0'
     implementation 'com.github.ByteHamster:SearchPreference:v2.5.1'
     implementation "com.github.skydoves:colorpickerpreference:2.0.4"
-    implementation 'com.github.evrencoskun:TableView:v0.8.9.4'
 
     implementation 'net.openid:appauth:0.11.1'
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
@@ -231,8 +238,10 @@ dependencies {
 
     //hilt dependency injection
     implementation "com.google.dagger:hilt-android:2.56.2"
+    implementation 'androidx.compose.material3:material3:1.4.0'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
     ksp "com.google.dagger:hilt-compiler:2.56.2"
+    implementation "androidx.hilt:hilt-navigation-compose:1.3.0"
 
     implementation 'androidx.test.ext:junit-ktx:1.3.0'
 
@@ -252,9 +261,6 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:5.15.2'
     testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
-
-    //androidx exif interface
-    implementation "androidx.exifinterface:exifinterface:1.4.1"
 
     //camerax
     def camerax_version = "1.4.2"
@@ -284,16 +290,21 @@ dependencies {
     // Stepper UI
     implementation 'com.github.binayshaw7777:KotStep:3.0.1'
 
-    // Add Compose related plugins
-    implementation platform('androidx.compose:compose-bom:2025.08.00')
+    // compose reorderable
+    implementation "sh.calvin.reorderable:reorderable:3.0.0"
 
-    implementation "androidx.compose.material:material-icons-extended:1.6.0"
+    // Add Compose related plugins
+    implementation platform('androidx.compose:compose-bom:2025.11.00')
+
+    implementation "androidx.compose.material:material-icons-extended:1.7.8"
     // Integration with activities
-    implementation 'androidx.activity:activity-compose:1.10.1'
-    implementation 'androidx.activity:activity-ktx:1.10.1'
+    implementation 'androidx.activity:activity-compose:1.11.0'
+    implementation 'androidx.activity:activity-ktx:1.11.0'
 
     // Material Design 3
     implementation 'androidx.compose.material3:material3'
+    implementation "androidx.compose.material3:material3-window-size-class:1.4.0"
+    implementation 'androidx.compose.material3.adaptive:adaptive:1.3.0-alpha05'
     //  foundational components
     implementation 'androidx.compose.foundation:foundation'
     implementation 'androidx.compose.ui:ui'
@@ -345,4 +356,12 @@ repositories {
 
 tasks.register('prepareKotlinBuildScriptModel') {}
 
-android.defaultConfig.manifestPlaceholders = ['appAuthRedirectScheme': 'fieldbook' ]
+android.defaultConfig.manifestPlaceholders = ['appAuthRedirectScheme': 'fieldbook']
+
+// generates res/raw/aboutlibraries.json from the real dependency graph at build time
+// the nested blocks are set as properties, groovy resolves collect { } to its own collect method
+aboutLibraries {
+    // licenses come from the local poms, no network call during the build
+    collect.fetchRemoteLicense = false
+    export.prettyPrint = true
+}

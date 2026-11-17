@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pheno_brapi_version_options">
+        <item>@string/pheno_brapi_version_v1</item>
+        <item>@string/pheno_brapi_version_v2</item>
+    </string-array>
+
+    <string-array name="pheno_brapi_oidc_flow_options">
+        <item>@string/pheno_brapi_oidc_flow_oauth_code</item>
+        <item>@string/pheno_brapi_oidc_flow_oauth_implicit</item>
+    </string-array>
+</resources>

@@ -15,6 +15,7 @@
     <string name="dialog_warning">Cảnh báo</string>
     <string name="dialog_save">Lưu</string>
     <string name="dialog_delete">Xóa</string>
+    <!-- Toolbar -->
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dữ liệu mẫu</string>
     <string name="startup_sample_data_message">Nạp dữ liệu mẫu</string>
@@ -116,10 +117,15 @@
     <string name="traits_create_true">Đúng</string>
     <string name="traits_create_false">Sai</string>
     <string name="traits_create_categories_text">Sử dụng / để phân chia các mục</string>
+    <string name="traits_attach_media_photo_label">Ảnh</string>
+    <string name="traits_attach_media_audio_label">Tiếng</string>
     <string name="traits_create_warning_name_blank">Tên tính trạng không được để trống</string>
     <string name="traits_create_warning_duplicate">Tính trạng đã tồn tại</string>
     <string name="traits_create_warning_numeric_required">Giá trị mặc định, nhỏ nhất, lớn nhất là bắt buộc và phải là định dạng số</string>
+    <!-- Decimal Places Radio Options -->
     <string name="edit_traits">Chỉnh sửa</string>
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">Giá trị nhỏ hơn mức nhỏ nhất</string>
@@ -156,6 +162,7 @@
     <string name="activity_collect_dialog_verify_no_button">Không</string>
     <string name="activity_collect_dialog_verify_yes_button">Có</string>
     <!--- Datagrid -->
+    <string name="dialog_data_grid_header_picker_ok">Đồng ý</string>
     <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Thiết bị của bạn không chứa phần cứng cần thiết cho tính năng này</string>
@@ -180,6 +187,7 @@
     <!--- Summary -->
     <!--- Repeated measures -->
     <string name="dialog_multi_measure_delete">Xóa</string>
+    <!--- Save failure -->
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
@@ -266,10 +274,14 @@
     <string name="brapi_base_url_desc">Dường dẫn gốc đến máy chủ BrAPI</string>
     <string name="brapi_choice_to_make_default_negative">Bỏ qua</string>
     <string name="brapi_choice_to_make_default_positive">Lưu</string>
-    <!-- Community Servers -->
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_field_book">Sổ tay đồng ruộng</string>
     <!-- Authorization -->
     <string name="brapi_save_authorize">Lưu và đăng nhập</string>
     <string name="brapi_revoke_auth">Đăng xuất</string>
+    <!-- Multi-account management -->
+    <string name="brapi_chip_edit">Chỉnh sửa</string>
+    <string name="brapi_chip_authorize">Lưu và đăng nhập</string>
     <string name="brapi_auth_btn">Đăng nhập vào trang web</string>
     <string name="brapi_auth_success">Thành công phê duyệt BrAPI</string>
     <string name="brapi_auth_deny">Từ chối phê duyệt BrAPI</string>
@@ -324,6 +336,9 @@
     <string name="brapi_export_skipped_user_created_images">Ảnh được tạo bởi người dùng</string>
     <string name="brapi_export_images">Ảnh</string>
     <string name="brapi_delete_message">Không thể xóa đánh giá đã được đồng bộ ở BrAPI, hãy sử dụng NA</string>
+    <string name="brapi_export_new_images_pending">Ảnh mới</string>
+    <string name="brapi_export_complete">Xuất thành công</string>
+    <string name="cancel">Bỏ qua</string>
     <!-- Pagination -->
     <string name="next">Tiếp theo</string>
     <string name="prev">Trước</string>
@@ -390,15 +405,28 @@ Các tính trạng và ruộng được tạo thủ công hoặc được nhập
     <string name="act_brapi_filter_import">Nhập</string>
     <string name="act_brapi_filter_clear">Xóa</string>
     <!-- base camera strings -->
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="view_trait_photo_settings_camera_custom">Mặc định</string>
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
     <!-- spectral trait strings -->
+    <!-- inno spectra -->
+    <!-- stages reported while the inno spectra device is connecting -->
     <string name="brapi_traits_filter_title">(Các) Tính trạng</string>
     <string name="dialog_quick_goto_title">Đi đến (nghiệm thức) nhanh</string>
     <string name="traits_sort_default">Mặc định</string>
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">Lưu</string>
+    <string name="delete">Xóa</string>
+    <string name="new_images">Ảnh mới</string>
+    <string name="edited_images">Ảnh đã được chỉnh sửa</string>
+    <string name="synced_images">Ảnh được đồng bộ</string>
+    <string name="local">Bộ nhớ máy</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
+    <string name="edit">Chỉnh sửa</string>
+    <!-- InnoSpectra settings layout -->
 </resources>

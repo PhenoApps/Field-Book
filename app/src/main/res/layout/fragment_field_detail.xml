@@ -449,50 +449,19 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:gravity="center_vertical">
+                        android:layout_marginEnd="16dp">
 
                         <TextView
                             style="@style/TextViewStyle.Bold.Title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/field_data_title"
-                            android:paddingRight="16dp"
-                            android:paddingBottom="8dp"/>
+                            android:text="@string/field_data_title" />
 
-                        <com.google.android.material.chip.ChipGroup
-                            android:id="@+id/dataChipGroup"
+                        <TextView
+                            style="@style/TextViewStyle.Sub"
+                            android:id="@+id/dataSummaryTextView"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            app:singleLine="false"
-                            app:chipSpacingHorizontal="8dp"
-                            app:chipSpacingVertical="8dp"
-                            android:descendantFocusability="blocksDescendants">
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/traitCountChip"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:clickable="false"
-                                android:focusable="false"
-                                app:chipIcon="@drawable/ic_ruler"
-                                app:chipIconSize="24dp"
-                                app:ensureMinTouchTargetSize="false"
-                                app:closeIconVisible="false"
-                                app:chipBackgroundColor="?attr/defaultChipBackground" />
-
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/observationCountChip"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:clickable="false"
-                                android:focusable="false"
-                                app:chipIcon="@drawable/ic_eye"
-                                app:chipIconSize="24dp"
-                                app:ensureMinTouchTargetSize="false"
-                                app:closeIconVisible="false"
-                                app:chipBackgroundColor="?attr/defaultChipBackground" />
-                        </com.google.android.material.chip.ChipGroup>
+                            android:layout_height="wrap_content" />
                     </LinearLayout>
 
                     <!-- Collapse/Expand Icon -->

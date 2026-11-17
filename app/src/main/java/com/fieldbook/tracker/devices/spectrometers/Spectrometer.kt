@@ -29,7 +29,12 @@ interface Spectrometer {
         color: String,
         uri: String,
         entryId: String,
-        traitId: String
+        traitId: String,
+        studyId: String? = null,
+        person: String? = null,
+        location: String? = null,
+        deviceAddress: String? = null,
+        deviceName: String? = null
     )
 
     fun interface ResultCallback {

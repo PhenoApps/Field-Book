@@ -2,17 +2,17 @@ package com.fieldbook.tracker.traits
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import android.util.Log
 import android.util.AttributeSet
 import android.util.Size
-import android.view.View
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
-import androidx.camera.core.Camera
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.view.PreviewView
@@ -31,7 +31,7 @@ import org.threeten.bp.OffsetDateTime
 import java.io.File
 import java.util.concurrent.ExecutorService
 
-class PhotoTraitLayout : CameraTrait {
+open class PhotoTraitLayout : CameraTrait {
 
     companion object {
         const val TAG = "PhotoTrait"
@@ -45,7 +45,9 @@ class PhotoTraitLayout : CameraTrait {
     }
 
     private var supportedResolutions: List<Size> = listOf()
-    private var previewViewHolder: ImageAdapter.PreviewViewHolder? = null
+
+    protected var previewHolder: ImageAdapter.PreviewViewHolder? = null
+    private var isCameraActive = false
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -56,6 +58,11 @@ class PhotoTraitLayout : CameraTrait {
     )
 
     override fun type() = type
+
+    override fun init(act: Activity) {
+        super.init(act)
+        isCameraActive = false
+    }
 
     private fun displayPreviewMode(mode: Mode) {
 
@@ -100,22 +107,25 @@ class PhotoTraitLayout : CameraTrait {
 
         }
 
-        shutterButton?.visibility = View.VISIBLE
-        settingsButton?.visibility = View.VISIBLE
+        shutterButton?.visibility = VISIBLE
+        settingsButton?.visibility = VISIBLE
         settingsButton?.isEnabled = true
         settingsButton?.setOnClickListener {
             showSettings()
         }
 
-        connectBtn?.visibility = View.GONE
+        connectBtn?.visibility = GONE
 
         setupCaptureButton {
 
-            takePicture()
+            capture()
 
         }
 
-        onSettingsChanged()
+        if (!isCameraActive) {
+            isCameraActive = true
+            onSettingsChanged()
+        }
     }
 
     @OptIn(ExperimentalCamera2Interop::class)
@@ -134,16 +144,16 @@ class PhotoTraitLayout : CameraTrait {
 
     private fun bindNoPreviewLifecycle() {
 
-        previewViewHolder?.previewView?.visibility = View.GONE
-        previewViewHolder?.embiggenButton?.visibility = View.GONE
+        previewHolder?.previewView?.visibility = GONE
+        previewHolder?.embiggenButton?.visibility = GONE
 
         try {
 
             val resolution = getSupportedResolutionByPreferences()
 
-            controller.getCameraXFacade().bindFrontCapture(resolution) { camera, executor, capture ->
+            controller.getCameraXFacade().bindFrontCapture(resolution) { _, executor, capture ->
 
-                setupCaptureUi(camera, executor, capture)
+                setupCaptureUi(executor, capture)
             }
 
         } catch (e: IllegalArgumentException) {
@@ -153,20 +163,23 @@ class PhotoTraitLayout : CameraTrait {
         }
     }
 
-    private fun setupCaptureUi(camera: Camera, executorService: ExecutorService, capture: ImageCapture) {
+    private fun setupCaptureUi(executorService: ExecutorService?, capture: ImageCapture) {
 
         setupCaptureButton {
 
             val file = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
 
             val outputFileOptions = ImageCapture.OutputFileOptions.Builder(file).build()
-            capture.takePicture(outputFileOptions, executorService,
-                object : ImageCapture.OnImageSavedCallback {
-                    override fun onError(error: ImageCaptureException) {}
-                    override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                        makeImage(currentTrait)
-                    }
-                })
+
+            executorService?.let {
+                capture.takePicture(outputFileOptions, executorService,
+                    object : ImageCapture.OnImageSavedCallback {
+                        override fun onError(error: ImageCaptureException) {}
+                        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                            makeImage(currentTrait)
+                        }
+                    })
+            }
         }
     }
 
@@ -175,13 +188,13 @@ class PhotoTraitLayout : CameraTrait {
      */
     private fun bindPreviewLifecycle() {
 
-        previewViewHolder?.previewView?.visibility = View.VISIBLE
+        previewHolder?.previewView?.visibility = VISIBLE
 
-        previewViewHolder?.previewView?.implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+        previewHolder?.previewView?.implementationMode = PreviewView.ImplementationMode.COMPATIBLE
 
-        previewViewHolder?.embiggenButton?.visibility = View.VISIBLE
+        previewHolder?.embiggenButton?.visibility = VISIBLE
 
-        previewViewHolder?.embiggenButton?.setOnClickListener {
+        previewHolder?.embiggenButton?.setOnClickListener {
 
             launchCameraX()
 
@@ -191,19 +204,26 @@ class PhotoTraitLayout : CameraTrait {
 
             val resolution = getSupportedResolutionByPreferences()
 
-            controller.getCameraXFacade().bindPreview(
-                previewViewHolder?.previewView,
-                resolution,
-                currentTrait.id,
-                Handler(Looper.getMainLooper())
-            ) { camera, executor, capture ->
-
-                setupCaptureUi(camera, executor, capture)
-            }
+            // use an overridable binding so VideoTraitLayout can request video-capable preview
+            bindPreviewLifecycleForMode(resolution)
 
         } catch (e: IllegalArgumentException) {
 
             e.printStackTrace()
+        }
+    }
+
+    // Overridable hook: bind preview lifecycle for a given camera mode. Default uses image capture preview.
+    protected open fun bindPreviewLifecycleForMode(resolution: Size?) {
+        controller.getCameraXFacade().bindPreview(
+            previewHolder?.previewView,
+            resolution,
+            currentTrait.id,
+            null,
+            showCropRegion = true
+        ) { _, executor, capture ->
+
+            setupCaptureUi( executor, capture)
         }
     }
 
@@ -225,9 +245,38 @@ class PhotoTraitLayout : CameraTrait {
         return resolution
     }
 
+    // whether the crop region overlay should be drawn on the inline preview
+    protected open fun isCropOverlayEnabled() = true
+
+    protected open fun updateCropRegion() {
+        val pv = previewHolder?.previewView ?: getPreviewViewHolder()?.previewView
+        if (pv != null) {
+            controller.getCameraXFacade().updateCropRegion(
+                pv,
+                currentTrait.id,
+                showCropRegion = isCropOverlayEnabled()
+            )
+        } else if (isPreviewable()) {
+            awaitPreviewHolder {
+                val view = previewHolder?.previewView ?: getPreviewViewHolder()?.previewView
+                if (view != null) {
+                    controller.getCameraXFacade().updateCropRegion(
+                        view,
+                        currentTrait.id,
+                        showCropRegion = isCropOverlayEnabled()
+                    )
+                }
+            }
+        }
+    }
+
     override fun loadLayout() {
         super.loadLayout()
-        setup()
+        if (!isCameraActive) {
+            setup()
+        } else {
+            updateCropRegion()
+        }
     }
 
     override fun showSettings() {
@@ -256,7 +305,7 @@ class PhotoTraitLayout : CameraTrait {
 
             controller.getCameraXFacade().unbind()
 
-            previewViewHolder = null
+            previewHolder = null
 
             loadAdapterItems()
 
@@ -268,11 +317,11 @@ class PhotoTraitLayout : CameraTrait {
         }
     }
 
-    private fun awaitPreviewHolder(callback: () -> Unit) {
+    protected open fun awaitPreviewHolder(callback: () -> Unit) {
 
-        previewViewHolder = getPreviewViewHolder()
+        previewHolder = getPreviewViewHolder()
 
-        if (previewViewHolder == null && isPreviewable()) {
+        if (previewHolder == null && isPreviewable()) {
 
             Handler(Looper.getMainLooper()).postDelayed({
                 awaitPreviewHolder(callback)
@@ -286,15 +335,15 @@ class PhotoTraitLayout : CameraTrait {
 
     private fun setupSystemCameraMode() {
 
-        previewViewHolder?.previewView?.visibility = View.GONE
+        previewHolder?.previewView?.visibility = GONE
 
-        previewViewHolder?.embiggenButton?.visibility = View.GONE
+        previewHolder?.embiggenButton?.visibility = GONE
 
         controller.getCameraXFacade().unbind()
 
         setupCaptureButton {
 
-            takePicture()
+            capture()
         }
 
         loadAdapterItems()
@@ -314,9 +363,14 @@ class PhotoTraitLayout : CameraTrait {
         bindCameraForInformation()
     }
 
-    fun makeImage(currentTrait: TraitObject) {
+    open fun makeImage(currentTrait: TraitObject): Boolean {
 
         val file = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
+
+        if (!file.exists() || file.length() == 0L) {
+            Log.e(TAG, "makeImage: temp file is missing or empty — camera may not have written to the output URI")
+            return false
+        }
 
         file.inputStream().use { stream ->
 
@@ -330,16 +384,19 @@ class PhotoTraitLayout : CameraTrait {
                 SaveState.SINGLE_SHOT
             )
         }
+
+        return true
     }
 
     /**
      * When button is pressed, create a cached image and switch to the camera intent.
      * CollectActivity will receive REQUEST_IMAGE_CAPTURE and call this layout's makeImage() method.
      */
-    private fun takePicture() {
+    protected open fun capture() {
 
         val file = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
 
+        file.delete()
         file.createNewFile()
 
         val uri =
@@ -350,6 +407,10 @@ class PhotoTraitLayout : CameraTrait {
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(context.packageManager) != null) {
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
+            // Required on Android 7.0+ so the camera app can write to the FileProvider URI.
+            // Without this the camera silently fails to save and returns RESULT_OK with an empty file.
+            takePictureIntent.clipData = ClipData.newRawUri("", uri)
+            takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             (context as Activity).startActivityForResult(
                 takePictureIntent,
                 PICTURE_REQUEST_CODE
@@ -359,19 +420,34 @@ class PhotoTraitLayout : CameraTrait {
         }
     }
 
-    private fun launchCameraX() {
+    protected open fun launchCameraX(mode: String = CameraActivity.MODE_PHOTO) {
         controller.getCameraXFacade().unbind()
+        isCameraActive = false
         val intent = Intent(context, CameraActivity::class.java)
         //set current trait id to set crop region
-        intent.putExtra(CameraActivity.EXTRA_TRAIT_ID, currentTrait.id)
+        intent.putExtra(CameraActivity.EXTRA_TRAIT_ID, currentTrait.id.toInt())
+        intent.putExtra(CameraActivity.EXTRA_STUDY_ID, (activity as CollectActivity).studyId)
+        intent.putExtra(CameraActivity.EXTRA_OBS_UNIT, currentRange.uniqueId)
+        if (mode.isNotEmpty()) intent.putExtra(CameraActivity.EXTRA_MODE, mode)
+        // mark that CameraActivity was launched from PhotoTrait so it can behave accordingly
+        intent.putExtra(CameraActivity.EXTRA_LAUNCHED_FOR_PHOTO_TRAIT, true)
         activity?.startActivityForResult(intent, PICTURE_REQUEST_CODE)
+    }
+
+    override fun onRefresh() {
+        super.onRefresh()
+        if (!isCameraActive) {
+            setup()
+        } else {
+            updateCropRegion()
+        }
     }
 
     override fun refreshLock() {
         super.refreshLock()
         (context as CollectActivity).traitLockData()
         try {
-            loadLayout()
+            onRefresh()
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }

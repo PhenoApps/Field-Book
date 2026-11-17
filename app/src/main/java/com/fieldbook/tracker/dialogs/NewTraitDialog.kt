@@ -12,28 +12,37 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts.TakePicture
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.activities.TraitEditorActivity
 import com.fieldbook.tracker.adapters.TraitFormatAdapter
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.TraitFormatParametersAdapter
 import com.fieldbook.tracker.traits.formats.ValidationResult
+import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
+import com.fieldbook.tracker.traits.formats.parameters.CanopySensitivityParameter
+import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.traits.formats.ui.ParameterScrollView
 import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.VibrateUtil
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.SoftKeyboardUtil
 import javax.inject.Inject
+import androidx.core.content.edit
+import androidx.lifecycle.lifecycleScope
+import com.fieldbook.tracker.database.repository.TraitRepository
+import com.fieldbook.tracker.traits.formats.parameters.DisplayValueParameter
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class NewTraitDialog(
-    private val activity: Activity
+    private val activity: Activity,
 ) :
     DialogFragment(),
     TraitFormatAdapter.FormatSelectionListener,
@@ -63,10 +72,19 @@ class NewTraitDialog(
     @Inject
     lateinit var database: DataHelper
 
-    //flag to just return selectable format
+    @Inject
+    lateinit var traitRepo: TraitRepository
+
+    private val canopyTestCaptureLauncher = registerForActivityResult(TakePicture()) { success ->
+        if (success) {
+            parametersSv.findHolder<CanopySensitivityParameter.ViewHolder>()?.onTestCaptureResult()
+        }
+    }
+
+    // flag to just return selectable format
     var isSelectingFormat: Boolean = false
 
-    //flag for editing existing brapi variable being imported
+    // flag for editing existing brapi variable being imported
     var isBrapiTraitImport: Boolean = false
 
     // UI elements of new trait dialog
@@ -78,13 +96,22 @@ class NewTraitDialog(
     private var positiveBtn: Button? = null
     private var neutralBtn: Button? = null
 
-    //holds the trait objects sent from trait editor activity
+    // holds the trait objects sent from trait editor activity
     private var initialTraitObject: TraitObject? = null
 
-    //when editing this tracks the original object, to see if values changed when discarding
+    // when editing this tracks the original object, to see if values changed when discarding
     private var originalInitialTraitObject: TraitObject? = null
 
-    //private var createVisible: Boolean
+    // tracks whether onStart has already built the dialog's initial screen, see onStart
+    private var isDialogPopulated = false
+
+    // private var createVisible: Boolean
+
+    private var onTraitSaved: (() -> Unit)? = null
+
+    fun setOnTraitSavedListener(listener: () -> Unit) {
+        onTraitSaved = listener
+    }
 
     fun setTraitObject(traitObject: TraitObject?) {
 
@@ -107,14 +134,22 @@ class NewTraitDialog(
         dialog?.window?.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
         dialog?.window?.clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
 
-        //following stretches dialog a bit for more pixel real estate
+        // following stretches dialog a bit for more pixel real estate
         val params = dialog?.window?.attributes
         params?.width = LinearLayout.LayoutParams.MATCH_PARENT
         params?.height = LinearLayout.LayoutParams.WRAP_CONTENT
         dialog?.window?.attributes = params
 
+        /**
+         * The dialog view survives onStop/onStart (returning from the test capture camera, for
+         * example), so the initial screen is only built once per dialog creation. Rebuilding it
+         * would send the user back to the format selector and discard the parameter views.
+         */
         context?.let {
-            show()
+            if (!isDialogPopulated) {
+                isDialogPopulated = true
+                show()
+            }
         }
     }
 
@@ -132,10 +167,9 @@ class NewTraitDialog(
 
             neutralBtn?.setText(R.string.dialog_back)
             neutralBtn?.setOnClickListener {
-                isShowingCameraOptions = false
-                isShowingSpectralOptions = false
+                isShowingSubFormat = false
                 traitFormatsRv.adapter = null
-                showFormatLayouts(Formats.getMainFormats())
+                showFormatLayouts(topLevelFormats)
             }
 
         } else {
@@ -166,69 +200,89 @@ class NewTraitDialog(
     }
 
     private fun showFormatParameters(format: Formats) {
+        lifecycleScope.launch {
 
-        positiveBtn?.visibility = View.VISIBLE
-        negativeBtn?.visibility = View.VISIBLE
+            positiveBtn?.visibility = View.VISIBLE
+            negativeBtn?.visibility = View.VISIBLE
 
-        traitFormatsRv.visibility = View.GONE
-        parametersSv.visibility = View.VISIBLE
+            traitFormatsRv.visibility = View.GONE
+            parametersSv.visibility = View.VISIBLE
 
-        //if editing a variable and observations exist, don't allow the format to change
-        var observationsExist = false
-        if (initialTraitObject != null) {
-            initialTraitObject?.id?.let { traitDbId ->
-                observationsExist = database.getAllObservationsOfVariable(traitDbId).isNotEmpty()
-                variableEditableErrorTv.visibility =
-                    if (observationsExist) View.VISIBLE else View.GONE
-            }
-        }
-
-        if (initialTraitObject == null || !observationsExist) {
-
-            neutralBtn?.setText(R.string.dialog_back)
-            neutralBtn?.setOnClickListener {
-                //close keyboard programmatically
-                SoftKeyboardUtil.closeKeyboard(context, traitFormatsRv, 1L)
-
-                (traitFormatsRv.adapter as? TraitFormatAdapter)?.selectedFormat = null
-
-                if (observationsExist) {
-                    onCancel()
-                }
-
-                if (format in Formats.getCameraFormats()) {
-
-                    isShowingCameraOptions = true
-
-                    showFormatLayouts(Formats.getCameraFormats(), showBack = true)
-
-                } else {
-
-                    showFormatLayouts(Formats.getMainFormats())
-
+            // if editing a variable and observations exist, don't allow the format to change
+            var observationsExist = false
+            if (initialTraitObject != null) {
+                initialTraitObject?.id?.let { traitDbId ->
+                    observationsExist = traitRepo.getTraitObservations(traitDbId).isNotEmpty()
+                    variableEditableErrorTv.visibility =
+                        if (observationsExist) View.VISIBLE else View.GONE
                 }
             }
-        }
 
-        negativeBtn?.setText(R.string.dialog_cancel)
-        negativeBtn?.setOnClickListener {
-            onCancel()
-        }
+            if (initialTraitObject == null || !observationsExist) {
 
-        positiveBtn?.setText(R.string.dialog_save)
-        positiveBtn?.setOnClickListener {
-            onSave(format)
-        }
+                neutralBtn?.setText(R.string.dialog_back)
+                neutralBtn?.setOnClickListener {
+                    // close keyboard programmatically
+                    SoftKeyboardUtil.closeKeyboard(context, traitFormatsRv, 1L)
 
-        setupParametersLinearLayout(format)
+                    (traitFormatsRv.adapter as? TraitFormatAdapter)?.selectedFormat = null
 
-        context?.let { ctx ->
-            dialog?.setTitle(
-                ctx.getString(
-                    R.string.trait_creator_parameters_title,
-                    format.getName(ctx)
+                    if (observationsExist) {
+                        onCancel()
+                    }
+
+                    if (format in Formats.getCameraFormats()) {
+
+                        isShowingSubFormat = true
+
+                        showFormatLayouts(Formats.getCameraFormats(), showBack = true)
+
+                    } else if (format in Formats.getHardwareFormats()) {
+
+                        isShowingSubFormat = true
+
+                        showFormatLayouts(Formats.getHardwareFormats(), showBack = true)
+
+                    } else if (format in Formats.getCustomFormats()) {
+
+                        isShowingSubFormat = true
+
+                        showFormatLayouts(Formats.getCustomFormats(), showBack = true)
+
+                    } else if (format in Formats.getExperimentalFormats()) {
+
+                        isShowingSubFormat = true
+
+                        showFormatLayouts(Formats.getExperimentalFormats(), showBack = true)
+
+                    } else {
+
+                        showFormatLayouts(topLevelFormats)
+
+                    }
+                }
+            }
+
+            negativeBtn?.setText(R.string.dialog_cancel)
+            negativeBtn?.setOnClickListener {
+                onCancel()
+            }
+
+            positiveBtn?.setText(R.string.dialog_save)
+            positiveBtn?.setOnClickListener {
+                onSave(format)
+            }
+
+            setupParametersLinearLayout(format)
+
+            context?.let { ctx ->
+                dialog?.setTitle(
+                    ctx.getString(
+                        R.string.trait_creator_parameters_title,
+                        format.getName(ctx)
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -254,15 +308,27 @@ class NewTraitDialog(
         variableEditableErrorTv =
             view.findViewById(R.id.dialog_new_trait_variable_editable_error_tv)
 
+        isDialogPopulated = false
+
         return builder.create()
     }
 
     private fun show() {
-        if (initialTraitObject == null) showFormatLayouts(Formats.getMainFormats()) else showFormatParameters(
-            Formats.entries.first {
+        topLevelFormats = if (prefs.getBoolean(PreferenceKeys.EXPERIMENTAL_TRAITS_CATEGORY, false)) {
+            Formats.getMainFormats() + listOf(Formats.BASE_EXPERIMENTAL)
+        } else {
+            Formats.getMainFormats()
+        }
+
+        if (initialTraitObject == null) {
+            showFormatLayouts(topLevelFormats)
+        } else {
+            val existingFormat = Formats.entries.firstOrNull {
                 initialTraitObject?.format == it.getDatabaseName()
             }
-        )
+            if (existingFormat == null) showFormatLayouts(topLevelFormats)
+            else showFormatParameters(existingFormat)
+        }
     }
 
     private fun getSelectedFormat(): Formats? =
@@ -275,15 +341,62 @@ class NewTraitDialog(
 
         format.getTraitFormatDefinition().parameters.forEach { parameter ->
 
+            val isBrapiTrait = initialTraitObject?.traitDataSource?.let {
+                it.isNotEmpty() && it != "local"
+            } == true
+
+            // show the DisplayValueParameter only for brapi traits
+            if (parameter is DisplayValueParameter && !isBrapiTrait) {
+                return@forEach
+            }
+
+            if (parameter is ResourceFileParameter) {
+
+                parameter.setActivity(activity)
+
+            }
+
+            if (parameter is CanopySensitivityParameter) {
+
+                parameter.setActivity(activity)
+
+            }
+
             parameter.createViewHolder(parametersSv)?.let { holder ->
 
                 holder.bind(parameter, initialTraitObject)
 
                 parametersSv.addViewHolder(holder)
+
+                (holder as? CanopySensitivityParameter.ViewHolder)?.setTestCaptureLauncher(canopyTestCaptureLauncher)
+
+                lockCanopySensitivityIfCollected(holder)
             }
         }
     }
 
+
+    /**
+     * Sensitivity can't be edited once the trait has observations, since the threshold is applied
+     * to stored captures as well as new ones.
+     */
+    private fun lockCanopySensitivityIfCollected(holder: BaseFormatParameter.ViewHolder) {
+
+        val canopyHolder = holder as? CanopySensitivityParameter.ViewHolder ?: return
+
+        val traitId = initialTraitObject?.id
+
+        if (traitId.isNullOrEmpty()) return
+
+        lifecycleScope.launch {
+
+            if (traitRepo.getTraitObservations(traitId).isNotEmpty()) {
+
+                canopyHolder.setLocked()
+
+            }
+        }
+    }
 
     private fun setupTraitFormatsRv(formats: List<Formats>) {
 
@@ -300,67 +413,69 @@ class NewTraitDialog(
     }
 
     private fun onSave(format: Formats) {
+        lifecycleScope.launch {
 
-        var pass = true
+            var pass = true
 
-        if (validateParameters().result != true) pass = false
+            if (validateParameters().result != true) pass = false
 
-        if (pass && initialTraitObject == null) {
+            if (pass && initialTraitObject == null) {
 
-            if (validateFormat().result != true) {
-
-                pass = false
-
-            } else {
-
-                val pos: Int = database.maxPositionFromTraits + 1
-
-                val t = createTraitObjectFromUi()
-
-                t.realPosition = pos
-
-                database.insertTraits(t)
-
-                onSaveFinish()
-            }
-
-        } else if (pass) {
-
-            initialTraitObject?.let { traitObject ->
-
-                if (validateFormat().result != true && !isBrapiTraitImport) {
+                if (validateFormat().result != true) {
 
                     pass = false
 
                 } else {
 
-                    context?.let {
+                    val pos: Int = traitRepo.getMaxPosition() + 1
 
-                        val t = updateInitialTraitObjectFromUi(traitObject)
+                    val t = createTraitObjectFromUi()
 
-                        t.format = format.getDatabaseName()
+                    t.realPosition = pos
 
-                        if (isBrapiTraitImport) {
+                    traitRepo.insertTrait(t)
 
-                            (activity as? TraitObjectUpdateListener)?.onTraitObjectUpdated(t)
+                    onSaveFinish()
+                }
 
-                        } else {
+            } else if (pass) {
 
-                            updateDatabaseTrait(t)
+                initialTraitObject?.let { traitObject ->
 
+                    if (validateFormat().result != true && !isBrapiTraitImport) {
+
+                        pass = false
+
+                    } else {
+
+                        context?.let {
+
+                            val t = updateInitialTraitObjectFromUi(traitObject)
+
+                            t.format = format.getDatabaseName()
+
+                            if (isBrapiTraitImport) {
+
+                                (activity as? TraitObjectUpdateListener)?.onTraitObjectUpdated(t)
+
+                            } else {
+
+                                updateDatabaseTrait(t)
+
+                            }
+
+                            onSaveFinish()
                         }
-
-                        onSaveFinish()
                     }
                 }
             }
-        }
 
-        if (!pass) {
+            if (!pass) {
 
-            vibrator.vibrate()
+                vibrator.vibrate()
 
-            soundHelperImpl.playError()
+                soundHelperImpl.playError()
+            }
         }
     }
 
@@ -368,14 +483,14 @@ class NewTraitDialog(
 
         if (!isSelectingFormat && !isBrapiTraitImport) {
 
-            val ed = this.prefs.edit()
-            ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, false)
-            ed.apply()
+            prefs.edit { putBoolean(GeneralKeys.TRAITS_EXPORTED, false) }
 
             CollectActivity.reloadData = true
 
             soundHelperImpl.playCelebrate()
         }
+
+        onTraitSaved?.invoke()
 
         (activity as? TraitDialogDismissListener)?.onNewTraitDialogDismiss()
 
@@ -461,21 +576,10 @@ class NewTraitDialog(
      * The trait object passed should already have UI loaded values.
      * Simply pass these to the DataHelper editTraits function to call SQL update.
      */
-    private fun updateDatabaseTrait(traitObject: TraitObject) {
+    private suspend fun updateDatabaseTrait(traitObject: TraitObject) {
 
-        database.editTraits(
-            traitObject.id,
-            traitObject.name,
-            traitObject.format,
-            traitObject.defaultValue,
-            traitObject.minimum,
-            traitObject.maximum,
-            traitObject.details,
-            traitObject.categories,
-            traitObject.closeKeyboardOnOpen,
-            traitObject.cropImage,
-            traitObject.saveImage,
-        )
+        traitRepo.updateTrait(traitObject)
+
     }
 
     private fun validateFormat(): ValidationResult {
@@ -492,7 +596,7 @@ class NewTraitDialog(
     private fun validateParameters(): ValidationResult {
 
         return parametersSv.validateParameters(
-            database = database,
+            traitRepo = traitRepo,
             initialTraitObject = initialTraitObject
         )
     }
@@ -513,26 +617,29 @@ class NewTraitDialog(
         }
     }
 
-    private var isShowingCameraOptions = false
-    private var isShowingSpectralOptions = false
+    private var isShowingSubFormat = false
+    private var topLevelFormats: List<Formats> = emptyList()
+
+    fun onTestCaptureResult() {
+        parametersSv.findHolder<CanopySensitivityParameter.ViewHolder>()?.onTestCaptureResult()
+    }
 
     override fun onSelected(format: Formats) {
 
-        if (format == Formats.BASE_PHOTO && !isShowingCameraOptions) {
+        if (format in Formats.getBaseFormats() && !isShowingSubFormat) {
 
-            isShowingCameraOptions = true
-
-            traitFormatsRv.adapter = null
-
-            showFormatLayouts(Formats.getCameraFormats(), showBack = true)
-
-        } else if (format == Formats.BASE_SPECTRAL && !isShowingSpectralOptions) {
-
-            isShowingSpectralOptions = true
+            isShowingSubFormat = true
 
             traitFormatsRv.adapter = null
 
-            showFormatLayouts(Formats.getSpectralFormats(), showBack = true)
+            showFormatLayouts(when (format) {
+                Formats.BASE_PHOTO -> Formats.getCameraFormats()
+                Formats.BASE_SPECTRAL -> Formats.getSpectralFormats()
+                Formats.HARDWARE -> Formats.getHardwareFormats()
+                Formats.CUSTOM -> Formats.getCustomFormats()
+                Formats.BASE_EXPERIMENTAL -> Formats.getExperimentalFormats()
+                else -> Formats.getMainFormats()
+            }, showBack = true)
 
         } else {
 

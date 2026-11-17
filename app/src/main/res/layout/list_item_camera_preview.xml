@@ -18,14 +18,21 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <androidx.camera.view.PreviewView
-            tools:visibility="visible"
-            android:visibility="gone"
-            android:id="@+id/trait_camera_pv"
+        <!-- Container that allows showing the live PreviewView -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="fitCenter"
-            app:implementationMode="compatible"/>
+            android:layout_height="match_parent">
+
+            <androidx.camera.view.PreviewView
+                tools:visibility="visible"
+                android:visibility="gone"
+                android:id="@+id/trait_camera_pv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                app:implementationMode="compatible"/>
+
+        </FrameLayout>
 
     </androidx.cardview.widget.CardView>
 

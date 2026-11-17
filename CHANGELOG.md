@@ -13,6 +13,215 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [v7.3.4] - 2026-11-17
+
+### Fixed
+- Bug fixes and enhancements (https://github.com/PhenoApps/Field-Book/pull/1577)
+
+## [v7.3.3] - 2026-11-10
+
+### Fixed
+- Bug fixes and enhancements (https://github.com/PhenoApps/Field-Book/pull/1559)
+- Features requiring FFmpegKit no longer crash on 32-bit devices (https://github.com/PhenoApps/Field-Book/pull/1535)
+
+## [v7.3.2] - 2026-10-06
+
+### Changed
+- Improved USB camera integration (https://github.com/PhenoApps/Field-Book/pull/1544)
+
+### Fixed
+- Slashes in trait names no longer stop images from saving (https://github.com/PhenoApps/Field-Book/pull/1556)
+
+## [v7.3.1] - 2026-09-29
+
+### Added
+- Sync now lists observations that cannot be sent via BrAPI (https://github.com/PhenoApps/Field-Book/pull/1542)
+
+### Changed
+- User is now notified of failed database writes (https://github.com/PhenoApps/Field-Book/pull/1515)
+
+### Fixed
+- Boox barcode scanning and theme improvements (https://github.com/PhenoApps/Field-Book/pull/1532)
+- InnoSpectra and Nix trait improvements and bug fixes (https://github.com/PhenoApps/Field-Book/pull/1529)
+- GoPro connection improvements (https://github.com/PhenoApps/Field-Book/pull/1522)
+- Canopy trait improvements and bug fixes (https://github.com/PhenoApps/Field-Book/pull/1514)
+- BrAPI account manager improvements and optimizations (https://github.com/PhenoApps/Field-Book/pull/1524)
+- Traits imported via BrAPI are now filtered to match the correct observation unit level (https://github.com/PhenoApps/Field-Book/pull/1513)
+- Photos taken on Samsung One UI 8.5 devices are now saved correctly (https://github.com/PhenoApps/Field-Book/pull/1525)
+- Last selected entry no longer changes after modifying trait visibility (https://github.com/PhenoApps/Field-Book/pull/1517)
+- Fixed several issues with the Pollinator trait (https://github.com/PhenoApps/Field-Book/pull/1519)
+
+## [v7.3.0] - 2026-08-10
+
+### Added
+- New Canopy Cover experimental trait (https://github.com/PhenoApps/Field-Book/pull/1501)
+- New Pollinator trait to count categories for a set duration (https://github.com/PhenoApps/Field-Book/pull/1492)
+- Datagrid cells can now be shaded with a color gradient (https://github.com/PhenoApps/Field-Book/pull/1488)
+- Datagrid columns can now be sorted (https://github.com/PhenoApps/Field-Book/pull/1488)
+- Datagrid column width can be adjusted to match values (https://github.com/PhenoApps/Field-Book/pull/1488)
+- Datagrid columns can now be locked to remain visible while scrolling (https://github.com/PhenoApps/Field-Book/pull/1488)
+- Multiple attributes can now be selected as row headers in Datagrid (https://github.com/PhenoApps/Field-Book/pull/1488)
+- New Datagrid Map View matches spatial layout of the field (https://github.com/PhenoApps/Field-Book/pull/1488)
+- Multiple BrAPI accounts can now be added (https://github.com/PhenoApps/Field-Book/pull/1412)
+- BrAPI accounts are now managed in Android system settings (https://github.com/PhenoApps/Field-Book/pull/1412)
+- Entry navigation area can be optionally hidden from the interface (https://github.com/PhenoApps/Field-Book/pull/1502)
+
+### Fixed
+- Bug fixes and enhancements (https://github.com/PhenoApps/Field-Book/pull/1500)
+
+## [v7.2.3] - 2026-07-24
+
+### Fixed
+- Categorical traits with multiple categories selected now correctly reset (https://github.com/PhenoApps/Field-Book/pull/1498)
+- Auto advance in date traits now correctly resets after a value is saved (https://github.com/PhenoApps/Field-Book/pull/1496)
+
+## [v7.2.2] - 2026-07-07
+
+### Fixed
+- Photos are no longer corrupted on certain Samsung devices (https://github.com/PhenoApps/Field-Book/pull/1489)
+- Numerous BrAPI bug fixes and improvements (https://github.com/PhenoApps/Field-Book/pull/1483)
+
+## [v7.2.1] - 2026-04-30
+
+### Added
+- New Experimental Traits setting to show traits under development (https://github.com/PhenoApps/Field-Book/pull/1469)
+
+### Fixed
+- Large values now fit correctly in the repeated values view (https://github.com/PhenoApps/Field-Book/pull/1468)
+- InfoBars no longer disappear when attempting to display trait data (https://github.com/PhenoApps/Field-Book/pull/1458)
+- Repeated measures can now still be collected when data input is frozen (https://github.com/PhenoApps/Field-Book/pull/1459)
+- Nix trait now works correctly in public builds (https://github.com/PhenoApps/Field-Book/pull/1465)
+- Canon trait now works correctly with EOS 6D Mark II (https://github.com/PhenoApps/Field-Book/pull/1463)
+
+## [v7.2.0] - 2026-03-17
+
+### Added
+- New Innospectra trait format (https://github.com/PhenoApps/Field-Book/pull/1392)
+- Entry progress bar is now scrollable for navigation (https://github.com/PhenoApps/Field-Book/pull/1414)
+- Simpler debugging now in system settings (https://github.com/PhenoApps/Field-Book/pull/1438)
+- Categorical traits now have an option that allows new categories to be defined during collection (https://github.com/PhenoApps/Field-Book/pull/1411)
+
+### Changed
+- Media now exports as file name instead of full URI (https://github.com/PhenoApps/Field-Book/pull/1443)
+- Sample files updated (https://github.com/PhenoApps/Field-Book/pull/1444)
+- Hardware and Custom trait groups added to the trait creator (https://github.com/PhenoApps/Field-Book/pull/1445)
+- Disease severity scale is now created and managed within Field Book (https://github.com/PhenoApps/Field-Book/pull/1416)
+- Delete field dialog now includes an archive option (https://github.com/PhenoApps/Field-Book/pull/1413)
+
+### Fixed
+- Toolbars now use the correct themes (https://github.com/PhenoApps/Field-Book/pull/1437)
+- Trait files from BreedBase are now correctly imported (https://github.com/PhenoApps/Field-Book/pull/1442)
+
+## [v7.1.2] - 2026-02-24
+
+### Added
+- External scanners can now be used on numeric and percent traits (https://github.com/PhenoApps/Field-Book/pull/1410)
+
+### Changed
+- Bundling more than 100 media items now warns users that it will slow down the app (https://github.com/PhenoApps/Field-Book/pull/1407)
+
+### Fixed
+- Both names and aliases now display in the field search results (https://github.com/PhenoApps/Field-Book/pull/1408)
+- BrAPI observation timestamps now update correctly when edited (https://github.com/PhenoApps/Field-Book/pull/1432)
+
+## [v7.1.1] - 2026-02-19
+
+### Fixed
+- Bug fixes and enhancements (https://github.com/PhenoApps/Field-Book/pull/1418)
+
+## [v7.1.0] - 2026-02-18
+
+### Added
+- Bottom toolbar in Collect can now be used for barcode navigation (https://github.com/PhenoApps/Field-Book/pull/1390)
+- Photos, videos, and audio files can now be attached to individual observations (https://github.com/PhenoApps/Field-Book/pull/1390)
+- Timestamp can now be optionally displayed under phenotypes in Collect (https://github.com/PhenoApps/Field-Book/pull/1409)
+- New video trait format (https://github.com/PhenoApps/Field-Book/pull/1390)
+
+### Changed
+- Nearest field finder now searches across all location data (https://github.com/PhenoApps/Field-Book/pull/1399)
+
+### Fixed
+- Camera previews no longer reload when navigating between entries (https://github.com/PhenoApps/Field-Book/pull/1405)
+- GeoNav popup no longer causes a crash when navigating (https://github.com/PhenoApps/Field-Book/pull/1415)
+- Correct value is now displayed for saved dates (https://github.com/PhenoApps/Field-Book/pull/1404)
+
+## [v7.0.2] - 2026-02-10
+
+### Fixed
+- Internal GeoJSON data are now saved as doubles (https://github.com/PhenoApps/Field-Book/pull/1394)
+- BrAPI improvements and optimizations (https://github.com/PhenoApps/Field-Book/pull/1396)
+
+## [v7.0.1] - 2026-02-01
+
+### Fixed
+- BrAPI imports no longer always include "TEST" entry types (https://github.com/PhenoApps/Field-Book/pull/1387)
+- Improvements for Canon integration (https://github.com/PhenoApps/Field-Book/pull/1389)
+
+## [v7.0.0] - 2026-01-01
+
+### Added
+- Traits list now includes individual trait pages with options that are adjustable on a per trait basis
+- Traits include an option to enable repeated measures
+- Traits include an option to automatically switch to the next entry when data is input
+- Traits include an option to choose a specific resource image that will be displayed in Collect
+- Numeric traits include an option to ask if outlier values should be allowed
+- Numeric traits include an option to limit decimal places for values
+- Numeric traits include an option to disable the math symbol buttons
+- Date traits include an option to convert between date and day of year
+- Categorical traits include an option to collect multiple categories
+- Categorical traits imported via BrAPI include an option to display either the label or value
+- Traits can now be renamed with previous names appearing in a list
+- BrAPI sync and export are now merged into a single screen
+- BrAPI server compatibility can now be viewed in the BrAPI settings
+
+### Changed
+- Multicat trait format removed (replaced with categorical option)
+- Removed the following settings (moved to traits): day of year, BrAPI label/value, enable repeated measures
+- Copy, edit, and deleting traits is now within each individual trait
+- Images can now be skipped during BrAPI export
+
+### Fixed
+- Date trait calendar now uses the correct day of year setting
+
+## [v6.3.6] - 2025-12-02
+
+### Added
+
+### Changed
+
+### Fixed
+- BrAPI authorization redirect link updated
+
+## [v6.3.5] - 2025-12-02
+
+### Added
+
+### Changed
+
+### Fixed
+- BrAPI now redirects and opens Field Book when authorizing
+
+## [v6.3.4] - 2025-11-17
+
+### Added
+
+### Changed
+- New BrAPI import now only displays active trials and studies
+
+### Fixed
+- GoPro no longer disconnects after image capture
+- BMS studies now correctly import via BrAPI (observation level and additional info fixes)
+- Numerous bug fixes and enhancements
+
+## [v6.3.3] - 2025-11-03
+
+### Added
+
+### Changed
+
+### Fixed
+- GoPro preview is no longer blank on certain devices
+
 ## [v6.3.2] - 2025-10-20
 
 ### Added
@@ -780,4 +989,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.3.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.0
 [v6.3.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.1
 
+
 [v6.3.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.2
+[v6.3.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.3
+
+
+[v6.3.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.4
+[v6.3.5]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.5
+
+
+[v6.3.6]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.6
+
+
+[v7.0.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.0.0
+[v7.0.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.0.1
+[v7.0.2]: https://github.com/PhenoApps/Field-Book/releases/tag/7.0.2
+
+[v7.1.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.1.0
+[v7.1.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.1.1
+[v7.1.2]: https://github.com/PhenoApps/Field-Book/releases/tag/7.1.2
+
+[v7.2.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.0
+
+[v7.2.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.1
+
+[v7.2.2]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.2
+[v7.2.3]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.3
+
+[v7.3.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.3.0
+[v7.3.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.3.1
+[v7.3.2]: https://github.com/PhenoApps/Field-Book/releases/tag/7.3.2
+[v7.3.3]: https://github.com/PhenoApps/Field-Book/releases/tag/7.3.3
+[v7.3.4]: https://github.com/PhenoApps/Field-Book/releases/tag/7.3.4

@@ -7,10 +7,18 @@ import com.fieldbook.tracker.views.TraitBoxView
 
 class MediaKeyCodeActionHelper {
 
-    enum class VolumeNavigation {
-        DISABLED,
-        TRAIT_NAVIGATION,
-        RANGE_NAVIGATION
+    enum class VolumeNavigation(val value: String) {
+        DISABLED("0"),
+        TRAIT_NAVIGATION("1"),
+        RANGE_NAVIGATION("2");
+
+        companion object {
+            @JvmField
+            val DEFAULT = DISABLED
+
+            fun fromValue(value: String?): VolumeNavigation =
+                entries.find { it.value == value } ?: DEFAULT
+        }
     }
 
     companion object {
@@ -21,17 +29,14 @@ class MediaKeyCodeActionHelper {
 
             //bugfix for compatibility with old preference
             try {
-                prefs.getString(PreferenceKeys.VOLUME_NAVIGATION, VolumeNavigation.DISABLED.ordinal.toString())
+                prefs.getString(PreferenceKeys.VOLUME_NAVIGATION, VolumeNavigation.DEFAULT.value)
             } catch (e: ClassCastException) {
                 prefs.edit().remove(PreferenceKeys.VOLUME_NAVIGATION).apply()
             }
 
-            val volumeNavEnabled = when(prefs.getString(PreferenceKeys.VOLUME_NAVIGATION, VolumeNavigation.DISABLED.ordinal.toString())) {
-                VolumeNavigation.DISABLED.ordinal.toString() -> VolumeNavigation.DISABLED
-                VolumeNavigation.TRAIT_NAVIGATION.ordinal.toString() -> VolumeNavigation.TRAIT_NAVIGATION
-                VolumeNavigation.RANGE_NAVIGATION.ordinal.toString() -> VolumeNavigation.RANGE_NAVIGATION
-                else -> VolumeNavigation.DISABLED
-            }
+            val volumeNavEnabled = VolumeNavigation.fromValue(
+                prefs.getString(PreferenceKeys.VOLUME_NAVIGATION, VolumeNavigation.DEFAULT.value)
+            )
 
             val mediaControlEnabled = prefs.getBoolean(PreferenceKeys.MEDIA_KEYCODE_NAVIGATION, false)
 

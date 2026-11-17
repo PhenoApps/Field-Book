@@ -2,7 +2,6 @@ name: do-github-release
 
 # This workflow automates the app release process and supports multiple triggers:
 # - Manual dispatch: Releases unconditionally with a specified version bump.
-# - Dispatch from `process-pr-merge`: Releases unconditionally using the version bump from `process-pr-merge`.
 # - Weekly schedule: Runs every Monday at 3:00 PM EST and performs a patch release if the app directory has changed since the last release.
 
 # Key steps:
@@ -27,15 +26,17 @@ on:
 jobs:
   check-changes:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       release_required: ${{ steps.release-check.outputs.release_required }}
       bump_type: ${{ steps.release-check.outputs.bump_type }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
-          token: ${{ secrets.ACTIONS_PAT }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Determine Release Type and Necessity
         id: release-check
@@ -70,15 +71,17 @@ jobs:
           fi
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     needs: check-changes
     if: needs.check-changes.outputs.release_required == 'true'
     steps:
 
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
-          token: ${{ secrets.ACTIONS_PAT }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Bump Version in version.properties
         id: bump-version
@@ -108,65 +111,19 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
 
-      - name: Update changelog.xml
-        id: update-changelog-xml
-        run: |
-
-          # Read the Unreleased section and process notes based on type
-          RELEASE_CONTENT="" CURRENT_TYPE=""
-          while IFS= read -r note; do
-            if [[ "$note" == "### Added"* ]]; then
-              CURRENT_TYPE="new"
-            elif [[ "$note" == "### Changed"* ]]; then
-              CURRENT_TYPE="info"
-            elif [[ "$note" == "### Fixed"* ]]; then
-              CURRENT_TYPE="bugfix"
-            elif [[ "$note" =~ ^- ]]; then
-              clean_note=$(echo "$note" | sed -E 's/^- //; s/ *\(.*\)//')
-              RELEASE_CONTENT+="        <${CURRENT_TYPE}>${clean_note}</${CURRENT_TYPE}>\n"
-              #pr_number=$(echo "$note" | grep -oP 'pull/\K[0-9]+' || echo "N/A")
-              #RELEASE_CONTENT+="        <${CURRENT_TYPE}>${clean_note} (#${pr_number})</${CURRENT_TYPE}>\n"
-              
-            fi
-          done < <(sed -n '/## \[Unreleased\]/,/^## /p' CHANGELOG.md | sed '1,2d' | sed '$d')
-
-          # Generate, insert, and log the new release block
-          today=$(date +'%Y-%m-%d')
-          RELEASE_BLOCK="    <release date=\"$today\" versionCode=\"$VERSION_CODE\" versionName=\"v$VERSION\">\n"
-          RELEASE_BLOCK+="$RELEASE_CONTENT"
-          RELEASE_BLOCK+="    </release>"
-          sed -i "/<changelog>/a \\\n$RELEASE_BLOCK" app/src/main/res/raw/changelog.xml
-          echo "Generated release block:"
-          echo -e "$RELEASE_BLOCK"
-
-      - name: Process CHANGELOG.md
+      - name: Process CHANGELOG.md and update changelog.xml
         id: process-changelog
         run: |
-          unreleased_section=$(sed -n '/## \[Unreleased\]/,/^## /p' CHANGELOG.md | sed '1,2d' | sed '$d')
-
-          if [ -z "$unreleased_section" ]; then
-            changelog_escaped="No release notes"
-          else
-            changelog_escaped=$(echo "$unreleased_section" | sed 's/^- /✔ /g' | sed ':a;N;$!ba;s/\n/%0A/g')
-          fi
-
-          echo "changelog_additions=$changelog_escaped" >> $GITHUB_OUTPUT
-
-          today=$(date +'%Y-%m-%d')
-          sed -i "s/## \[Unreleased\]/## [v$VERSION] - $today/" CHANGELOG.md
-          sed -i '/## \[v'$VERSION'\]/i ## [Unreleased]\n\n### Added\n\n### Changed\n\n### Fixed\n' CHANGELOG.md
-
-          REPO_URL="https://github.com/${{ github.repository }}/releases/tag"
-          printf "\n[v$VERSION]: $REPO_URL/$VERSION" >> CHANGELOG.md
+          python3 .github/workflows/scripts/github-release.py "${{ github.repository }}" "CHANGELOG.md" "app/src/main/res/raw/changelog.xml"
 
       - name: Set Up Build Environment
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v6
         with:
           java-version: '17'
           distribution: 'temurin'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Install Build Tools 29.0.3
         run: sdkmanager "build-tools;29.0.3"
@@ -175,39 +132,64 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Get local.properties from secrets
-        run: echo "${{secrets.LOCAL_PROPERTIES }}" > $GITHUB_WORKSPACE/local.properties
-  
+        env:
+          LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
+        run: printenv LOCAL_PROPERTIES > $GITHUB_WORKSPACE/local.properties
+
       - name: Build APK
         run: ./gradlew app:assembleRelease
 
       - name: Sign APK
-        uses: r0adkll/sign-android-release@v1
-        with:
-          releaseDirectory: app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          ALIAS: ${{ secrets.ALIAS }}
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          BUILD_TOOLS="$ANDROID_HOME/build-tools/29.0.3"
+          DIR=app/build/outputs/apk/release
+          KEYSTORE="$RUNNER_TEMP/signing.jks"
+          trap 'rm -f "$KEYSTORE"' EXIT
+
+          echo "$SIGNING_KEY" | base64 -d > "$KEYSTORE"
+
+          "$BUILD_TOOLS/zipalign" -f -p 4 "$DIR/app-release-unsigned.apk" "$DIR/app-release-aligned.apk"
+
+          "$BUILD_TOOLS/apksigner" sign \
+            --ks "$KEYSTORE" \
+            --ks-key-alias "$ALIAS" \
+            --ks-pass env:KEY_STORE_PASSWORD \
+            --key-pass env:KEY_PASSWORD \
+            --out "$DIR/app-release-unsigned-signed.apk" \
+            "$DIR/app-release-aligned.apk"
+
+          "$BUILD_TOOLS/apksigner" verify "$DIR/app-release-unsigned-signed.apk"
 
       - name: Upload Built APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Signed APK
-          path: app/build/outputs/
+          path: app/build/outputs/apk/release/app-release-unsigned-signed.apk
+
+      # credentials are only configured for the push so the build can't read the PAT
+      - name: Configure Push Credentials
+        env:
+          ACTIONS_PAT: ${{ secrets.ACTIONS_PAT }}
+        run: |
+          AUTH=$(printf 'x-access-token:%s' "$ACTIONS_PAT" | base64 -w0)
+          echo "::add-mask::$AUTH"
+          git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $AUTH"
 
       - name: Commit Version and Changelog Changes
         if: ${{ success() }}
-        uses: EndBug/add-and-commit@v7
+        uses: EndBug/add-and-commit@v11
         with:
           add: "version.properties CHANGELOG.md app/src/main/res/raw/changelog.xml"
-          message: "Bump ${{ env.BUMP_TYPE }} and update changelog for v${{ env.VERSION }}"
-          token: ${{ secrets.ACTIONS_PAT }}
+          message: "Bump ${{ needs.check-changes.outputs.bump_type }} and update changelog for v${{ env.VERSION }}"
 
-      - name: Push Changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+      - name: Remove Push Credentials
+        if: ${{ always() }}
+        run: git config --local --unset-all http.https://github.com/.extraheader || true
 
       - name: Make GitHub Release
         uses: svenstaro/upload-release-action@v2
@@ -237,4 +219,4 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: com.fieldbook.tracker
           releaseFiles: app/build/outputs/apk/release/app-release-unsigned-signed.apk
-          track: alpha
+          tracks: alpha

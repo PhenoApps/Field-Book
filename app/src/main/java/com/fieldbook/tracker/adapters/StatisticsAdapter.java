@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +39,7 @@ import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -140,8 +142,9 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
             }
             dateObjects.add(dateObject);
 
-            if (observation.getObservation_variable_field_book_format() != null) {
-                if (Formats.Companion.isCameraTrait(observation.getObservation_variable_field_book_format())) {
+            final String traitFormat = observation.getObservation_variable_field_book_format();
+            if (traitFormat != null) {
+                if (Formats.Companion.isCameraTrait(traitFormat)) {
                     imageCount++;
                 }
             }
@@ -154,10 +157,19 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 
         }
 
+        // The interval sum only means anything in the order the observations were taken. This
+        // sorts the parsed dates rather than trusting the query order, because the stored
+        // timestamps carry a UTC offset and older rows have none, so the raw strings cannot be
+        // ordered reliably across both forms.
+        Collections.sort(dateObjects);
+
         long totalInterval = 0;
         for (int i = 1; i< dateObjects.size(); i++){
             long diff = dateObjects.get(i).getTime() - dateObjects.get(i-1).getTime();
-            if (diff <= TimeUnit.MINUTES.toMillis(intervalThreshold)){
+            // Gaps longer than the threshold are breaks between sessions rather than time spent
+            // collecting. The lower bound keeps a stray out-of-order timestamp from subtracting
+            // from the total, which is what previously drove this figure negative.
+            if (diff > 0 && diff <= TimeUnit.MINUTES.toMillis(intervalThreshold)){
                 totalInterval += TimeUnit.MILLISECONDS.toSeconds(diff);
             }
         }
@@ -209,10 +221,9 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         List<String> unitWithMostObservationsList = new ArrayList<>();
         for (ObservationModel observation : observations) {
             if (observation.getObservation_unit_id().equals(unitWithMostObservations)) {
-                final String traitFormat = observation.getObservation_variable_field_book_format();
+                String traitFormat = observation.getObservation_variable_field_book_format();
 
                 if (traitFormat != null) {
-
                     TraitFormat formats = Formats.Companion.findTrait(traitFormat);
 
                     Object valueModel = observation.getValue();
@@ -225,15 +236,16 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 
                     if (formats instanceof ValuePresenter) {
 
-                        unitWithMostObservationsList.add(observation.getObservation_variable_name() + ": " + ((ValuePresenter) formats).represent(originActivity, valueModel));
+                        unitWithMostObservationsList.add(observation.getObservation_variable_alias() + ": " + ((ValuePresenter) formats).represent(originActivity, valueModel, null));
 
                     } else {
 
-                        unitWithMostObservationsList.add(observation.getObservation_variable_name() + ": " + observation.getValue());
+                        unitWithMostObservationsList.add(observation.getObservation_variable_alias() + ": " + observation.getValue());
 
                     }
 
                 }
+
             }
         }
 

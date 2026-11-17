@@ -27,6 +27,7 @@ Development of Field Book is possible because of the support received from the f
 - USAID [No. 7200AA‐19LE‐00005](https://ilci.cornell.edu/)
 - USDA NIFA SCRI [No. 2022-51181-38449](https://portal.nifa.usda.gov/lmd4/recent_awards)
 - USDA NIFA AG2PI [No. 2022-70412-38454](https://www.ag2pi.org/resources/ag2pi-funded-seed-grants/)
+- Gates Foundation
 
 ## ✨ Contributors
 This project follows the [all-contributors](https://allcontributors.org/) specification. Contributions of any kind are welcome!
@@ -87,6 +88,11 @@ This project follows the [all-contributors](https://allcontributors.org/) specif
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/akshat22"><img src="https://avatars.githubusercontent.com/u/50794731?v=4?s=100" width="100px;" alt="Akshat Savla"/><br /><sub><b>Akshat Savla</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=akshat22" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/jpietragalla"><img src="https://avatars.githubusercontent.com/u/78973920?v=4?s=100" width="100px;" alt="jpietragalla"/><br /><sub><b>jpietragalla</b></sub></a><br /><a href="#translation-jpietragalla" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/rmcp"><img src="https://avatars.githubusercontent.com/u/5850588?v=4?s=100" width="100px;" alt="Renier Pestana"/><br /><sub><b>Renier Pestana</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=rmcp" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/alexismanin"><img src="https://avatars.githubusercontent.com/u/44767131?v=4?s=100" width="100px;" alt="Alexis Manin"/><br /><sub><b>Alexis Manin</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=alexismanin" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Stathmin"><img src="https://avatars.githubusercontent.com/u/55657873?v=4?s=100" width="100px;" alt="Stathmin"/><br /><sub><b>Stathmin</b></sub></a><br /><a href="#translation-Stathmin" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/BrianSmart"><img src="https://avatars.githubusercontent.com/u/106196144?v=4?s=100" width="100px;" alt="Brian Smart"/><br /><sub><b>Brian Smart</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=briansmart" title="Code">💻</a> <a href="https://github.com/PhenoApps/Field-Book/commits?author=briansmart" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>

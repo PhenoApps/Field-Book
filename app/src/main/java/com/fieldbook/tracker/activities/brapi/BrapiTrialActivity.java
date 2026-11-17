@@ -32,8 +32,6 @@ public class BrapiTrialActivity extends ThemedActivity {
     private BrapiTrial brapiTrial;
     private BrapiPaginationManager paginationManager;
 
-    private final BrapiAuthDialogFragment brapiAuth = new BrapiAuthDialogFragment().newInstance();
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -120,15 +118,7 @@ public class BrapiTrialActivity extends ThemedActivity {
     }
 
     private void showBrapiAuthDialog() {
-        try {
-            runOnUiThread(() -> {
-                if (!brapiAuth.isVisible()) {
-                    brapiAuth.show(getSupportFragmentManager(), "BrapiAuthDialogFragment");
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        runOnUiThread(() -> BrapiAuthDialogFragment.showIfNotShowing(getSupportFragmentManager()));
     }
 
     private ListAdapter buildTrialsArrayAdapter(List<BrapiTrial> trials) {

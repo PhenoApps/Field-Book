@@ -1,0 +1,38 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginEnd="16dp"
+    android:background="@drawable/cell"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/list_item_trait_parameter_title"
+        style="@style/TextViewStyle.Bold.Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|center_vertical"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="@string/traits_create_unit" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/list_item_trait_parameter_til"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:endIconMode="custom"
+        app:errorEnabled="false">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/list_item_trait_parameter_unit_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/traits_create_optional"
+            android:imeOptions="actionNext"
+            android:inputType="textCapWords" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+</LinearLayout>

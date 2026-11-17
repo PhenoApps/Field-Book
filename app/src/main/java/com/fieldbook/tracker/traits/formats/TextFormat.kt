@@ -1,10 +1,15 @@
 package com.fieldbook.tracker.traits.formats
 
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.traits.formats.feature.DisplayValue
+import com.fieldbook.tracker.traits.formats.feature.Scannable
 import com.fieldbook.tracker.traits.formats.parameters.CloseKeyboardParameter
 import com.fieldbook.tracker.traits.formats.parameters.DefaultValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
+import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
+import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 
 class TextFormat : TraitFormat(
     format = Formats.TEXT,
@@ -17,5 +22,8 @@ class TextFormat : TraitFormat(
     NameParameter(),
     DefaultValueParameter(),
     DetailsParameter(),
-    CloseKeyboardParameter(false)
-), Scannable
+    CloseKeyboardParameter(false),
+    RepeatedMeasureParameter(),
+    ResourceFileParameter(),
+    AttachMediaParameter()
+), Scannable, DisplayValue

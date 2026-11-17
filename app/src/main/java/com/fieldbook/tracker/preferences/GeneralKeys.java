@@ -32,6 +32,9 @@ public class GeneralKeys {
     public static final String HIDE_ENTRIES_WITH_DATA               = "com.fieldbook.tracker.HIDE_ENTRIES";
     public static final String ATTR_CHOOSER_DIALOG_TAB              = "ATTR_CHOOSER_DIALOG_TAB";
 
+    //Behavior
+    public static final String BARCODE_SCANNING_OPTIONS_EDIT = "BARCODE_SCANNING_OPTIONS_EDIT";
+
     // Files and Naming
     public static final String DEFAULT_STORAGE_LOCATION_PREFERENCE  = "DEFAULT_STORAGE_LOCATION_PREFERENCE";
 
@@ -94,9 +97,6 @@ public class GeneralKeys {
     public static final String REGION = "region";
     public static final String TIPS_CONFIGURED = "TipsConfigured";
 
-    //shared preferences file name
-    public static final String SHARED_PREF_FILE_NAME = "Settings";
-
     //used to get the name of the currently selected field that is saved in preferences
     //example: field_sample how to get: sharedPreferences.getString(Constants.FIELD_FILE, "")
     public static final String FIELD_FILE = "FieldFile";
@@ -139,13 +139,31 @@ public class GeneralKeys {
     public static final String EXPORT_FORMAT_DATABASE = "EXPORT_FORMAT_DATABASE";
     public static final String EXPORT_OVERWRITE = "Overwrite";
 
-    // Field detail
+    // Field and trait detail
     public static final String FIELD_DETAIL_OVERVIEW_COLLAPSED = "FIELD_DETAIL_OVERVIEW_COLLAPSED";
     public static final String FIELD_DETAIL_DATA_COLLAPSED = "FIELD_DETAIL_DATA_COLLAPSED";
     public static final String FIELD_DETAIL_FIELD_ID = "FIELD_DETAIL_FIELD_ID";
+    public static final String TRAIT_DETAIL_OVERVIEW_COLLAPSED = "TRAIT_DETAIL_OVERVIEW_COLLAPSED";
+    public static final String TRAIT_DETAIL_OPTIONS_COLLAPSED = "TRAIT_DETAIL_OPTIONS_COLLAPSED";
+    public static final String TRAIT_DETAIL_DATA_COLLAPSED = "TRAIT_DETAIL_DATA_COLLAPSED";
 
     //Data grid
+    //old preference used with only one header
     public static final String DATAGRID_PREFIX_TRAIT = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";
+    public static final String DATAGRID_LOCKED_COLUMN_IDS = "com.fieldbook.tracker.datagrid.DATAGRID_LOCKED_COLUMN_IDS";
+    public static final String DATAGRID_WRAP_CONTENT = "com.fieldbook.tracker.datagrid.DATAGRID_WRAP_CONTENT";
+    public static final String DATAGRID_HEATMAP = "com.fieldbook.tracker.datagrid.DATAGRID_HEATMAP";
+    public static final String DATAGRID_EXTRA_HEADERS = "com.fieldbook.tracker.datagrid.DATAGRID_EXTRA_HEADERS";
+    public static final String DATAGRID_SORT_COLUMN = "com.fieldbook.tracker.datagrid.DATAGRID_SORT_COLUMN";
+    public static final String DATAGRID_SORT_ASCENDING = "com.fieldbook.tracker.datagrid.DATAGRID_SORT_ASCENDING";
+    public static final String DATAGRID_ZOOM = "com.fieldbook.tracker.datagrid.DATAGRID_ZOOM";
+    //Map view
+    public static final String MAP_VIEW_SETTING = "com.fieldbook.tracker.datagrid.MAP_VIEW_SETTING";
+    public static final String MAP_ROW_ATTR = "com.fieldbook.tracker.datagrid.MAP_ROW_ATTR";
+    public static final String MAP_COL_ATTR = "com.fieldbook.tracker.datagrid.MAP_COL_ATTR";
+    public static final String MAP_INVERT_ROW = "com.fieldbook.tracker.datagrid.MAP_INVERT_ROW";
+    public static final String MAP_INVERT_COL = "com.fieldbook.tracker.datagrid.MAP_INVERT_COL";
+    public static final String DATAGRID_MAP_ZOOM = "com.fieldbook.tracker.datagrid.DATAGRID_MAP_ZOOM";
 
     //summary filter
     public static final String SUMMARY_FILTER_ATTRIBUTES = "com.fieldbook.tracker.summary.SUMMARY_FILTER_ATTRIBUTES";
@@ -155,7 +173,7 @@ public class GeneralKeys {
     public static final String CALENDAR_LAST_SAVED_DATE = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";
 
     //Zebra Label Print Trait
-    public static final String LABEL_PRINT_DEVICE_NAME      = "LABEL_PRINT_DEVICE_NAME";
+    public static final String LABEL_PRINT_DEVICE_NAME = "LABEL_PRINT_DEVICE_NAME";
 
     //Dialog Export
     public static final String DIALOG_EXPORT_BUNDLE_CHECKED = "com.fieldbook.tracker.DIALOG_EXPORT_BUNDLE_CHECKED";
@@ -177,6 +195,9 @@ public class GeneralKeys {
     public static final String USB_CAMERA_AUTO_WHITE_BALANCE = "com.fieldbook.tracker.traits.camera.usb.AUTO_WHITE_BALANCE";
 
     public static final String USB_CAMERA_AUTO_FOCUS = "com.fieldbook.tracker.traits.camera.usb.AUTO_FOCUS";
+
+    // Preference: when attaching media, prioritize detected barcode and auto-return with it
+    public static final String ATTACH_MEDIA_BARCODE_PRIORITIZE = "ATTACH_MEDIA_BARCODE_PRIORITIZE";
 
     @NotNull
     public static final Object SORT_ORDER = "com.fieldbook.tracker.field_sort_order";
@@ -219,12 +240,14 @@ public class GeneralKeys {
         return "com.fieldbook.tracker.crop_coordinates." + traitId;
     }
 
-    /**
-     * InnoSpectra Nano
-     */
-
     @NonNull
     public static final String INNOSPECTRA_NANO_CONFIG_INDEX = "com.fieldbook.tracker.traits.innospectra_nano.INDEX";
+
+    @NonNull
+    public static final String INNOSPECTRA_NANO_DEVICE_ID = "nano_device_id";
+
+    @NonNull
+    public static final String INNOSPECTRA_NANO_DEVICE_NAME = "nano_device_name";
 
     @NonNull
     public static final String NIX_NAME = "com.fieldbook.tracker.traits.nix.NAME";
@@ -263,6 +286,12 @@ public class GeneralKeys {
                 getDropDownTraitKey(index)
         );
     }
+
+    @NotNull
+    public static final String PREF_KEY_SHOWN_JUMP_INFO = "pref_shown_jump_to_plot_bottom_toolbar_alert";
+
+    @NotNull
+    public static final String PREF_KEY_SHOWN_BARCODE_OPTION = "pref_shown_barcode_option";
 
     private GeneralKeys() {
 

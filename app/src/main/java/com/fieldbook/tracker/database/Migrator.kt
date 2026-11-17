@@ -8,9 +8,13 @@ import android.util.Log
 import androidx.core.content.contentValuesOf
 import androidx.core.database.getBlobOrNull
 import androidx.core.database.getStringOrNull
+import com.fieldbook.tracker.database.migrators.DateFormatVersion19
 import com.fieldbook.tracker.database.migrators.RefactorMigratorVersion13
 import com.fieldbook.tracker.database.migrators.GroupMigratorVersion14
+import com.fieldbook.tracker.database.migrators.ObservationMediaMigratorVersion21
+import com.fieldbook.tracker.database.migrators.MulticatToCategoricalVersion20
 import com.fieldbook.tracker.database.migrators.SpectralMigratorVersion16
+import com.fieldbook.tracker.database.migrators.TraitAliasSynonymVersion18
 import com.fieldbook.tracker.database.migrators.StudyConfigurationVersion17
 import com.fieldbook.tracker.objects.TraitObject
 
@@ -423,6 +427,51 @@ class Migrator {
                 }
                 .onSuccess {
                     Log.d(TAG, "Migrated to version 17")
+                    Log.d(TAG, "Migrated to version 16")
+                }
+        }
+
+        fun migrateToVersion18(db: SQLiteDatabase) {
+
+            TraitAliasSynonymVersion18().migrate(db)
+                .onFailure {
+                    Log.e(TAG, "Failed to migrate to version 18", it)
+                }
+                .onSuccess {
+                    Log.d(TAG, "Migrated to version 18")
+                }
+        }
+
+        fun migrateToVersion19(db: SQLiteDatabase) {
+
+            DateFormatVersion19().migrate(db)
+                .onFailure {
+                    Log.e(TAG, "Failed to migrate to version 19", it)
+                }
+                .onSuccess {
+                    Log.d(TAG, "Migrated to version 19")
+                }
+        }
+
+        fun migrateToVersion20(db: SQLiteDatabase) {
+
+            MulticatToCategoricalVersion20().migrate(db)
+                .onFailure {
+                    Log.e(TAG, "Failed to migrate to version 20", it)
+                }
+                .onSuccess {
+                    Log.d(TAG, "Migrated to version 20")
+                }
+        }
+
+        fun migrateToVersion21(db: SQLiteDatabase) {
+
+            ObservationMediaMigratorVersion21().migrate(db)
+                .onFailure {
+                    Log.e(TAG, "Failed to migrate to version 21", it)
+                }
+                .onSuccess {
+                    Log.d(TAG, "Migrated to version 21")
                 }
         }
     }

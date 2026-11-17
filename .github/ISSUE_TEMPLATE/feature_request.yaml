@@ -1,7 +1,6 @@
 name: 🪄 Feature Request
 description: I would like to see a new feature in Field Book.
-title: "[REQUEST]: "
-labels: "feature request"
+type: "feature"
 
 body:
   - type: textarea

@@ -18,6 +18,7 @@ import com.fieldbook.tracker.fragments.field_creator.FieldCreatorDirectionFragme
 import com.fieldbook.tracker.fragments.field_creator.FieldCreatorPatternTypeFragmentDirections
 import com.fieldbook.tracker.fragments.field_creator.FieldCreatorSizeFragmentDirections
 import com.fieldbook.tracker.fragments.field_creator.FieldCreatorStartCornerFragmentDirections
+import com.fieldbook.tracker.utilities.InsetHandler
 import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.viewmodels.FieldConfig
 import com.fieldbook.tracker.viewmodels.FieldCreatorViewModel
@@ -63,9 +64,18 @@ class FieldCreatorActivity : ThemedActivity() {
             setHomeButtonEnabled(true)
         }
 
+        setupFieldCreatorWindowInsets()
+
         stepperView = findViewById(R.id.field_creator_stepper)
         setupStepper(getCurrentStepFromViewModel())
         observeForStepper()
+    }
+
+    private fun setupFieldCreatorWindowInsets() {
+        val rootView = findViewById<View>(android.R.id.content)
+        val toolbar = findViewById<Toolbar>(R.id.field_creator_toolbar)
+
+        InsetHandler.setupStandardInsets(rootView, toolbar)
     }
 
     fun setCreationInProgress(inProgress: Boolean) {

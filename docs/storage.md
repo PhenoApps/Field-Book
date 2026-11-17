@@ -28,9 +28,8 @@ Field Book will create the following subfolders within the selected **Storage lo
 
 # File transfer
 
-To add your own files to the appropriate subfolders you may need to manually transfer files from a computer.
-This can be accomplished by connecting your Android device via a USB cable and changing its USB mode to allow file transfer.
-Each device manufacturer has slight variations for the appearance of this dialog, but it is generally accessible from the notifications drawer.
+To add your own files, you can manually transfer files from a computer by connecting your Android device via a USB cable and changing its USB mode to allow file transfer.
+Each device manufacturer has slight variations for this process, but it is generally accessible from the notifications drawer.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/fields/fields_transfer.png" width="325px"> 

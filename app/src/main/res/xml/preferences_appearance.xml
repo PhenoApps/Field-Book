@@ -56,6 +56,13 @@
             android:title="@string/preferences_appearance_infobar_hide_prefix" />
 
         <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_hide_entry_arrows"
+            android:key="HIDE_ENTRY_NAVIGATION"
+            android:summary="@string/preferences_appearance_hide_entry_navigation_description"
+            android:title="@string/preferences_appearance_hide_entry_navigation" />
+
+        <CheckBoxPreference
             android:defaultValue="true"
             android:icon="@drawable/ic_range_progress"
             android:key="RANGE_PROGRESS_BAR"
@@ -68,6 +75,13 @@
             android:key="TRAITS_PROGRESS_BAR"
             android:summary="@string/preferences_appearance_traits_progress_bar_description"
             android:title="@string/preferences_appearance_traits_progress_bar" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_pref_timestamp"
+            android:key="SHOW_OBSERVATION_TIMESTAMP"
+            android:summary="@string/preferences_appearance_observation_timestamp_description"
+            android:title="@string/preferences_appearance_observation_timestamp" />
 
     </PreferenceCategory>
 </PreferenceScreen>

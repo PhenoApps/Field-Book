@@ -49,6 +49,7 @@ public class CounterTraitLayout extends BaseTraitLayout {
 
         // Add counter
         addCounterBtn.setOnClickListener(view -> {
+            if (isLocked) return;
             TraitObject trait = getCurrentTrait();
             if (trait != null) {
                 if (getCurrentObservation() == null || getCurrentObservation().getValue().equals("NA")) {
@@ -71,6 +72,7 @@ public class CounterTraitLayout extends BaseTraitLayout {
 
         // Minus counter
         minusCounterBtn.setOnClickListener(view -> {
+            if (isLocked) return;
             if (getCurrentObservation() == null || getCurrentObservation().getValue().equals("NA")) {
                 getCollectInputView().setText("-1");
             } else {
