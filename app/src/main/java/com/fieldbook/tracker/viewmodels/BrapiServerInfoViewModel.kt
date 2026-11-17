@@ -43,7 +43,7 @@ class BrapiServerInfoViewModel @Inject constructor(
         val organizationName: String = "",
         val serverDescription: String = "",
         val modulesMap: Map<String, BrapiModuleCalls> = emptyMap(),
-        val appCompatibility: BrapiModuleCalls? = null,
+        val appCompatibility: List<BrapiModuleCalls> = emptyList(),
         val errorMessage: String? = null,
         val isBrapiV1Incompatible: Boolean = false,
         val hasApiException: Boolean = false,

@@ -7,11 +7,12 @@
 Enable/Disable BrAPI throughout Field Book app.
 Disabling BrAPI hides all other BrAPI settings, and removes BrAPI as an option from imports and exports.
 
-Once enabled, three options are available:
+Once enabled, four options are available:
 
 - <img class="icon" src="_static/icons/settings/brapi/key.png"> [**Add Account**](#accounts) to add and manage BrAPI accounts.
 - <img class="icon" src="_static/icons/settings/brapi/share-variant.png"> **Shared Servers** to reuse a BrAPI account already added in another PhenoApps app on the same device.
 - <img class="icon" src="_static/icons/settings/brapi/cogs.png"> [**Transmission Settings**](#transmission-settings) to configure how Field Book communicates with BrAPI servers.
+- <img class="icon" src="_static/icons/fields/sync.png"> [**Sync Settings**](#sync-settings) to sync fields automatically and get reminders about unsynced observations.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/brapi/settings/brapi_default.png" width="350px"> 
@@ -61,8 +62,11 @@ On inactive servers, a **Switch Server** action switches Field Book to use that 
 #### Check Compatibility
 
 The top card displays the information for a server including its server name, organization, and description.
-The second card shows how many of the BrAPI calls used by Field Book are supported by the server.
-The remaining cards show module-wise comparison of all calls in the BrAPI specification that have been implemented by the server and/or Field Book.
+The next two cards show how many of the BrAPI calls used by Field Book are supported by the server.
+**Import to Field Book** covers the calls used to import fields and traits and to download observations.
+**Upload from Field Book** covers the calls used to send observations and images to the server.
+Each method of a call is its own row, so a server that lets Field Book read observations but not create or update them shows `GET observations` as supported and `POST observations` and `PUT observations` as not supported.
+The remaining cards, under **All Server Calls**, compare every call the server lists, grouped by BrAPI module, with the calls Field Book uses.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/brapi/settings/brapi_compatibility.png" width="350px"> 
@@ -95,3 +99,36 @@ This matters for field and trait imports, which need a fresh cache to see new da
   <img class="screenshot" src="_static/images/brapi/settings/brapi_transmission_settings.png" width="350px"> 
   <figcaption class="screenshot-caption"><i>Transmission Settings</i></figcaption> 
 </figure>
+
+## Sync Settings
+
+Press <img class="icon" src="_static/icons/fields/sync.png"> **Sync Settings** to have Field Book sync a BrAPI field when it is opened, and to be reminded about observations that are not synced.
+Automatic syncs download new observations from the server and then upload new and edited observations, including images.
+They only include fields imported from the active server.
+
+Automatic syncs never make a choice on your behalf.
+If an observation was edited both on the device and on the server, both values are left as they are and the local edit is not uploaded.
+This includes an observation edited in Collect while a sync is running.
+See [Importing and merging observations](../brapi.md#importing-and-merging-observations) for how Field Book tells that the server copy changed, and when it cannot.
+If a new observation appears to already be on the server, it is not uploaded.
+Choices already made on the sync screen are followed, so a kept local value or a match chosen to upload again is uploaded.
+The field's Sync card shows how many observations need review, and they can be resolved in the [Needs Review](../brapi.md#needs-review) card on the sync screen.
+Observations edited only on the device are uploaded, and observations changed only on the server are downloaded.
+
+- <img class="icon" src="_static/icons/settings/system/refresh.png"> **Sync When Opening a Field** syncs a BrAPI field each time its details are opened.
+Defaults to off.
+- **Automatic Upload** chooses what automatic syncs upload.
+**New and edited observations** uploads everything.
+**New observations only** uploads observations and images collected on this device, and leaves changes to data already on the server to the sync screen, where they are checked first.
+Defaults to `New and edited observations`.
+- **Include Images** lets automatic syncs upload images as well as observations.
+Turn it off to save data on slow or metered connections, images are then only uploaded from the sync screen.
+Defaults to on.
+- **Notify on Reconnect** shows a notification for each BrAPI field with observations that are not synced, when the device gets a network connection back.
+Observations the server does not accept are left out, since no sync can send them.
+Tapping a notification or its **Sync** button opens that field's sync screen, and **Dismiss** closes it.
+Going back from the sync screen returns to that field's details.
+Opening a field's sync screen also clears its notification.
+Archived fields are not included.
+Field Book asks for permission to post notifications when this is turned on.
+Defaults to off.

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_refresh"
+        android:key="BRAPI_SYNC_ON_FIELD_OPEN"
+        android:summary="@string/preferences_brapi_sync_on_field_open_summary"
+        android:title="@string/preferences_brapi_sync_on_field_open_title" />
+
+    <ListPreference
+        android:defaultValue="all"
+        android:dialogTitle="@string/preferences_brapi_sync_upload_mode_title"
+        android:entries="@array/pref_brapi_sync_upload_mode_entries"
+        android:entryValues="@array/pref_brapi_sync_upload_mode_values"
+        android:icon="@drawable/upload"
+        android:key="BRAPI_SYNC_UPLOAD_MODE"
+        android:summary="@string/preferences_brapi_sync_upload_mode_summary"
+        android:title="@string/preferences_brapi_sync_upload_mode_title" />
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:icon="@drawable/ic_trait_camera"
+        android:key="BRAPI_SYNC_UPLOAD_IMAGES"
+        android:summary="@string/preferences_brapi_sync_upload_images_summary"
+        android:title="@string/preferences_brapi_sync_upload_images_title" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/wifi"
+        android:key="BRAPI_SYNC_RECONNECT_NOTIFICATION"
+        android:summary="@string/preferences_brapi_sync_reconnect_notification_summary"
+        android:title="@string/preferences_brapi_sync_reconnect_notification_title" />
+
+</PreferenceScreen>

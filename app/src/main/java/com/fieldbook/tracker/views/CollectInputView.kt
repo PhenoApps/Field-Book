@@ -123,7 +123,13 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
         editText.setOnEditorActionListener(listener)
     }
 
-    fun getRep(): String = repeatView.getRep()
+    // Without repeated values only the latest rep is shown (see initialize), and the repeat view
+    // holds no selection, so the rep comes from the activity to keep edits on the displayed value.
+    fun getRep(): String = if (isRepeatEnabled()) {
+        repeatView.getRep()
+    } else {
+        (context as? CollectActivity)?.getRep() ?: repeatView.getRep()
+    }
 
     val editText: EditText
         get() = if (isRepeatEnabled()) {

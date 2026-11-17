@@ -293,6 +293,23 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/brapi_authenticator" />
         </service>
+
+        <!-- Dismiss button on the BrAPI reconnect notifications -->
+        <receiver
+            android:name=".activities.brapi.io.sync.BrapiNotificationActionReceiver"
+            android:exported="false" />
+
+        <!-- WorkManager is initialized on demand by FieldBook so the BrAPI sync workers can use Hilt -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
     </application>
 
     <queries>
@@ -342,6 +359,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" tools:remove="android:maxSdkVersion" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />

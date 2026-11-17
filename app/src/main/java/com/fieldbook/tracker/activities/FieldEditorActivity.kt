@@ -3,6 +3,7 @@ package com.fieldbook.tracker.activities
 import android.Manifest
 import android.app.AlertDialog
 import android.content.Intent
+import android.os.Bundle
 import android.graphics.Rect
 import android.location.Location
 import android.net.Uri
@@ -66,6 +67,27 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
     companion object {
         private const val TAG = "FieldEditor"
         private const val PERMISSIONS_REQUEST_STORAGE = 998
+
+        // Opens straight to a field's details, used by the BrAPI sync notification's back stack
+        const val EXTRA_FIELD_DETAIL_ID = "com.fieldbook.tracker.activities.FieldEditorActivity.FIELD_DETAIL_ID"
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // A recreated activity already restored its fragment back stack
+        if (savedInstanceState == null) showRequestedFieldDetail(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        showRequestedFieldDetail(intent)
+    }
+
+    private fun showRequestedFieldDetail(intent: Intent?) {
+        val fieldId = intent?.getIntExtra(EXTRA_FIELD_DETAIL_ID, -1) ?: -1
+        if (fieldId != -1) startFieldDetailFragment(fieldId)
     }
 
     @Inject
