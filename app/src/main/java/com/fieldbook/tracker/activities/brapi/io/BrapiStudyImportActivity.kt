@@ -33,6 +33,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -192,6 +193,10 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             try {
 
                 fetchObservationLevels(programDbId).join()
+
+            } catch (e: CancellationException) {
+
+                throw e // activity scope was cancelled (e.g. onDestroy), not an error
 
             } catch (e: Exception) {
 
@@ -610,9 +615,20 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
                         studies.firstOrNull { it.studyDbId == id }?.let {
 
-                            saveStudy(it, level, sortOrder)
+                            if (saveStudy(it, level, sortOrder)) {
 
-                            successfullyImportedStudies.add(id) // track the successfully imported fields
+                                successfullyImportedStudies.add(id) // track the successfully imported fields
+
+                            } else {
+
+                                Log.e(TAG, "Study $id was not saved")
+
+                                runOnUiThread {
+
+                                    Toast.makeText(this@BrapiStudyImportActivity, getString(R.string.failed_to_save_study), Toast.LENGTH_SHORT).show()
+
+                                }
+                            }
 
                         }
 
@@ -645,11 +661,11 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         study: BrAPIStudy,
         level: BrapiObservationLevel,
         sortId: String
-    ) {
+    ): Boolean {
 
         var maxVariableIndex = db.maxPositionFromTraits + 1
 
-        attributesTable?.get(study.studyDbId)?.let { studyAttributes ->
+        return attributesTable?.get(study.studyDbId)?.let { studyAttributes ->
 
             observationUnits[study.studyDbId]?.filter {
                 it.observationUnitPosition.observationLevel.levelName.equals(level.observationLevelName, ignoreCase = true)
@@ -706,15 +722,16 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     details.values.addAll(unitAttributes)
 
                     //primary/secondary no longer required
+                    // status is false when the field isn't created (e.g. no plots, duplicate name)
                     brapiService.saveStudyDetails(
                         details,
                         level,
                         "",
                         "",
                         sortId,
-                    )
+                    )?.status == true
                 }
-        }
+        } ?: false
     }
 
     private suspend fun fetchObservationLevels(programDbId: String) = coroutineScope {

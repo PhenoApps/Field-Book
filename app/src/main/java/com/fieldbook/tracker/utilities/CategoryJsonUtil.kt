@@ -161,13 +161,16 @@ class CategoryJsonUtil {
                     try {
                         // TODO: decide if this attribute needs to be passed from other functions
                         val showValue = row["categoryDisplayValue"] as? Boolean == true
+                        // label is optional for BrAPI categories, so fall back to the other field
+                        val represent = { category: BrAPIScaleValidValuesCategories ->
+                            if (showValue || forBrapi) category.value ?: category.label
+                            else category.label ?: category.value
+                        }
                         val decoded = decode(rawValue ?: "")
                         if (decoded.size > 1) { // trait has multicat enabled
-                            decoded.joinToString(":") {
-                                if (showValue || forBrapi) it.value else it.label
-                            }
+                            decoded.joinToString(":") { represent(it) ?: "" }
                         } else {
-                            if (showValue || forBrapi) decoded[0].value else decoded[0].label
+                            represent(decoded[0])
                         }
                     } catch (ignore: Exception) {
                         rawValue

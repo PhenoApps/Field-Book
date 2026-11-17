@@ -412,6 +412,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             // observation was what stalled fields with a lot of data.
             val trait = database.getTraitByName(traitDetail.traitName)
 
+            // observations are the stored values; categorical ones are JSON and become the
+            // label or value here, depending on the trait's display setting
             val processedObservations =
                 traitDetail.observations?.map { observation ->
                     trait?.let {
@@ -434,7 +436,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                 ContextCompat.getDrawable(context, iconRes ?: R.drawable.ic_trait_categorical),
                 processedObservations,
                 traitDetail.completeness,
-                dayOfYearValues
+                dayOfYearValues,
+                showCategoryValue = trait?.categoryDisplayValue == true
             )
         }
     }
@@ -676,11 +679,16 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                 setActiveField(id)
                 queryAndLoadFields()
             }
-            (activity as? FieldArchivedActivity)?.finish()
-
-            Handler(Looper.getMainLooper()).postDelayed({
+            val archivedActivity = activity as? FieldArchivedActivity
+            if (archivedActivity != null) {
+                // start collect while still attached, finishing first detaches this fragment
                 startCollectActivity()
-            }, 100)
+                archivedActivity.finish()
+            } else {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    if (isAdded) startCollectActivity()
+                }, 100)
+            }
         }
     }
 }

@@ -35,6 +35,7 @@ import com.google.android.gms.nearby.connection.PayloadTransferUpdate
 import com.google.android.gms.nearby.connection.Strategy
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.qualifiers.ActivityContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -340,6 +341,8 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
                     withContext(Dispatchers.IO) {
                         docFile = fileHandler?.prepareFileForTransfer()
                     }
+                } catch (e: CancellationException) {
+                    throw e // scope cancelled by cleanup(), not an error
                 } catch (e: Exception) {
                     setProgressStatus(getString(R.string.nearby_share_failed_export_generation_message, e.message), R.drawable.ic_transfer_error)
                     stopNearbyShare()

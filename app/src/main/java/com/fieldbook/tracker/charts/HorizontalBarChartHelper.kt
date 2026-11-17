@@ -33,8 +33,11 @@ object HorizontalBarChartHelper {
 
         // Determine sorted categories: use parsedCategories if available and matching, otherwise use default order
         val sortedCategories = if (!parsedCategories.isNullOrEmpty()) {
-            val matchingCategories = parsedCategories.filter { categoryCounts.containsKey(it) }.reversed()
-            if (matchingCategories.isNotEmpty()) matchingCategories else categoryCounts.keys.map { it.toString() }.sorted()
+            val matchingCategories = parsedCategories.filter { categoryCounts.containsKey(it) }
+            // keep observations that aren't in the category list (multicat combinations,
+            // values from a since-edited category list) after the listed ones instead of dropping them
+            val unlistedCategories = categoryCounts.keys.map { it.toString() }.filter { it !in parsedCategories }.sorted()
+            if (matchingCategories.isNotEmpty()) (matchingCategories + unlistedCategories).reversed() else categoryCounts.keys.map { it.toString() }.sorted()
         } else {
             categoryCounts.keys.map { it.toString() }.sorted()
         }

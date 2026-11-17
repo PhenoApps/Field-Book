@@ -135,6 +135,12 @@ class ExportUtil @Inject constructor(
 
     fun export() {
 
+        // without the export directory nothing can be written, so stop before showing the export dialog
+        if (BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export) == null) {
+            Toast.makeText(context, R.string.error_storage_directory, Toast.LENGTH_LONG).show()
+            return
+        }
+
         exportPermission()
 
     }
@@ -606,8 +612,13 @@ class ExportUtil @Inject constructor(
                     }
 
                     progressDialog?.dismiss()
-                    finalFile?.let { shareFile(it) }
-                    CitationDialog(context).show()
+                    if (finalFile != null) {
+                        shareFile(finalFile)
+                        CitationDialog(context).show()
+                    } else {
+                        // no file was written (e.g. storage lost mid-export), don't report success
+                        Toast.makeText(context, context.getString(R.string.export_error_general), Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
             is ExportResult.Failure -> {
