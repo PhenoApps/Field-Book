@@ -115,7 +115,7 @@ public class AboutActivity extends MaterialAboutActivity {
                 .equals(String.valueOf(ThemedActivity.HIGH_CONTRAST))) {
             appCardBuilder.addItem(new MaterialAboutTitleItem.Builder()
                     .text(getString(R.string.field_book))
-                    .icon(R.mipmap.ic_launcher_monochrome)
+                    .icon(R.mipmap.ic_launcher_high_contrast)
                     .build());
         } else {
             appCardBuilder.addItem(new MaterialAboutTitleItem.Builder()
