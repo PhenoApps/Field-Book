@@ -61,6 +61,13 @@
 
         <CheckBoxPreference
             android:defaultValue="false"
+            android:icon="@drawable/ic_script_text_outline"
+            android:key="com.tracker.fieldbook.preference.debug.logcat_capture_enabled"
+            android:title="@string/pref_debug_logcat_title"
+            android:summary="@string/pref_debug_logcat_summary"/>
+
+        <CheckBoxPreference
+            android:defaultValue="false"
             android:icon="@drawable/ic_card_account_details_outline"
             android:key="com.tracker.fieldbook.preference.crashlytics.user_id_enabled"
             android:title="@string/pref_profile_crashlytics_user_id_enabled"

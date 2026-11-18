@@ -13,6 +13,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
 import com.fieldbook.tracker.fragments.ExportDatabaseFragment
 import com.fieldbook.tracker.preferences.enums.TransferSource
+import com.fieldbook.tracker.utilities.LogcatRecorder
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.BaseDocumentTreeUtil
@@ -77,6 +78,25 @@ class SystemPreferencesFragment : PreferenceFragmentCompat(),
                     .commit()
             }
             true
+        }
+
+        val logcatCapturePref = findPreference<CheckBoxPreference>(GeneralKeys.LOGCAT_CAPTURE_ENABLED)
+        logcatCapturePref?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
+            val ctx = context ?: return@OnPreferenceChangeListener false
+            if (newValue as Boolean) {
+                val fileName = LogcatRecorder.start(ctx)
+                if (fileName != null) {
+                    Toast.makeText(ctx, getString(R.string.pref_debug_logcat_started, fileName), Toast.LENGTH_LONG).show()
+                    true
+                } else {
+                    Toast.makeText(ctx, R.string.error_storage_directory, Toast.LENGTH_LONG).show()
+                    false
+                }
+            } else {
+                LogcatRecorder.stop()
+                Toast.makeText(ctx, R.string.pref_debug_logcat_stopped, Toast.LENGTH_SHORT).show()
+                true
+            }
         }
     }
 
