@@ -270,6 +270,9 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
 
                 //Reloading collect activity screen to move to the selected plot
                 RangeBoxView rangeBox = originActivity.findViewById(R.id.act_collect_range_box);
+                if (!rangeBox.allowNavigation()) {
+                    return;
+                }
                 int[] rangeID = rangeBox.getRangeID();
                 originActivity.moveToSearch("search", rangeID, CollectActivity.searchRange, CollectActivity.searchPlot, null, -1);
             });
