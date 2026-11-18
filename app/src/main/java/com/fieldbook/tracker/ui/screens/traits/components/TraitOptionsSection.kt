@@ -35,6 +35,7 @@ import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.AllowOtherParameter
 import com.fieldbook.tracker.traits.formats.parameters.CanopySensitivityParameter
 import com.fieldbook.tracker.traits.formats.parameters.MultipleCategoriesParameter
+import com.fieldbook.tracker.traits.formats.parameters.OutlierDetectionParameter
 import com.fieldbook.tracker.traits.formats.parameters.Parameters
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
@@ -230,6 +231,7 @@ private fun getParamIcon(param: BaseFormatParameter, trait: TraitObject): Int {
                 is InvalidValueParameter -> if (isEnabled) R.drawable.ic_outlier else R.drawable.ic_outlier_off
                 is MathSymbolsParameter -> if (isEnabled) R.drawable.ic_symbol else R.drawable.ic_symbol_off
                 is MultipleCategoriesParameter -> if (isEnabled) R.drawable.ic_multicat else R.drawable.ic_single_cat
+                is OutlierDetectionParameter -> if (isEnabled) R.drawable.ic_outlier_detection else R.drawable.ic_outlier_detection_off
                 is AllowOtherParameter -> if (isEnabled) R.drawable.ic_categorical_other else R.drawable.ic_categorical_other_off
                 is RepeatedMeasureParameter -> if (isEnabled) R.drawable.ic_repeated_measures else R.drawable.ic_repeated_measures_off
                 is SaveImageParameter -> if (isEnabled) R.drawable.ic_transfer else R.drawable.ic_transfer_off
@@ -253,6 +255,7 @@ private fun getParamText(context: Context, param: BaseFormatParameter, trait: Tr
     return when (param) {
         is AutoSwitchPlotParameter -> context.getString(R.string.trait_detail_chip_automatic_switch)
         is InvalidValueParameter -> context.getString(R.string.trait_detail_chip_invalid_value)
+        is OutlierDetectionParameter -> context.getString(R.string.trait_detail_chip_outlier_detection)
         is MathSymbolsParameter -> context.getString(R.string.trait_detail_chip_math_symbols)
         is MultipleCategoriesParameter -> {
             val isEnabled = param.getToggleValue(trait)
