@@ -109,6 +109,7 @@ import com.fieldbook.tracker.utilities.FieldAudioHelper;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.FuzzySearch;
+import com.fieldbook.tracker.utilities.SuggestedMatch;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.GeoNavHelper;
 import com.fieldbook.tracker.utilities.GnssThreadHelper;
@@ -1266,6 +1267,13 @@ public class CollectActivity extends ThemedActivity
      * @return true if found in another field, false otherwise
      */
     private boolean searchAcrossAllFields(String searchValue, boolean autoNavigate, boolean suppressReactions) {
+        return searchAcrossAllFields(searchValue, autoNavigate, suppressReactions, !suppressReactions);
+    }
+
+    /**
+     * @param suggestSimilar whether to offer similar ids when there is no exact match
+     */
+    private boolean searchAcrossAllFields(String searchValue, boolean autoNavigate, boolean suppressReactions, boolean suggestSimilar) {
         Log.d("Field Book", "Delegating cross-field search to FuzzySearch for: " + searchValue);
 
         inputPlotId = searchValue;
@@ -1302,9 +1310,46 @@ public class CollectActivity extends ThemedActivity
             Log.e(TAG, "FuzzySearch lookup failed", e);
         }
 
+        if (suggestSimilar && fuzzySearch.isSuggestSimilarEnabled() && showSimilarMatches(searchValue)) {
+            if (!suppressReactions) soundHelper.playError();
+            return false;
+        }
+
         if (!suppressReactions) {
             soundHelper.playError();
             Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
+        }
+
+        return false;
+    }
+
+    /**
+     * Offers plots similar to a search value that had no exact match, e.g. a misread barcode.
+     * @return true if suggestions were shown
+     */
+    private boolean showSimilarMatches(String searchValue) {
+
+        try {
+            int currentStudyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+            List<SuggestedMatch> suggestions = fuzzySearch.findSimilarPlots(searchValue, currentStudyId);
+
+            if (suggestions.isEmpty()) return false;
+
+            fuzzySearch.showSuggestionsDialog(searchValue, suggestions, match -> {
+                int studyId = match.getField().getStudyId();
+                if (studyId == currentStudyId) {
+                    rangeBox.setAllRangeID();
+                    moveToSearch("id", rangeBox.getRangeID(), null, null, match.getPlotId(), -1);
+                } else {
+                    switchField(studyId, match.getPlotId());
+                }
+                return Unit.INSTANCE;
+            });
+
+            return true;
+
+        } catch (Exception e) {
+            Log.e(TAG, "Similar id lookup failed", e);
         }
 
         return false;
@@ -2882,7 +2927,7 @@ public class CollectActivity extends ThemedActivity
         builder.setMessage(getString(R.string.barcode_ask_message, barcode));
 
         builder.setPositiveButton(R.string.barcode_ask_enter, (dialog, which) -> validateAndSaveBarcodeScan(barcode));
-        builder.setNegativeButton(R.string.barcode_ask_move, (dialog, which) -> searchAcrossAllFields(barcode, true, true));
+        builder.setNegativeButton(R.string.barcode_ask_move, (dialog, which) -> searchAcrossAllFields(barcode, true, true, true));
         builder.setNeutralButton(R.string.edit, (dialog, which) -> {
             Intent editBehaviorIntent = new Intent(this, PreferencesActivity.class);
             editBehaviorIntent.putExtra(GeneralKeys.BARCODE_SCANNING_OPTIONS_EDIT, true);
