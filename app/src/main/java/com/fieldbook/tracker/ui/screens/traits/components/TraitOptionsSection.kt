@@ -20,6 +20,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.FieldFileObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.Formats
+import com.fieldbook.tracker.devices.multispeq.MultispeqParameter
 import com.fieldbook.tracker.traits.formats.parameters.AutoSwitchPlotParameter
 import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
 import com.fieldbook.tracker.traits.formats.parameters.CategoriesParameter
@@ -35,6 +36,7 @@ import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.AllowOtherParameter
 import com.fieldbook.tracker.traits.formats.parameters.CanopySensitivityParameter
 import com.fieldbook.tracker.traits.formats.parameters.MultipleCategoriesParameter
+import com.fieldbook.tracker.traits.formats.parameters.MultispeqParametersParameter
 import com.fieldbook.tracker.traits.formats.parameters.Parameters
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
@@ -64,6 +66,7 @@ val excludedParams = setOf(
     Parameters.RESOURCE_FILE,
     Parameters.USE_DAY_OF_YEAR,
     Parameters.DISPLAY_VALUE,
+    Parameters.MULTISPEQ_PARAMETERS, // handled via dedicated chip below
 )
 
 @Composable
@@ -144,6 +147,26 @@ fun TraitOptionsSection(
                     icon = R.drawable.ic_tag_edit,
                     onClick = {
                         showBrapiLabelValueDialog = true
+                    }
+                )
+            }
+
+            // MultispeQ measurement parameter selection chip
+            if (trait.format == "multispeq") {
+                val selectedCount = MultispeqParameter.fromJsonString(trait.categories).size
+                val total = MultispeqParameter.values().size
+                val chipText = if (selectedCount == 0) {
+                    stringResource(R.string.multispeq_parameters_card_title)
+                } else {
+                    stringResource(R.string.multispeq_parameters_summary, selectedCount, total)
+                }
+                Chip(
+                    text = chipText,
+                    icon = R.drawable.ic_tune,
+                    onClick = {
+                        MultispeqParametersParameter.showDialog(context, trait.categories) { newJson ->
+                            onUpdateTrait(trait.clone().apply { categories = newJson })
+                        }
                     }
                 )
             }
