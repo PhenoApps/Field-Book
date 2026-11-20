@@ -565,7 +565,10 @@
     <string name="trait_detail_chip_invalid_value">Outlier values</string>
     <string name="trait_detail_chip_severities">Severities</string>
     <string name="trait_detail_chip_duration">Duration: %s</string>
-    <string name="trait_detail_chip_auto_advance_digits">Auto advance: %d digits</string>
+    <plurals name="trait_detail_chip_auto_advance_digits">
+        <item quantity="one">Auto advance: %d digit</item>
+        <item quantity="other">Auto advance: %d digits</item>
+    </plurals>
     <string name="trait_detail_chip_auto_advance_digits_off">Auto advance off</string>
 
     <string name="trait_parameter_allow_multicat">Multiple Category Selection</string>

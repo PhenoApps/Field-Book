@@ -255,7 +255,7 @@ private fun getParamText(context: Context, param: BaseFormatParameter, trait: Tr
     return when (param) {
         is AutoSwitchPlotParameter -> context.getString(R.string.trait_detail_chip_automatic_switch)
         is AutoAdvanceDigitsParameter -> trait.autoAdvanceDigits.toIntOrNull()?.let {
-            context.getString(R.string.trait_detail_chip_auto_advance_digits, it)
+            context.resources.getQuantityString(R.plurals.trait_detail_chip_auto_advance_digits, it, it)
         } ?: context.getString(R.string.trait_detail_chip_auto_advance_digits_off)
         is InvalidValueParameter -> context.getString(R.string.trait_detail_chip_invalid_value)
         is MathSymbolsParameter -> context.getString(R.string.trait_detail_chip_math_symbols)
