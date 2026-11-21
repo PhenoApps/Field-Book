@@ -35,6 +35,7 @@ class RangeBoxView : ConstraintLayout {
         const val TAG = "RangeBoxView"
         //truncate to three characters plus the colon
         const val TRUNCATE_LENGTH = 3 + 1
+        private const val ATTRIBUTE_CHOOSER_TAG = "attributeChooserDialog"
     }
 
     private var controller: CollectRangeController
@@ -186,52 +187,12 @@ class RangeBoxView : ConstraintLayout {
 
         setName()
 
-        val attributeChooserDialog = AttributeChooserDialog(
-            showTraits = false,
-            showOther = false,
-            showSystemAttributes = false
-        )
-
         primaryNameTv.setOnClickListener {
-            attributeChooserDialog.setOnAttributeSelectedListener(object :
-                AttributeChooserDialog.OnAttributeSelectedListener {
-                override fun onAttributeSelected(model: AttributeAdapter.AttributeModel) {
-                    //update preference primary name
-                    controller.getPreferences().edit {
-                        putString(
-                            GeneralKeys.PRIMARY_NAME,
-                            model.label
-                        )
-                    }
-                    setName()
-                    refresh()
-                }
-            })
-            attributeChooserDialog.show(
-                (controller.getContext() as CollectActivity).supportFragmentManager,
-                "attributeChooserDialog"
-            )
+            showNameAttributeChooser(GeneralKeys.PRIMARY_NAME)
         }
 
         secondaryNameTv.setOnClickListener {
-            attributeChooserDialog.setOnAttributeSelectedListener(object :
-                AttributeChooserDialog.OnAttributeSelectedListener {
-                override fun onAttributeSelected(model: AttributeAdapter.AttributeModel) {
-                    //update preference primary name
-                    controller.getPreferences().edit {
-                        putString(
-                            GeneralKeys.SECONDARY_NAME,
-                            model.label
-                        )
-                    }
-                    setName()
-                    refresh()
-                }
-            })
-            attributeChooserDialog.show(
-                (controller.getContext() as CollectActivity).supportFragmentManager,
-                "attributeChooserDialog"
-            )
+            showNameAttributeChooser(GeneralKeys.SECONDARY_NAME)
         }
 
         primaryIdTv.setOnClickListener {
@@ -241,6 +202,35 @@ class RangeBoxView : ConstraintLayout {
         secondaryIdTv.setOnClickListener {
             showQuickGoToDialog(primaryClicked = false)
         }
+    }
+
+    /**
+     * Shows a new attribute chooser that saves the selection to the given name preference.
+     * A fresh dialog is created per click and repeat taps are ignored while one is showing,
+     * otherwise a double tap shows the same fragment twice and crashes.
+     */
+    private fun showNameAttributeChooser(namePreferenceKey: String) {
+        val fragmentManager = (controller.getContext() as CollectActivity).supportFragmentManager
+
+        if (fragmentManager.isStateSaved
+            || fragmentManager.findFragmentByTag(ATTRIBUTE_CHOOSER_TAG) != null) return
+
+        AttributeChooserDialog(
+            showTraits = false,
+            showOther = false,
+            showSystemAttributes = false
+        ).apply {
+            setOnAttributeSelectedListener(object :
+                AttributeChooserDialog.OnAttributeSelectedListener {
+                override fun onAttributeSelected(model: AttributeAdapter.AttributeModel) {
+                    controller.getPreferences().edit {
+                        putString(namePreferenceKey, model.label)
+                    }
+                    setName()
+                    refresh()
+                }
+            })
+        }.showNow(fragmentManager, ATTRIBUTE_CHOOSER_TAG)
     }
 
     /**
