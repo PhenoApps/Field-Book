@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.preferences
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -10,7 +12,11 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorManager
+import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.preference.CheckBoxPreference
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
@@ -25,7 +31,6 @@ import com.fieldbook.tracker.preferences.enums.GeoNavUpdateInterval
 import com.fieldbook.tracker.preferences.enums.LocationCollectionMode
 import com.fieldbook.tracker.utilities.GeoNavHelper
 import dagger.hilt.android.AndroidEntryPoint
-import org.phenoapps.security.Security
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -37,10 +42,40 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
     @Inject
     lateinit var preferences: SharedPreferences
 
-    private val advisor by Security().secureBluetooth()
+    private val bluetoothPermissions: Array<String> =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            arrayOf(Manifest.permission.BLUETOOTH_CONNECT)
+        } else {
+            arrayOf(
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        }
+
+    // re-check grants instead of trusting the result map, which is empty if the request was interrupted
+    private val bluetoothPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) {
+        if (hasBluetoothPermissions()) {
+            startDeviceChoiceDialog()
+        } else context?.let { ctx ->
+            Toast.makeText(
+                ctx,
+                org.phenoapps.androidlibrary.R.string.frag_secure_permission_not_granted,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    private fun hasBluetoothPermissions(): Boolean {
+        val ctx = context ?: return false
+        return bluetoothPermissions.all {
+            ContextCompat.checkSelfPermission(ctx, it) == PackageManager.PERMISSION_GRANTED
+        }
+    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        advisor.initialize()
         setPreferencesFromResource(R.xml.preferences_location, rootKey)
 
         setupUi()
@@ -85,8 +120,10 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
 
         findPreference<Preference>(PreferenceKeys.PAIR_BLUETOOTH)?.let { pairDevicePref ->
             pairDevicePref.onPreferenceClickListener = Preference.OnPreferenceClickListener {
-                advisor.connectWith {
+                if (hasBluetoothPermissions()) {
                     startDeviceChoiceDialog()
+                } else {
+                    bluetoothPermissionLauncher.launch(bluetoothPermissions)
                 }
                 true
             }
@@ -258,10 +295,13 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
      * When the user chooses a device, it's mac address is saved in the preferences.
      * This can later be used to pair and communicate with the device (look in the GNSS trait class)
      */
+    @SuppressLint("MissingPermission")
     private fun startDeviceChoiceDialog() {
 
+        if (!hasBluetoothPermissions()) return
+
         //check if the device has bluetooth enabled, if not, request it to be enabled via system action
-        val adapter = BluetoothAdapter.getDefaultAdapter()
+        val adapter = BluetoothAdapter.getDefaultAdapter() ?: return
         if (adapter.isEnabled) {
             val pairedDevices = adapter.bondedDevices
 
