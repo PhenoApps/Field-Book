@@ -1106,6 +1106,7 @@ public class CollectActivity extends ThemedActivity
             Utils.makeToast(this, getString(R.string.act_trait_editor_no_traits_exist));
             setResult(RESULT_CANCELED);
             finish();
+            return;
         }
 
         traitBox.initialize(visibleTraits);
@@ -1957,7 +1958,7 @@ public class CollectActivity extends ThemedActivity
 
             sequence.start();
         } else if (itemId == searchId) {
-            SearchDialog searchdialog = new SearchDialog(this, this);
+            SearchDialog searchdialog = new SearchDialog();
             searchdialog.show(getSupportFragmentManager(), "DialogTag");
         } else if (itemId == resourcesId) {
             TraitObject currentTrait = getCurrentTrait();

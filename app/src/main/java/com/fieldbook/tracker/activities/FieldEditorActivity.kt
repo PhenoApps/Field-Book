@@ -745,7 +745,12 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
 
         val importColumns = fieldFile.columns ?: run {
             // in some cases getColumns is returning null, so print an error message to the user
-            Utils.makeToast(this, getString(R.string.act_field_editor_failed_to_read_columns))
+            val message = if (fieldFile.isTooLarge) {
+                R.string.act_field_editor_file_too_large
+            } else {
+                R.string.act_field_editor_failed_to_read_columns
+            }
+            Utils.makeToast(this, getString(message))
             return
         }
 

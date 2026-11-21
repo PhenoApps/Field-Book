@@ -184,7 +184,7 @@ class TraitActivity : ThemedActivity() {
     }
 
     private fun showCreateNewTraitDialog(trait: TraitObject?, onSaved: () -> Unit) {
-        val dialog = NewTraitDialog(this)
+        val dialog = NewTraitDialog()
         dialog.setTraitObject(trait)
         dialog.setOnTraitSavedListener { onSaved() }
         dialog.show(supportFragmentManager, "NewTraitDialog")

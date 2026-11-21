@@ -37,6 +37,9 @@ class InfobarAttributeChooserDialog : AttributeChooserDialog() {
         }
     }
 
+    /** Selections are saved to preferences directly, so no listener is needed. */
+    override fun hasSelectionHandler(): Boolean = true
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val infoBarPosition = arguments?.getInt(ARG_INFO_BAR_POSITION)
             ?: throw IllegalStateException("InfobarAttributeChooserDialog requires an infoBarPosition argument")

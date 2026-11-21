@@ -1,7 +1,5 @@
 package com.fieldbook.tracker.activities.brapi.io.filter
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
@@ -30,13 +28,6 @@ import kotlinx.coroutines.launch
  */
 abstract class ListFilterActivity : ThemedActivity(),
     CoroutineScope by MainScope() {
-
-    companion object {
-
-        fun getIntent(activity: Activity): Intent {
-            return Intent(activity, ListFilterActivity::class.java)
-        }
-    }
 
     protected val searchModels: ArrayList<String> = arrayListOf()
     protected var searchJob: Job? = null

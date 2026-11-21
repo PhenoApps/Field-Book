@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.dialogs
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
@@ -41,9 +40,7 @@ import com.fieldbook.tracker.traits.formats.parameters.DisplayValueParameter
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class NewTraitDialog(
-    private val activity: Activity,
-) :
+class NewTraitDialog :
     DialogFragment(),
     TraitFormatAdapter.FormatSelectionListener,
     TraitFormatParametersAdapter.TraitFormatAdapterController {
@@ -120,8 +117,22 @@ class NewTraitDialog(
 
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // the trait being edited, flags and save callback are not saved,
+        // so a recreated dialog can't continue; close it instead
+        if (savedInstanceState != null) {
+            showsDialog = false
+            dismissAllowingStateLoss()
+        }
+    }
+
     override fun onStart() {
         super.onStart()
+
+        // closed in onCreate after being recreated, nothing to build
+        if (!showsDialog) return
 
         positiveBtn = (dialog as AlertDialog?)?.getButton(AlertDialog.BUTTON_POSITIVE)
         negativeBtn = (dialog as AlertDialog?)?.getButton(AlertDialog.BUTTON_NEGATIVE)
@@ -291,7 +302,7 @@ class NewTraitDialog(
         val view = layoutInflater.inflate(R.layout.dialog_trait_creator, null)
 
         val builder = AlertDialog.Builder(
-            activity,
+            requireActivity(),
             R.style.AppAlertDialog
         )
 
@@ -352,13 +363,13 @@ class NewTraitDialog(
 
             if (parameter is ResourceFileParameter) {
 
-                parameter.setActivity(activity)
+                parameter.setActivity(requireActivity())
 
             }
 
             if (parameter is CanopySensitivityParameter) {
 
-                parameter.setActivity(activity)
+                parameter.setActivity(requireActivity())
 
             }
 
@@ -525,18 +536,18 @@ class NewTraitDialog(
 
     private fun askUserToVerifyDismiss() {
 
-        val builder = AlertDialog.Builder(activity, R.style.AppAlertDialog)
+        val builder = AlertDialog.Builder(requireActivity(), R.style.AppAlertDialog)
 
-        builder.setTitle(activity.getString(R.string.dialog_close))
+        builder.setTitle(getString(R.string.dialog_close))
 
-        builder.setMessage(activity.getString(R.string.dialog_confirm))
+        builder.setMessage(getString(R.string.dialog_confirm))
 
-        builder.setPositiveButton(activity.getString(R.string.dialog_yes)) { dialog, _ ->
+        builder.setPositiveButton(getString(R.string.dialog_yes)) { dialog, _ ->
             dialog.dismiss()
             dismiss()
         }
 
-        builder.setNegativeButton(activity.getString(R.string.dialog_no)) { dialog, _ ->
+        builder.setNegativeButton(getString(R.string.dialog_no)) { dialog, _ ->
             dialog.dismiss()
         }
 

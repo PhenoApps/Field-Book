@@ -49,25 +49,23 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
     SharedPreferences ep;
 
     private static final String TAG = "SearchDialog";
-    private static CollectActivity originActivity;
     private SearchAdapter searchAdapter;
     private static List<SearchDialogDataModel> dataSet;
     public static boolean openResults;
-    private final onSearchResultsClickedListener onSearchResultsClickedListener;
 
-    public SearchDialog(CollectActivity activity, onSearchResultsClickedListener onSearchResultsClickedListener) {
-        originActivity = activity;
-        this.onSearchResultsClickedListener = onSearchResultsClickedListener;
+    // the host is read from the fragment instead of a constructor so the dialog can be recreated
+    private CollectActivity getCollectActivity() {
+        return (CollectActivity) requireActivity();
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(originActivity, R.style.AppAlertDialog);
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity(), R.style.AppAlertDialog);
 
         View customView = getLayoutInflater().inflate(R.layout.dialog_search, null);
-        builder.setTitle(originActivity.getString(R.string.main_toolbar_search));
+        builder.setTitle(getString(R.string.main_toolbar_search));
         builder.setView(customView);
 
         if (dataSet == null) {
@@ -134,11 +132,11 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
     }
 
     public void createAttributeChooserDialog() {
-        AttributeChooserDialog attributeChooserDialog = new AttributeChooserDialog(
-                true, true, false
+        AttributeChooserDialog attributeChooserDialog = AttributeChooserDialog.newInstance(
+                0, true, true, false
         );
         attributeChooserDialog.setOnAttributeSelectedListener(this);
-        attributeChooserDialog.show(originActivity.getSupportFragmentManager(), "attributeChooserDialog");
+        attributeChooserDialog.show(requireActivity().getSupportFragmentManager(), "attributeChooserDialog");
     }
 
     @Override
@@ -167,6 +165,9 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
     }
 
     public void createSearchResultsDialog () {
+        // captured here because this fragment is dismissed before the results dialog's callbacks run
+        final CollectActivity originActivity = getCollectActivity();
+
         String searchQuery = originActivity.getDatabase().getSearchQuery(dataSet);
         final SearchData[] data = originActivity.getDatabase().getRangeBySql(searchQuery);
 
@@ -231,7 +232,7 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
 
             builder1.setNeutralButton(R.string.dialog_back, (dialogInterface1, id1) -> {
                 dialogInterface1.dismiss();
-                SearchDialog searchdialog = new SearchDialog(originActivity, onSearchResultsClickedListener);
+                SearchDialog searchdialog = new SearchDialog();
                 searchdialog.show(originActivity.getSupportFragmentManager(), TAG);
             });
 
@@ -265,7 +266,7 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
                 openResults = true;
 
                 // When you click on an item, send the data back to the main screen
-                onSearchResultsClickedListener.onSearchResultsClicked(data[position].unique, data[position].range, data[position].plot, true);
+                originActivity.onSearchResultsClicked(data[position].unique, data[position].range, data[position].plot, true);
                 dialog.dismiss();
 
                 //Reloading collect activity screen to move to the selected plot

@@ -201,6 +201,7 @@
     <string name="act_field_editor_failed_to_read_columns">Field Book could not load the file.</string>
     <string name="act_field_editor_load_file_failed">An error occurred during file load.</string>
     <string name="act_field_editor_file_open_failed">File failed to open.</string>
+    <string name="act_field_editor_file_too_large">This file is too large to import as an Excel file. Save it as a CSV file and import that instead.</string>
 
     <!-- Field Creator  -->
     <string name="field_creator_activity_toolbar_title">Create New Field</string>
@@ -657,6 +658,7 @@
     <string name="menu_data_grid_action_grid_view">Grid View</string>
     <string name="menu_data_grid_action_map_attributes">Set Row/Column</string>
     <string name="map_view_no_layout">Field layout not available. Open Map Settings to define the row and column attributes.</string>
+    <string name="map_view_layout_too_large">This field layout is too large to show as a map. Choose different row and column attributes.</string>
     <string name="map_view_choose_attributes_title">Choose Row and Column</string>
     <string name="map_settings_title">Map Settings</string>
     <string name="map_settings_row_attribute">Row attribute</string>

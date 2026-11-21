@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Typeface
 import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
@@ -91,6 +92,13 @@ class DataGridActivity : ThemedActivity() {
     companion object {
         private const val TAG = "DataGridActivity"
         private const val ROW_HEADER_DELIMITER = " "
+
+        /**
+         * Largest map grid (rows x columns) that will be allocated, about 20MB of cell references.
+         * The grid is sized by the largest row/column value, so an attribute with very large numbers
+         * (an id, for example) or many distinct GPS coordinates would otherwise exhaust the heap.
+         */
+        private const val MAX_MAP_CELLS = 5_000_000L
 
         /** Splits an attribute name into alphabetic tokens on any run of non-letter characters. */
         private val ATTR_TOKEN_DELIMITER_REGEX = Regex("[^A-Za-z]+")
@@ -837,6 +845,20 @@ class DataGridActivity : ThemedActivity() {
                         )
                     )
                 }
+            }
+
+            if (maxRow.toLong() * maxCol > MAX_MAP_CELLS) {
+                Log.w(TAG, "Map grid of $maxRow x $maxCol exceeds $MAX_MAP_CELLS cells, not drawing map.")
+                withContext(Dispatchers.Main) {
+                    Utils.makeToast(applicationContext, getString(R.string.map_view_layout_too_large))
+                    // an empty grid shows the missing layout message and opens the layout picker
+                    mapPlotDataList = emptyList()
+                    mapGridRows = 0
+                    mapGridCols = 0
+                    mapGrid = emptyArray()
+                    isLoading = false
+                }
+                return@launch
             }
 
             // Inverting an axis flips which corner holds cell 1,1 by mirroring the grid placement.

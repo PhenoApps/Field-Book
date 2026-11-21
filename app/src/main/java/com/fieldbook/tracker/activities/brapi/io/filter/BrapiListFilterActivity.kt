@@ -52,10 +52,6 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
     companion object {
 
         const val EXTRA_FILTER_ROOT = "com.fieldbook.tracker.activities.brapi.io.extras.filter_root"
-
-        fun getIntent(activity: Activity): Intent {
-            return Intent(activity, BrapiListFilterActivity::class.java)
-        }
     }
 
     open val defaultRootFilterKey: String = ""

@@ -77,6 +77,8 @@ public class FieldFileObject {
     public abstract static class FieldFileBase {
         boolean openFail;
         boolean specialCharactersFail;
+        // set when the file could not be loaded because it does not fit in memory
+        boolean tooLarge;
         private final Uri path_;
         private final Context ctx;
 
@@ -177,6 +179,10 @@ public class FieldFileObject {
 
         public boolean getOpenFailed() {
             return openFail;
+        }
+
+        public boolean isTooLarge() {
+            return tooLarge;
         }
 
         public void setName(String name) { this.name = name; }
@@ -448,6 +454,14 @@ public class FieldFileObject {
             } catch (IOException format) {
 
                 format.printStackTrace();
+
+            } catch (OutOfMemoryError oom) {
+
+                // XSSFWorkbook holds the whole workbook in memory, very large files can exhaust the heap
+                // the partially built workbook is only referenced here, so releasing it frees the memory
+                wb = null;
+                tooLarge = true;
+                return null;
 
             }
 
