@@ -1106,6 +1106,7 @@ public class CollectActivity extends ThemedActivity
             Utils.makeToast(this, getString(R.string.act_trait_editor_no_traits_exist));
             setResult(RESULT_CANCELED);
             finish();
+            return;
         }
 
         traitBox.initialize(visibleTraits);

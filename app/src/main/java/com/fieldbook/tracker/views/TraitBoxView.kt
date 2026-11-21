@@ -360,6 +360,9 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun setSelection(pos: Int) {
+        // no visible traits, CollectActivity finishes in this case
+        if (visibleTraitsList.isEmpty()) return
+
         // if pos is -1, default back to first element
         // pos = -1 if the last used trait was disabled
         currentTrait = visibleTraitsList[if (pos == -1) 0 else pos]
