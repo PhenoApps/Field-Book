@@ -215,7 +215,7 @@ class RangeBoxView : ConstraintLayout {
         if (fragmentManager.isStateSaved
             || fragmentManager.findFragmentByTag(ATTRIBUTE_CHOOSER_TAG) != null) return
 
-        AttributeChooserDialog(
+        AttributeChooserDialog.newInstance(
             showTraits = false,
             showOther = false,
             showSystemAttributes = false

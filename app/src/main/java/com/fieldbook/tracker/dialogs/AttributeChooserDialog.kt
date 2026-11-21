@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.CheckBox
 import android.widget.ProgressBar
 import androidx.core.content.edit
+import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,27 +27,46 @@ import com.google.android.material.tabs.TabLayout
  * Added 'showSystemAttributes' that will toggle the adding of the field name attribute to the list of attributes (and any future system attributes).
  */
 
-open class AttributeChooserDialog(
-    private val showTraits: Boolean = true,
-    private val showOther: Boolean = true,
-    private val showSystemAttributes: Boolean = true
-) : DialogFragment(), AttributeAdapter.AttributeAdapterController {
+open class AttributeChooserDialog : DialogFragment(), AttributeAdapter.AttributeAdapterController {
 
     companion object {
         const val TAG = "AttributeChooserDialog"
 
         private const val ARG_TITLE = "title"
+        private const val ARG_SHOW_TRAITS = "showTraits"
+        private const val ARG_SHOW_OTHER = "showOther"
+        private const val ARG_SHOW_SYSTEM_ATTRIBUTES = "showSystemAttributes"
 
-        /** Factory method to create a new dialog with an infoBarPosition argument. */
-        fun newInstance(titleResId: Int): AttributeChooserDialog {
-            val args = Bundle().apply {
-                putInt(ARG_TITLE, titleResId)
-            }
-            return AttributeChooserDialog().apply {
-                arguments = args
-            }
+        /**
+         * Creates a new dialog.
+         * Options are stored in the arguments so they survive the dialog being recreated.
+         * A titleResId of 0 uses the default title.
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun newInstance(
+            titleResId: Int = 0,
+            showTraits: Boolean = true,
+            showOther: Boolean = true,
+            showSystemAttributes: Boolean = true
+        ): AttributeChooserDialog = AttributeChooserDialog().apply {
+            arguments = bundleOf(
+                ARG_TITLE to titleResId,
+                ARG_SHOW_TRAITS to showTraits,
+                ARG_SHOW_OTHER to showOther,
+                ARG_SHOW_SYSTEM_ATTRIBUTES to showSystemAttributes
+            )
         }
     }
+
+    protected open val showTraits: Boolean
+        get() = arguments?.getBoolean(ARG_SHOW_TRAITS, true) ?: true
+
+    protected open val showOther: Boolean
+        get() = arguments?.getBoolean(ARG_SHOW_OTHER, true) ?: true
+
+    protected open val showSystemAttributes: Boolean
+        get() = arguments?.getBoolean(ARG_SHOW_SYSTEM_ATTRIBUTES, true) ?: true
 
     interface OnAttributeSelectedListener {
         fun onAttributeSelected(model: AttributeAdapter.AttributeModel)
@@ -61,6 +81,22 @@ open class AttributeChooserDialog(
     protected var visibleTraits = arrayOf<TraitObject>()
     protected var nonVisibleTraits = arrayOf<TraitObject>()
     protected var attributeSelectedListener: OnAttributeSelectedListener? = null
+
+    /**
+     * Whether a selection will be handled.
+     * Subclasses that handle clicks themselves override this.
+     */
+    protected open fun hasSelectionHandler(): Boolean = attributeSelectedListener != null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // listeners are not saved, so a recreated dialog would ignore selections; close it instead
+        if (savedInstanceState != null && !hasSelectionHandler()) {
+            showsDialog = false
+            dismissAllowingStateLoss()
+        }
+    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val inflater = requireActivity().layoutInflater

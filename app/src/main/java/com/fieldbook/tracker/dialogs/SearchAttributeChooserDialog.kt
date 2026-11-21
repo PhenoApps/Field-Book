@@ -74,15 +74,22 @@ import com.fieldbook.tracker.utilities.BackgroundUiTask
  * Dialog to choose a search attribute for a field.
  * Extends the AttributeChooserDialog to add a checkbox for applying the selection to all fields.
  */
-class SearchAttributeChooserDialog : AttributeChooserDialog(
-    showTraits = false,
-    showOther = false,
-    showSystemAttributes = false
-) {
+class SearchAttributeChooserDialog : AttributeChooserDialog() {
 
     companion object {
         const val TAG = "SearchAttributeDialog"
     }
+
+    override val showTraits: Boolean
+        get() = false
+
+    override val showOther: Boolean
+        get() = false
+
+    override val showSystemAttributes: Boolean
+        get() = false
+
+    override fun hasSelectionHandler(): Boolean = onSearchAttributeSelectedListener != null
 
     interface OnSearchAttributeSelectedListener {
         fun onSearchAttributeSelected(label: String, applyToAll: Boolean)
