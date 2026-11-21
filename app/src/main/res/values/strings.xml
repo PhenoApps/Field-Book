@@ -201,6 +201,7 @@
     <string name="act_field_editor_failed_to_read_columns">Field Book could not load the file.</string>
     <string name="act_field_editor_load_file_failed">An error occurred during file load.</string>
     <string name="act_field_editor_file_open_failed">File failed to open.</string>
+    <string name="act_field_editor_file_too_large">This file is too large to import as an Excel file. Save it as a CSV file and import that instead.</string>
 
     <!-- Field Creator  -->
     <string name="field_creator_activity_toolbar_title">Create New Field</string>
