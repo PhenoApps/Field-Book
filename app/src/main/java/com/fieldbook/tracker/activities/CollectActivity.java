@@ -1958,7 +1958,7 @@ public class CollectActivity extends ThemedActivity
 
             sequence.start();
         } else if (itemId == searchId) {
-            SearchDialog searchdialog = new SearchDialog(this, this);
+            SearchDialog searchdialog = new SearchDialog();
             searchdialog.show(getSupportFragmentManager(), "DialogTag");
         } else if (itemId == resourcesId) {
             TraitObject currentTrait = getCurrentTrait();
