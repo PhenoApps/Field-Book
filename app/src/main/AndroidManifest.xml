@@ -111,11 +111,6 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.brapi.io.filter.ListFilterActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
-
         <activity android:name=".activities.brapi.io.filter.BrapiProgramFilterActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
