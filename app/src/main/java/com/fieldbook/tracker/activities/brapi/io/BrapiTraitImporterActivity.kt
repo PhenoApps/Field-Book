@@ -170,7 +170,7 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
 
         if (traitObject?.format == TextTraitLayout.type) {
 
-            val traitDialog = NewTraitDialog(this)
+            val traitDialog = NewTraitDialog()
 
             // traitDialog.isSelectingFormat = true
 
