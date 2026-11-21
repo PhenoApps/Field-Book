@@ -658,6 +658,7 @@
     <string name="menu_data_grid_action_grid_view">Grid View</string>
     <string name="menu_data_grid_action_map_attributes">Set Row/Column</string>
     <string name="map_view_no_layout">Field layout not available. Open Map Settings to define the row and column attributes.</string>
+    <string name="map_view_layout_too_large">This field layout is too large to show as a map. Choose different row and column attributes.</string>
     <string name="map_view_choose_attributes_title">Choose Row and Column</string>
     <string name="map_settings_title">Map Settings</string>
     <string name="map_settings_row_attribute">Row attribute</string>
