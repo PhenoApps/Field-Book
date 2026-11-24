@@ -15,7 +15,8 @@ enum class Parameters {
     ATTACH_MEDIA,
     ALLOW_OTHER,
     CANOPY_SENSITIVITY,
-    DURATION;
+    DURATION,
+    MULTISPEQ_PARAMETERS;
 
     companion object {
 
