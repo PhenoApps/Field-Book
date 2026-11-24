@@ -18,6 +18,7 @@ import com.fieldbook.tracker.traits.formats.parameters.MaximumParameter
 import com.fieldbook.tracker.traits.formats.parameters.MinimumParameter
 import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.traits.formats.parameters.OutlierDetectionParameter
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.traits.formats.parameters.UnitParameter
@@ -40,6 +41,7 @@ open class NumericFormat(
             DecimalPlacesParameter(),
             MathSymbolsParameter(),
             InvalidValueParameter(),
+            OutlierDetectionParameter(),
             DetailsParameter(),
             UnitParameter(),
             RepeatedMeasureParameter(),
