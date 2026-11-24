@@ -2,15 +2,23 @@ package com.fieldbook.tracker.traits.formats
 
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
+import com.fieldbook.tracker.traits.formats.parameters.CaptureVideoParameter
 import com.fieldbook.tracker.traits.formats.parameters.CropImageParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.traits.formats.parameters.Parameters
 import com.fieldbook.tracker.traits.formats.parameters.SaveImageParameter
 
 class GoProFormat(
     override vararg val parameters: BaseFormatParameter = arrayOf(
         NameParameter(),
         DetailsParameter(),
+        //videos stay on the camera and only their file name is saved, so nothing is copied or cropped
+        CaptureVideoParameter(
+            noticeTitleRes = R.string.gopro_video_notice_title,
+            noticeMessageRes = R.string.gopro_video_notice_message,
+            hiddenInVideo = setOf(Parameters.SAVE_IMAGE, Parameters.CROP_IMAGE)
+        ),
         CropImageParameter(),
         SaveImageParameter()
     )

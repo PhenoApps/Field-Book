@@ -22,6 +22,7 @@ import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.parameters.AutoSwitchPlotParameter
 import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
+import com.fieldbook.tracker.traits.formats.parameters.CaptureVideoParameter
 import com.fieldbook.tracker.traits.formats.parameters.CategoriesParameter
 import com.fieldbook.tracker.traits.formats.parameters.CloseKeyboardParameter
 import com.fieldbook.tracker.traits.formats.parameters.CropImageParameter
@@ -44,6 +45,8 @@ import com.fieldbook.tracker.traits.formats.parameters.UnitParameter
 import com.fieldbook.tracker.ui.components.widgets.Chip
 import com.fieldbook.tracker.ui.screens.traits.dialogs.BrapiLabelValueDialog
 import com.fieldbook.tracker.ui.screens.traits.dialogs.CanopySensitivityLockedDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.CaptureModeLockedDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.CaptureVideoNoticeDialog
 import com.fieldbook.tracker.ui.screens.traits.dialogs.DateFormatDialog
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.StringUtil.capitalizeFirstLetter
@@ -79,6 +82,8 @@ fun TraitOptionsSection(
     var showDateFormatDialog by remember { mutableStateOf(false) }
     var showBrapiLabelValueDialog by remember { mutableStateOf(false) }
     var showCanopySensitivityLockedDialog by remember { mutableStateOf(false) }
+    var showCaptureModeLockedDialog by remember { mutableStateOf(false) }
+    var captureVideoNotice by remember { mutableStateOf<CaptureVideoParameter?>(null) }
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         FlowRow(
@@ -153,10 +158,19 @@ fun TraitOptionsSection(
 
             formatDefinition?.let { definition ->
 
+                // the format decides which of its options stop applying once it records video
+                val hiddenInVideo = definition.parameters
+                    .filterIsInstance<CaptureVideoParameter>()
+                    .firstOrNull()
+                    ?.takeIf { it.getToggleValue(trait) }
+                    ?.hiddenInVideo
+                    ?: emptySet()
+
                 val displayableParams =
                     definition.parameters.filter { param ->
                         param.parameter !in excludedParams &&
-                        !(param is AllowOtherParameter && isBrapiTrait)
+                        !(param is AllowOtherParameter && isBrapiTrait) &&
+                        param.parameter !in hiddenInVideo
                     }
 
                 displayableParams.forEach { param ->
@@ -168,6 +182,15 @@ fun TraitOptionsSection(
                             // it can't change once observations exist for this trait
                             if (param is CanopySensitivityParameter && hasObservations) {
                                 showCanopySensitivityLockedDialog = true
+                            } else if (param is CaptureVideoParameter && hasObservations) {
+                                // switching would mix photos and videos under one trait
+                                showCaptureModeLockedDialog = true
+                            } else if (param is CaptureVideoParameter) {
+                                val updatedTrait = trait.clone()
+                                if (param.toggleValue(updatedTrait)) {
+                                    captureVideoNotice = param
+                                }
+                                onUpdateTrait(updatedTrait)
                             } else if (param is DefaultToggleParameter) {
                                 val updatedTrait = trait.clone()
                                 param.toggleValue(updatedTrait)
@@ -203,6 +226,24 @@ fun TraitOptionsSection(
         )
     }
 
+    if (showCaptureModeLockedDialog) {
+        CaptureModeLockedDialog(
+            onDismiss = { showCaptureModeLockedDialog = false }
+        )
+    }
+
+    captureVideoNotice?.let { param ->
+        val title = param.noticeTitleRes
+        val message = param.noticeMessageRes
+        if (title != null && message != null) {
+            CaptureVideoNoticeDialog(
+                title = stringResource(title),
+                message = stringResource(message),
+                onDismiss = { captureVideoNotice = null }
+            )
+        }
+    }
+
     if (showBrapiLabelValueDialog) {
         BrapiLabelValueDialog(
             categories = trait.categories,
@@ -233,6 +274,7 @@ private fun getParamIcon(param: BaseFormatParameter, trait: TraitObject): Int {
                 is AllowOtherParameter -> if (isEnabled) R.drawable.ic_categorical_other else R.drawable.ic_categorical_other_off
                 is RepeatedMeasureParameter -> if (isEnabled) R.drawable.ic_repeated_measures else R.drawable.ic_repeated_measures_off
                 is SaveImageParameter -> if (isEnabled) R.drawable.ic_transfer else R.drawable.ic_transfer_off
+                is CaptureVideoParameter -> if (isEnabled) R.drawable.video else R.drawable.ic_trait_camera
                 else -> R.drawable.ic_tag_edit
             }
         }
@@ -261,6 +303,10 @@ private fun getParamText(context: Context, param: BaseFormatParameter, trait: Tr
         }
 
         is SaveImageParameter -> context.getString(R.string.trait_detail_chip_transfer_images)
+        is CaptureVideoParameter -> {
+            if (param.getToggleValue(trait)) context.getString(R.string.trait_detail_chip_capture_video)
+            else context.getString(R.string.trait_detail_chip_capture_photo)
+        }
         is SeveritiesParameter -> context.getString(R.string.trait_detail_chip_severities)
         is DurationParameter -> {
             val seconds = trait.duration.toIntOrNull() ?: DEFAULT_DURATION_SECONDS

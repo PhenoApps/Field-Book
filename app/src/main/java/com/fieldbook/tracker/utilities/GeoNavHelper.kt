@@ -562,6 +562,9 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                         runOnUiThread {
                             if (preferences.getBoolean(GeneralKeys.GEONAV_AUTO, false)) {
                                 lastPlotIdNav = null
+                                //skip quietly while navigation is locked, clearing the memo above
+                                //lets the next position update try this plot again
+                                if (!rangeBox.isNavigationEnabled()) return@runOnUiThread
                                 moveToSearch("id", rangeBox.getRangeID(), null, null, id, -1)
                                 Toast.makeText(
                                     this,
@@ -643,6 +646,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                 val btn =
                                     snackView.findViewById<ImageButton>(R.id.geonav_snackbar_btn)
                                 btn?.setOnClickListener { v: View? ->
+                                    if (!getRangeBox().allowNavigation()) return@setOnClickListener
                                     mGeoNavSnackbar?.dismiss()
                                     lastPlotIdNav = null
 
