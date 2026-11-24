@@ -18,8 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.BrapiModuleCalls
-import com.fieldbook.tracker.utilities.CallImplementedBy
-import com.fieldbook.tracker.utilities.ServiceComparison
+import com.fieldbook.tracker.utilities.CallComparison
 import com.fieldbook.tracker.viewmodels.BrapiServerInfoViewModel.ServerInfoUiState
 
 @Composable
@@ -42,12 +41,10 @@ fun ServerInfoScreen(uiState: ServerInfoUiState) {
                     )
                 }
 
-                // field book compatibility
+                // field book compatibility, one card per purpose (import, upload)
                 // shows serverSupported / totalFBCalls as %
-                uiState.appCompatibility?.let { compatibility ->
-                    item {
-                        ModuleCard(moduleInfo = compatibility)
-                    }
+                items(uiState.appCompatibility) { compatibility ->
+                    ModuleCard(moduleInfo = compatibility)
                 }
 
                 // section title
@@ -81,56 +78,29 @@ private fun ServerInfoScreenPreview() {
                 serverName = "Test Server",
                 organizationName = "Breeding Insight",
                 serverDescription = "A description for the server",
-                modulesMap = mapOf<String, BrapiModuleCalls>(
+                modulesMap = mapOf(
                     "core" to BrapiModuleCalls(
                         moduleName = "Core",
                         calls = listOf(
-                            ServiceComparison(
-                                service = "studies",
-                                methods = listOf("GET", "POST"),
-                                isAppImplemented = true,
-                                implementedMethods = listOf("GET"),
-                                source = CallImplementedBy.SERVER_AND_APP
-                            ),
-                            ServiceComparison(
-                                service = "programs",
-                                methods = listOf("GET"),
-                                isAppImplemented = true,
-                                implementedMethods = listOf("GET"),
-                                source = CallImplementedBy.SERVER_AND_APP
-                            ),
-                            ServiceComparison(
-                                service = "trials",
-                                methods = listOf("GET", "POST"),
-                                isAppImplemented = false,
-                                implementedMethods = emptyList(),
-                                source = CallImplementedBy.SERVER
-                            )
+                            CallComparison("programs", "GET", supportedByServer = true, supportedByApp = true),
+                            CallComparison("studies", "GET", supportedByServer = true, supportedByApp = true),
+                            CallComparison("studies", "POST", supportedByServer = true, supportedByApp = false),
                         ),
-                        appImplementedCount = 2,
+                        supportedCount = 2,
                         totalCalls = 3
                     ),
                 ),
-                appCompatibility = BrapiModuleCalls(
-                    moduleName = "Field Book Compatibility",
-                    calls = listOf(
-                        ServiceComparison(
-                            service = "programs",
-                            methods = listOf("GET"),
-                            isAppImplemented = true,
-                            implementedMethods = listOf("GET"),
-                            source = CallImplementedBy.SERVER_AND_APP
+                appCompatibility = listOf(
+                    BrapiModuleCalls(
+                        moduleName = "Upload from Field Book",
+                        calls = listOf(
+                            CallComparison("observations", "POST", supportedByServer = true, supportedByApp = true),
+                            CallComparison("observations", "PUT", supportedByServer = false, supportedByApp = true),
                         ),
-                        ServiceComparison(
-                            service = "observations",
-                            methods = listOf("GET", "POST", "PUT"),
-                            isAppImplemented = true,
-                            implementedMethods = emptyList(),
-                            source = CallImplementedBy.APP
-                        )
-                    ),
-                    appImplementedCount = 1,
-                    totalCalls = 2
+                        supportedCount = 1,
+                        totalCalls = 2,
+                        isAppCompatibility = true
+                    )
                 ),
                 errorMessage = null,
                 isBrapiV1Incompatible = false

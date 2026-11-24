@@ -1085,8 +1085,8 @@ public class CollectActivity extends ThemedActivity
 
             return collectInputView.getRep(); //gets the selected repeated value index from view
 
-        } else return database.getDefaultRep(getStudyId(), getObservationUnit(), getTraitDbId());
-        //gets the minimum default index
+        } else return database.getLatestRep(getStudyId(), getObservationUnit(), getTraitDbId());
+        //the latest rep, the one CollectInputView displays, so edits and deletes reach the shown value
     }
 
     // This is central to the application
