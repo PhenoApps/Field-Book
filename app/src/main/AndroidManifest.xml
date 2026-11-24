@@ -14,7 +14,7 @@
         android:name=".application.FieldBook"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/field_book"
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
@@ -32,7 +32,7 @@
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
             android:launchMode="singleTop"
-            android:roundIcon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher_round"
             android:screenOrientation="portrait"
             android:targetActivity=".activities.ConfigActivity">
             <intent-filter>
