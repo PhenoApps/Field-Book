@@ -1,5 +1,9 @@
 <changelog>
 
+    <release date="2026-11-24" versionCode="70305" versionName="v7.3.5">
+        <bugfix>Bug fixes and enhancements</bugfix>
+    </release>
+
     <release date="2026-11-17" versionCode="70304" versionName="v7.3.4">
         <bugfix>Bug fixes and enhancements</bugfix>
     </release>
