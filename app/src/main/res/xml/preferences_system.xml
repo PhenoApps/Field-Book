@@ -59,6 +59,15 @@
             android:summary="@string/pref_debug_application_summary"
             android:title="@string/pref_debug_application_title" />
 
+        <ListPreference
+            android:defaultValue="0"
+            android:icon="@drawable/ic_script_text_outline"
+            android:key="com.tracker.fieldbook.preference.debug.logcat_capture_duration"
+            android:title="@string/pref_debug_logcat_title"
+            android:summary="@string/pref_debug_logcat_summary"
+            android:entries="@array/pref_debug_logcat_duration_entries"
+            android:entryValues="@array/pref_debug_logcat_duration_values"/>
+
         <CheckBoxPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_card_account_details_outline"

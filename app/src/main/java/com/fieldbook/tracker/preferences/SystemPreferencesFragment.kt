@@ -3,6 +3,7 @@ package com.fieldbook.tracker.preferences
 import android.app.AlertDialog
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.util.Log
 import android.widget.Toast
 import androidx.preference.CheckBoxPreference
@@ -13,11 +14,13 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
 import com.fieldbook.tracker.fragments.ExportDatabaseFragment
 import com.fieldbook.tracker.preferences.enums.TransferSource
+import com.fieldbook.tracker.utilities.LogcatRecorder
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
@@ -78,6 +81,54 @@ class SystemPreferencesFragment : PreferenceFragmentCompat(),
             }
             true
         }
+
+        val logcatCapturePref = findPreference<ListPreference>(GeneralKeys.LOGCAT_CAPTURE_DURATION)
+        logcatCapturePref?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
+            val ctx = context ?: return@OnPreferenceChangeListener false
+            val minutes = newValue.toString().toIntOrNull() ?: 0
+            val accepted = if (minutes > 0) {
+                val fileName = LogcatRecorder.start(ctx, minutes)
+                if (fileName != null) {
+                    Toast.makeText(ctx, getString(R.string.pref_debug_logcat_started, fileName), Toast.LENGTH_LONG).show()
+                    true
+                } else {
+                    Toast.makeText(ctx, R.string.error_storage_directory, Toast.LENGTH_LONG).show()
+                    false
+                }
+            } else {
+                if (LogcatRecorder.isRunning) {
+                    Toast.makeText(ctx, R.string.pref_debug_logcat_stopped, Toast.LENGTH_SHORT).show()
+                }
+                LogcatRecorder.stop(ctx)
+                true
+            }
+            updateLogcatSummary()
+            accepted
+        }
+    }
+
+    // keeps the debug log preference in sync when the recorder times out while this screen is open
+    private val logcatPrefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        if (key == GeneralKeys.LOGCAT_CAPTURE_DURATION || key == GeneralKeys.LOGCAT_CAPTURE_END_TIME) {
+            syncLogcatPreference()
+        }
+    }
+
+    private fun syncLogcatPreference() {
+        findPreference<ListPreference>(GeneralKeys.LOGCAT_CAPTURE_DURATION)?.value =
+            preferences.getString(GeneralKeys.LOGCAT_CAPTURE_DURATION, LogcatRecorder.OFF)
+        updateLogcatSummary()
+    }
+
+    private fun updateLogcatSummary() {
+        val pref = findPreference<ListPreference>(GeneralKeys.LOGCAT_CAPTURE_DURATION) ?: return
+        val ctx = context ?: return
+        pref.summary = if (LogcatRecorder.isRunning) {
+            val time = DateFormat.getTimeFormat(ctx).format(Date(LogcatRecorder.endTime))
+            getString(R.string.pref_debug_logcat_running, time)
+        } else {
+            getString(R.string.pref_debug_logcat_summary)
+        }
     }
 
     private fun checkDirectory(): Boolean {
@@ -97,6 +148,13 @@ class SystemPreferencesFragment : PreferenceFragmentCompat(),
     override fun onResume() {
         super.onResume()
         setupCrashlyticsPreference()
+        preferences.registerOnSharedPreferenceChangeListener(logcatPrefListener)
+        syncLogcatPreference()
+    }
+
+    override fun onPause() {
+        preferences.unregisterOnSharedPreferenceChangeListener(logcatPrefListener)
+        super.onPause()
     }
 
     private fun validateBrapiEnabledBeforeSetting(newValue: String): Boolean {
