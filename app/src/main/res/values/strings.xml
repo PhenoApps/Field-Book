@@ -964,7 +964,12 @@
     <string name="pref_debug_application_title">Debug Application</string>
     <string name="pref_debug_application_summary">Obtain a file to help developers debug issues in the app</string>
     <string name="pref_debug_logcat_title">Debug Log</string>
-    <string name="pref_debug_logcat_summary">Continuously writes logs to a file.</string>
+    <string name="pref_debug_logcat_summary">Writes logs to a file for a limited time.</string>
+    <string name="pref_debug_logcat_running">Recording until %s</string>
+    <string name="pref_debug_logcat_off">Off</string>
+    <string name="pref_debug_logcat_1_minute">1 minute</string>
+    <string name="pref_debug_logcat_3_minutes">3 minutes</string>
+    <string name="pref_debug_logcat_5_minutes">5 minutes</string>
     <string name="pref_debug_logcat_started">Debug log started: %s</string>
     <string name="pref_debug_logcat_stopped">Debug log saved</string>
     <string name="pref_profile_crashlytics_user_id_enabled">Unique ID</string>

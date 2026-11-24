@@ -1,10 +1,8 @@
 package com.fieldbook.tracker.application;
 
 import androidx.multidex.MultiDexApplication;
-import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.BuildConfig;
-import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.LogcatRecorder;
 
 import dagger.hilt.android.HiltAndroidApp;
@@ -23,9 +21,6 @@ public class FieldBook extends MultiDexApplication {
     public void onCreate() {
         super.onCreate();
 
-        if (PreferenceManager.getDefaultSharedPreferences(this)
-                .getBoolean(GeneralKeys.LOGCAT_CAPTURE_ENABLED, false)) {
-            LogcatRecorder.INSTANCE.start(this);
-        }
+        LogcatRecorder.INSTANCE.resume(this);
     }
 }

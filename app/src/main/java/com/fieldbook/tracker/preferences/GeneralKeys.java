@@ -17,7 +17,9 @@ public class GeneralKeys {
     public static final String CRASHLYTICS_ID                       = "com.tracker.fieldbook.preference.crashlytics.id";
 
     //Debugging
-    public static final String LOGCAT_CAPTURE_ENABLED               = "com.tracker.fieldbook.preference.debug.logcat_capture_enabled";
+    public static final String LOGCAT_CAPTURE_DURATION              = "com.tracker.fieldbook.preference.debug.logcat_capture_duration";
+    public static final String LOGCAT_CAPTURE_END_TIME              = "com.tracker.fieldbook.preference.debug.logcat_capture_end_time";
+    public static final String LOGCAT_CAPTURE_FILE_URI              = "com.tracker.fieldbook.preference.debug.logcat_capture_file_uri";
 
     public static final String FIRST_NAME = "FirstName";
     public static final String LAST_NAME = "LastName";
